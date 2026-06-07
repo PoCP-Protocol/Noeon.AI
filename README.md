@@ -1,16 +1,20 @@
 # Noeon AI — The Cognitive Programming Language
 
-> **The world's first programming language that thinks like a human brain.**
+**A new species of programming language, created by Humans and AI together.**
 
-[![Version](https://img.shields.io/badge/version-0.6.0--genesis-blue)]()
-[![Tests](https://img.shields.io/badge/tests-472%2B%20passed-green)]()
+> *"A language that doesn't just describe computation — it thinks."*
+
+[![Version](https://img.shields.io/badge/version-0.7.0--unified-blue)]()
+[![Tests](https://img.shields.io/badge/tests-551%2B%20passed-green)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
 ---
 
 ## What Is Noeon?
 
-Noeon is not a framework, not a library, not an agent toolkit. It is a **new species** — a programming language where every construct maps to a neural mechanism, every value carries uncertainty, and programs don't execute instructions — they **think**.
+Noeon is the world's first **cognitive programming language** — a language modeled after the human brain's thinking process. Unlike traditional languages that execute instructions sequentially, Noeon programs **perceive, attend, predict, reason, decide, validate, learn, remember, and evolve** — just like a brain.
+
+Every program, whether it's an AEL task contract or a cognitive flow, compiles down to a single **Cognitive Intermediate Representation (IR)** and executes through one **Unified Cognitive Kernel**.
 
 ```
 # Traditional language: Execute instructions
@@ -27,95 +31,54 @@ REFLECT "Was my reasoning sound?" depth=deep
 
 ---
 
-## Core Competitive Advantages
+## v0.7: The Unification
 
-These are capabilities that **no other programming language has**:
-
-### 1. Formal Cognitive Type System
-
-Every value in Noeon is a `CognitiveValue` — it carries confidence, provenance, time, and salience.
-
-```javascript
-const { belief, uncertain, temporal, emotion, intention } = require('./src/runtime/cognitive/type-system');
-
-// A belief with confidence that can be supported or contradicted
-const b = belief('AI will transform education', 0.8);
-b.support('Study shows 30% improvement');   // Strengthens
-b.contradict('Some schools report no change'); // Weakens
-console.log(b.coherence);  // How well-supported?
-
-// An uncertain value with Bayesian updates
-const price = uncertain(100, 25);  // mean=100, variance=25
-price.observe(102, 10);  // Update with new evidence
-console.log(price.probAbove(105));  // Probability of being > 105
-
-// A temporal value that tracks change over time
-const metric = temporal(0);
-metric.update(1); metric.update(3); metric.update(6);
-console.log(metric.trend);       // 'increasing'
-console.log(metric.predict(10)); // Extrapolate 10 steps ahead
-
-// An emotion that biases decisions
-const excitement = emotion('excited', 0.8, 0.9);
-console.log(excitement.riskModifier);  // > 1.0 (increases risk tolerance)
-```
-
-### 2. Stream of Consciousness (vs. Sequential Execution)
-
-Traditional programs execute line by line. Noeon programs **think continuously**.
+The key insight of v0.7: **A contract IS a thought.**
 
 ```
-STREAM mode="continuous" cycle_ms=200
-  ON surprise > 0.7 DO REASON strategy="deep"
-  ON confidence < 0.4 DO SEEK "clarification"
-  ON idle > 10 DO CONSOLIDATE memories
+┌─────────────────────────────────────────────────────────────────┐
+│                    NOEON UNIFIED ARCHITECTURE                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│   .ael Source Code                                                │
+│        │                                                          │
+│        ▼                                                          │
+│   ┌─────────┐     ┌──────────────┐     ┌───────────────────┐    │
+│   │ Parser  │────▶│ Cognitive IR │────▶│ Unified Kernel    │    │
+│   └─────────┘     └──────────────┘     │                   │    │
+│                                         │ Perceive → Attend │    │
+│   AEL Contracts ─┐                     │ → Predict         │    │
+│                   ├─▶ Same IR ─────────▶│ → Process         │    │
+│   Cognitive     ─┘                     │ → Decide          │    │
+│   Flows                                │ → Validate        │    │
+│                                         │ → Learn           │    │
+│                                         │ → Remember        │    │
+│                                         │ → Evolve          │    │
+│                                         └───────────────────┘    │
+│                                                   │               │
+│                                                   ▼               │
+│                                         ┌───────────────────┐    │
+│                                         │ Observability     │    │
+│                                         │ (Logs + Traces +  │    │
+│                                         │  Metrics)         │    │
+│                                         └───────────────────┘    │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 3. Uncertainty-Native Values
+| AEL Contract Primitive | Maps To | Cognitive Operation |
+|---|---|---|
+| `TASK` | → | `INTENT` (goal the brain pursues) |
+| `BUDGET` | → | `CONSTRAINT` (resource limits) |
+| `COLLATERAL` | → | `COMMIT` (motivation/skin in the game) |
+| `VERIFY` | → | `VALIDATE` (self-checking) |
+| `REWARD` | → | `LEARN` (reinforcement signal) |
+| `COMPUTE` | → | `PROCESS` (reasoning) |
+| `FLOW` | → | `DECIDE` (state transitions = attention shifts) |
+| `PLUGIN` | → | `PERCEIVE` (external modality) |
+| `META_RULE` | → | `META` (self-governance) |
 
-Every value carries a **confidence distribution**. No more pretending the world is certain.
-
-### 4. Self-Modifying Syntax
-
-The language can **invent new grammar** at runtime based on usage patterns.
-
-```
-DEFINE "MARKET_SCAN" as
-  PERCEIVE channel="numerical" sensitivity=0.9
-  INTUIT "trend?" using=statistical
-  PREDICT horizon="1d"
-  DECIDE threshold=0.7
-
-MARKET_SCAN  # Now a first-class keyword
-```
-
-### 5. Knowledge Graph & Causal Reasoning
-
-Noeon maintains a **structured world model** and can reason about **causality**.
-
-```
-KNOW "rain" type="weather"
-CAUSE "rain" -> "flood" confidence=0.6
-WHY "flood"                    # Traces causal chains
-WHAT_IF "rain" value="none"    # Counterfactual reasoning
-```
-
-### 6. Cognitive Debugging
-
-Debug **thoughts**, not variables. See **why** a decision was made.
-
-### 7. Interactive REPL
-
-Think in real-time with an interactive cognitive environment.
-
-```bash
-npm run repl
-
-noeon> .believe "AI will transform education" confidence=0.8
-noeon> .reason Is AI better than traditional methods?
-noeon> .reflect
-noeon> .evolve
-```
+Both styles compile to the same Cognitive IR and execute through the same Kernel.
 
 ---
 
@@ -126,38 +89,88 @@ noeon> .evolve
 git clone https://github.com/PoCP-Protocol/Noeon.AI.git
 cd Noeon.AI && npm install
 
-# Interactive REPL — think in real-time
-npm run repl
+# Run a cognitive program through the Unified Kernel
+node src/cli.js run examples/cognitive_superbrain.ael --trace
 
-# Parse a cognitive contract
-npm run cognitive -- examples/cognitive_superbrain.ael
+# Compile to Cognitive IR (see how the brain plans)
+node src/cli.js compile examples/cognitive_advanced.ael --verbose
 
-# Run all tests (472+)
-npm run test:all
+# Inspect execution (full observability)
+node src/cli.js inspect examples/cognitive_minimal.ael
+
+# Interactive REPL (think interactively)
+node src/cli.js repl
+
+# Create a new project
+node src/cli.js init my-brain
 ```
 
 ---
 
-## Architecture: 6-Layer Language Stack
+## CLI Commands
+
+| Command | Description |
+|---|---|
+| `noeon run <file>` | Execute through Cognitive Kernel |
+| `noeon parse <file>` | Show AST structure |
+| `noeon compile <file>` | Compile to Cognitive IR |
+| `noeon explain <file>` | Natural language explanation |
+| `noeon validate <file>` | Validate syntax and semantics |
+| `noeon inspect <file>` | Execute with full tracing |
+| `noeon repl` | Interactive cognitive session |
+| `noeon init <name>` | Create new project |
+| `noeon status` | Show kernel status |
+
+---
+
+## Core Competitive Advantages
+
+### 1. Intent as Program
+You describe WHAT you want to achieve, the brain figures out HOW.
+
+### 2. Uncertainty-Native
+All values carry confidence. The system reasons under uncertainty natively.
+
+### 3. Time-Aware
+Memory decays, predictions update, beliefs evolve. The language understands time.
+
+### 4. Self-Aware
+Programs observe their own execution and adjust strategy in real-time.
+
+### 5. Emergent Behavior
+Simple cognitive rules combine to produce complex intelligent behavior.
+
+### 6. Self-Modifying Syntax
+The language can invent new grammar at runtime based on usage patterns.
+
+### 7. Causal Reasoning
+Built-in knowledge graph with counterfactual and interventional reasoning.
+
+---
+
+## Architecture: 7-Layer Language Stack
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Layer 6: REPL & Developer Experience                            │
-│    Interactive cognitive environment, thought traces              │
+│  Layer 7: CLI & Developer Experience                             │
+│    Unified CLI, REPL, project scaffolding                        │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 5: Standard Library                                       │
-│    Reasoning, Decision, Learning, Attention, Pattern, Probability│
+│  Layer 6: Observability                                          │
+│    Structured logs, thought traces, metrics, dashboard           │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 4: Module System                                          │
-│    CognitiveModule, Registry, Composer, Pipeline, Loader         │
+│  Layer 5: Standard Library & Modules                             │
+│    Reasoning, Decision, Learning, Attention, Pattern, Modules    │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 3: Type System                                            │
+│  Layer 4: Type System                                            │
 │    Belief, Uncertain, Temporal, Emotion, Intention, Percept      │
 ├─────────────────────────────────────────────────────────────────┤
-│  Layer 2: Cognitive Runtime (20 modules)                         │
-│    Workspace, Memory, DualProcess, Prediction, Metacognition,    │
-│    LLM Bridge, Social Brain, Evolution, Knowledge Graph,         │
-│    Consciousness Stream, Meta-Language, Multimodal Perception    │
+│  Layer 3: Unified Cognitive Kernel                               │
+│    Single execution engine, cognitive cycle, handler registry     │
+├─────────────────────────────────────────────────────────────────┤
+│  Layer 2: Cognitive IR (14 node types)                           │
+│    INTENT, CONSTRAINT, PROCESS, VALIDATE, LEARN, PERCEIVE,      │
+│    DECIDE, COMMIT, COLLABORATE, EVOLVE, REMEMBER, ATTEND,        │
+│    PREDICT, META                                                  │
 ├─────────────────────────────────────────────────────────────────┤
 │  Layer 1: Parser & Compiler                                      │
 │    50+ cognitive primitives, AEL syntax, AST generation          │
@@ -184,147 +197,88 @@ npm run test:all
 | Default Mode Network | `ConsciousnessStream` | Continuous background thinking |
 | Temporal + Parietal | `KnowledgeGraph` | World model & causal inference |
 | fMRI Scanner | `CognitiveDebugger` | Mind inspection & tracing |
+| Thalamo-cortical Loop | `CognitiveKernel` | Central integrator (Unified Kernel) |
+| Error Circuits | `FaultTolerance` | Graceful degradation |
 
 ---
 
-## Standard Library
+## Type System (7 Cognitive Types)
 
-Built-in cognitive algorithms — the "batteries included" of thinking.
-
-```javascript
-const { Reasoning, Decision, Learning, Attention, Pattern, Probability } = require('./src/stdlib');
-
-// Deductive reasoning
-Reasoning.deductive(premises, 'modus_ponens');
-
-// Abductive: Inference to best explanation
-Reasoning.abductive(observation, hypotheses);
-
-// Multi-criteria decision making
-Decision.multiCriteria(options, weights);
-
-// Bayesian belief update
-Learning.bayesianUpdate(prior, likelihood, evidence);
-
-// Anomaly detection
-Pattern.detectAnomaly(value, reference_distribution);
-```
-
----
-
-## Module System
-
-Define, compose, and reuse cognitive modules.
-
-```javascript
-const { defineModule, ModuleComposer } = require('./src/runtime/cognitive/module-system');
-
-const analyzer = defineModule('market_analyzer')
-  .version('1.0.0')
-  .accepts('numerical', 'temporal')
-  .produces('Belief', 'Uncertain')
-  .can('pattern_recognition', 'prediction')
-  .does(async (input) => ({ trend: 'bullish', confidence: 0.75 }))
-  .build();
-
-// Compose into pipelines
-const pipeline = composer.compose('full_analysis', [
-  { module: 'market_analyzer', role: 'perceive' },
-  { module: 'deep_reasoner', role: 'reason' },
-  { module: 'decision_maker', role: 'decide' }
-]);
-```
+| Type | Description | Example |
+|---|---|---|
+| `Belief` | Proposition + confidence | `Belief("sky is blue", 0.95)` |
+| `Uncertain` | Value + distribution | `Uncertain(42, {std: 5})` |
+| `Temporal` | Value + time + decay | `Temporal(price, "2024-01-01", 0.9)` |
+| `Emotion` | Valence + arousal | `Emotion(-0.3, 0.8)` |
+| `Intention` | Goal + priority + deadline | `Intention("learn", 0.9)` |
+| `Percept` | Sensory data + modality | `Percept(image, "visual")` |
+| `MemoryTrace` | Content + strength + associations | `MemoryTrace(fact, 0.7)` |
 
 ---
 
 ## Language Primitives (50+ Keywords)
 
 ### Perception & Attention
-| Keyword | Function |
-|---|---|
-| `PERCEIVE` | Open a perceptual channel |
-| `ATTEND` | Shift attention focus |
-| `SENSE` / `LOOK` / `LISTEN` / `READ` | Modality-specific perception |
-| `PERCEIVE_ALL` | Parallel multi-modal sensing |
+`PERCEIVE`, `ATTEND`, `SENSE`, `LOOK`, `LISTEN`, `READ`, `PERCEIVE_ALL`
 
 ### Reasoning & Decision
-| Keyword | Function |
-|---|---|
-| `INTUIT` | System 1 fast pattern matching |
-| `REASON` | System 2 deep logical analysis |
-| `PREDICT` | Generate predictions with confidence |
-| `DECIDE` | Make emotion-weighted decisions |
-| `DEBATE` | Internal dialectic reasoning |
-| `HYPOTHESIS` | Propose explanatory hypothesis |
+`INTUIT`, `REASON`, `PREDICT`, `DECIDE`, `DEBATE`, `HYPOTHESIS`
 
 ### Memory & Knowledge
-| Keyword | Function |
-|---|---|
-| `KNOW` / `RELATE` / `CAUSE` | Knowledge graph operations |
-| `RECALL` | Retrieve from memory |
-| `CONSOLIDATE` | Transfer to long-term storage |
-| `ACTIVATE` | Spreading activation |
-| `EMBED` | Vector embedding |
+`KNOW`, `RELATE`, `CAUSE`, `RECALL`, `CONSOLIDATE`, `ACTIVATE`, `EMBED`
 
 ### Metacognition & Evolution
-| Keyword | Function |
-|---|---|
-| `REFLECT` | Self-evaluate reasoning quality |
-| `MONITOR` | Track cognitive metrics |
-| `EVOLVE` | Trigger grammar/strategy evolution |
-| `DEFINE` | Create new keywords at runtime |
-| `MUTATE` / `SYNTHESIZE` | Evolutionary operations |
+`REFLECT`, `MONITOR`, `EVOLVE`, `DEFINE`, `MUTATE`, `SYNTHESIZE`
 
 ### Flow Control (Brain-Native)
-| Keyword | Function |
-|---|---|
-| `STREAM` | Continuous consciousness loop |
-| `THINK_UNTIL` | Loop until confidence threshold |
-| `WHEN_CONFIDENT` | Confidence-gated execution |
-| `ATTEND_PARALLEL` | Parallel cognitive threads |
-| `ON_SURPRISE` | Prediction error handler |
+`STREAM`, `THINK_UNTIL`, `WHEN_CONFIDENT`, `ATTEND_PARALLEL`, `ON_SURPRISE`
 
 ### Social Cognition
-| Keyword | Function |
-|---|---|
-| `CONSULT` | Query another cognitive agent |
-| `DEBATE_MULTI` | Multi-agent structured debate |
-| `SPAWN` / `DELEGATE` / `VOTE` | Agent management |
-
----
-
-## Project Stats
-
-| Metric | Value |
-|--------|-------|
-| Total source code | ~20,000 lines |
-| Cognitive primitives | 50+ |
-| Runtime modules | 20 |
-| Formal cognitive types | 7 (Belief, Uncertain, Temporal, Emotion, Intention, Percept, MemoryTrace) |
-| Standard library algorithms | 25+ |
-| Tests | 472+ (all passing) |
-| Versions | v0.1 → v0.6 |
+`CONSULT`, `DEBATE_MULTI`, `SPAWN`, `DELEGATE`, `VOTE`
 
 ---
 
 ## Test Results
 
 ```
-Conformance Tests:     ✓ All passed
+Kernel Tests (v0.7):   79 passed, 0 failed   ← NEW: Unified Kernel + IR + Observability
 Cognitive v0.3 Tests:  70 passed, 0 failed
 Cognitive v0.4 Tests:  138 passed, 0 failed
 Cognitive v0.5 Tests:  113 passed, 0 failed
 Cognitive v0.6 Tests:  151 passed, 0 failed
+Conformance Tests:     ✓ All passed
 ─────────────────────────────────────────────
-Total:                 472+ tests, 0 failures
+Total:                 551+ tests, 0 failures
 ```
 
 ---
 
-## Documentation
+## Project Statistics
 
-- [Language Specification](docs/LANGUAGE_SPEC.md) — Formal semantics of every primitive
-- [Cognitive Whitepaper](docs/NOEON_COGNITIVE_WHITEPAPER.md) — Design philosophy and neuroscience basis
+| Metric | Value |
+|---|---|
+| Total source code | ~22,000 lines |
+| Cognitive primitives | 50+ |
+| Runtime modules | 22 |
+| IR node types | 14 |
+| Formal cognitive types | 7 |
+| Standard library algorithms | 25+ |
+| CLI commands | 10 |
+| Tests | 551+ (all passing) |
+
+---
+
+## Evolution History
+
+```
+v0.1-0.2  AEL contract language foundation
+v0.3      Cognitive primitives (14 core)
+v0.4      LLM integration, semantic memory, social brain, evolution
+v0.5      Consciousness stream, knowledge graph, multimodal, meta-language
+v0.6      Type system, stdlib, modules, REPL, formal spec
+v0.7      UNIFIED COGNITIVE KERNEL ← You are here
+          └── Single IR, Single Kernel, Full Observability, CLI Toolchain
+```
 
 ---
 
@@ -343,16 +297,23 @@ Total:                 472+ tests, 0 failures
 
 ---
 
+## Documentation
+
+- [Language Specification](docs/LANGUAGE_SPEC.md) — Formal semantics of every primitive
+- [Cognitive Whitepaper](docs/NOEON_COGNITIVE_WHITEPAPER.md) — Design philosophy and neuroscience basis
+
+---
+
 ## Roadmap
 
 - [x] v0.1-0.2: AEL contract language foundation
 - [x] v0.3: Cognitive primitives (14 core)
 - [x] v0.4: LLM integration, semantic memory, social brain, evolution
 - [x] v0.5: Consciousness stream, knowledge graph, multimodal, meta-language
-- [x] **v0.6: Type system, stdlib, modules, REPL, formal spec (472+ tests)**
-- [ ] v0.7: Web Playground & VS Code extension
-- [ ] v0.8: Persistent memory & distributed cognition
-- [ ] v0.9: Production runtime with error recovery
+- [x] v0.6: Type system, stdlib, modules, REPL, formal spec
+- [x] **v0.7: Unified Cognitive Kernel, Cognitive IR, Observability, CLI (551+ tests)**
+- [ ] v0.8: VS Code Extension + Web Playground
+- [ ] v0.9: Production runtime with real LLM integration
 - [ ] v1.0: Complete AI-native programming language
 
 ---
@@ -371,11 +332,11 @@ This is not a tool for building AI. **This IS an AI, expressed as a language.**
 
 ## Positioning
 
-Noeon is a distributed intelligence economy for the AI era.
+Noeon is a cognitive intelligence infrastructure for the AI era.
 
-- Free competition among agents.
-- Verifiable cooperation across untrusted parties.
-- Automatic value settlement by protocol rules.
+- Programs that think, not just compute.
+- Verifiable reasoning with full observability.
+- Self-evolving systems that improve over time.
 
 **Tagline**: Let intelligence think freely, let value settle automatically, let order emerge spontaneously.
 
@@ -385,6 +346,6 @@ Noeon is a distributed intelligence economy for the AI era.
 
 MIT
 
-## Contributing
+## Created By
 
-This is an open experiment in creating a new form of intelligence. Contributions welcome.
+Humans & AI, together. A new species.
