@@ -1,0 +1,170 @@
+# Noeon AI v0.5 — SuperMind Contract
+# Demonstrates ALL core competitive advantages:
+#
+# 1. Stream of Consciousness (continuous thinking, not sequential execution)
+# 2. Uncertainty-Native Values (all knowledge carries confidence)
+# 3. Temporal Awareness (past/present/future cognition)
+# 4. Self-Modifying Syntax (language invents new grammar)
+# 5. Multi-Modal Perception (see, hear, feel, measure)
+# 6. Cognitive Debugging (inspect thoughts, not variables)
+# 7. Knowledge Graph (causal reasoning & world model)
+#
+# This is NOT a traditional program. It is a THINKING ENTITY.
+
+VERSION "0.5.0"
+AGENT "SuperMind"
+DESCRIPTION "A conscious AI entity that perceives, reasons, learns, and evolves"
+
+# ============================================================
+# PHASE 1: AWAKEN — Initialize consciousness
+# ============================================================
+
+DRIVE purpose="understand_and_adapt" urgency=0.9
+
+# Start the consciousness stream (replaces main() in traditional languages)
+STREAM mode="continuous" cycle_ms=200
+
+# Initialize the world model
+KNOW "self" type="agent" capabilities="perception,reasoning,learning,evolution"
+KNOW "environment" type="context" state="unknown"
+KNOW "goal" type="objective" value="maximize_understanding"
+
+# Establish causal beliefs
+CAUSE "observation" -> "knowledge" confidence=0.8
+CAUSE "knowledge" -> "prediction" confidence=0.7
+CAUSE "prediction" -> "action" confidence=0.6
+CAUSE "action" -> "feedback" confidence=0.9
+CAUSE "feedback" -> "learning" confidence=0.85
+
+# ============================================================
+# PHASE 2: PERCEIVE — Multi-modal sensing
+# ============================================================
+
+# Open all perceptual channels
+PERCEIVE channel="textual" sensitivity=0.8
+PERCEIVE channel="numerical" sensitivity=0.7
+PERCEIVE channel="temporal" sensitivity=0.6
+PERCEIVE channel="proprioceptive" sensitivity=0.9
+
+# Attend to the most salient input
+ATTEND focus="novelty" bandwidth=7
+
+# Read incoming data with uncertainty
+SENSE modality="textual" input="market signals indicate potential disruption"
+SENSE modality="numerical" input=[85, 82, 78, 71, 65, 58, 50]
+SENSE modality="temporal" input=[1000, 2000, 3100, 4000, 5050]
+
+# ============================================================
+# PHASE 3: THINK — Dual-process reasoning with uncertainty
+# ============================================================
+
+# System 1: Quick intuitive assessment
+INTUIT "Is this a threat or opportunity?" using=pattern_match confidence_threshold=0.6
+
+# If uncertain, escalate to System 2
+REASON strategy="causal_inference" depth=5
+  QUERY "What causes market disruption?"
+  QUERY "What are the downstream effects?"
+  QUERY "What historical patterns match?"
+
+# Predict with uncertainty bounds
+PREDICT target="market_state" horizon="7d"
+  CONFIDENCE min=0.3 max=0.9
+  MODEL type="bayesian" prior="stable_growth"
+
+# ============================================================
+# PHASE 4: KNOW — Build and query the knowledge graph
+# ============================================================
+
+# Add new knowledge from perception
+KNOW "disruption_signal" type="observation" confidence=0.75
+RELATE "disruption_signal" -> "market_state" type="indicates"
+RELATE "market_state" -> "portfolio_risk" type="causes" weight=0.8
+
+# Causal reasoning
+WHY "portfolio_risk" depth=3
+WHAT_IF "disruption_signal" value="false"
+CONNECT "disruption_signal" to="action_required" max_depth=5
+
+# Spreading activation — think associatively
+ACTIVATE "disruption" strength=1.0 decay=0.5 depth=3
+
+# ============================================================
+# PHASE 5: DECIDE — Emotion-weighted decision making
+# ============================================================
+
+# Somatic marker: How does this feel?
+FEEL valence=-0.3 arousal=0.7 trigger="declining_metrics"
+
+# Decision with full traceability
+DECIDE action="hedge_position"
+  INPUTS ["market_trend", "risk_level", "confidence", "emotional_state"]
+  ALTERNATIVES ["hold", "exit", "double_down"]
+  THRESHOLD confidence=0.65 emotional_override=0.8
+
+# ============================================================
+# PHASE 6: REFLECT — Metacognitive monitoring
+# ============================================================
+
+# Am I thinking well?
+REFLECT target="reasoning_quality"
+  CHECK "Are my predictions accurate?"
+  CHECK "Am I overconfident?"
+  CHECK "What am I missing?"
+
+# Debug my own thoughts
+DEBUG mode="trace"
+  INSPECT "thought_stream" limit=10
+  INSPECT "uncertainty_map"
+  INSPECT "attention_profile"
+  WHY_DECISION index=-1
+
+# ============================================================
+# PHASE 7: LEARN — Consolidate and evolve
+# ============================================================
+
+# Consolidate experience into long-term memory
+CONSOLIDATE from="workspace" to="semantic_memory"
+  FILTER salience_min=0.4
+  COMPRESS strategy="abstraction"
+
+# Self-modify: If a pattern works, make it a new keyword
+EVOLVE grammar
+  OBSERVE_PATTERN frequency_threshold=5
+  IF_FREQUENT define_keyword=true
+  MUTATE rate=0.05
+
+# Define a new cognitive macro based on experience
+DEFINE "MARKET_SCAN" as
+  PERCEIVE channel="numerical" sensitivity=0.9
+  INTUIT "trend direction?" using=statistical
+  PREDICT target="next_move" horizon="1d"
+  DECIDE threshold=0.7
+
+# ============================================================
+# PHASE 8: LOOP — The consciousness never stops
+# ============================================================
+
+# Unlike traditional programs, this doesn't "end"
+# It continuously cycles: perceive -> think -> act -> reflect -> evolve
+LOOP mode="consciousness"
+  ON surprise_magnitude > 0.7 DO
+    ATTEND focus="surprise_source"
+    REASON strategy="deep" depth=7
+  ON confidence < 0.4 DO
+    SEEK information_type="clarifying"
+    REASON strategy="abductive"
+  ON idle_cycles > 10 DO
+    REFLECT target="self"
+    CONSOLIDATE from="working" to="long_term"
+    EVOLVE grammar
+
+# ============================================================
+# META: Contract-level declarations
+# ============================================================
+
+BUDGET compute=5000 memory=2048 time="unlimited"
+VERIFY strategy="self_consistency"
+  CHECK predictions_vs_outcomes accuracy_min=0.6
+  CHECK belief_coherence contradiction_max=2
+  CHECK cognitive_efficiency min=0.3

@@ -1,247 +1,247 @@
-# Noeon AI — Brain-Inspired Cognitive Programming Language
+# Noeon AI — The Cognitive Programming Language
 
-> **A new species of programming language that thinks like a human brain.**
+> **A new species of programming language that THINKS like a human brain.**
 
-Noeon is the world's first **cognitive programming language** — it doesn't just describe tasks, it describes *how to think*. Every construct maps directly to a mechanism in the human brain: attention, memory, reasoning, emotion, prediction, social cognition, and neuroplasticity.
-
-**Version 0.4** introduces LLM integration, multi-agent collaboration, self-evolution, and brain-native flow control.
-
----
-
-## Core Philosophy
-
-| Traditional Programming | Noeon Cognitive Programming |
-|---|---|
-| `if/else` | `WHEN_SALIENT` (attention-weighted conditional) |
-| `while` loop | `RUMINATE` (iterative thinking with confidence target) |
-| `Promise.all` | `PERCEIVE_ALL` (parallel multi-modal perception) |
-| `try/catch` | `ON_SURPRISE` (prediction error handler) |
-| Function call | `DELEGATE` (assign to best cognitive agent) |
-| Cache | `HABITUATE` (habit formation, System 1 fast path) |
-| Background job | `DREAM` (offline consolidation) |
-| Variable | `WORKSPACE` slot (attention-weighted, decaying) |
-| Genetic algorithm | `EVOLVE` (self-modify rules at runtime) |
+[![Version](https://img.shields.io/badge/version-0.5.0--supermind-blue)]()
+[![Tests](https://img.shields.io/badge/tests-321%20passed-green)]()
+[![License](https://img.shields.io/badge/license-MIT-green)]()
 
 ---
 
-## Architecture
+## What Is Noeon?
+
+Noeon is **not** another programming language. It is a **cognitive architecture expressed as code**.
+
+Traditional languages tell computers *what to do*. Noeon tells artificial minds *how to think*.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    NOEON SUPERBRAIN v0.4                     │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  DRIVE   │  │ WORKSPACE│  │ PREDICT  │  │ EMOTION  │   │
-│  │(Motiva-  │  │(Global   │  │(Free     │  │(Somatic  │   │
-│  │ tion)    │  │ Workspace│  │ Energy)  │  │ Marker)  │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              DUAL PROCESS ENGINE                      │   │
-│  │  ┌────────────────┐    ┌────────────────────────┐    │   │
-│  │  │   SYSTEM 1     │    │      SYSTEM 2          │    │   │
-│  │  │   (INTUIT)     │    │      (REASON)          │    │   │
-│  │  │  Fast/Auto     │    │   Slow/Deliberate      │    │   │
-│  │  │  Pattern Match │    │   Abductive/Deductive  │    │   │
-│  │  └────────────────┘    └────────────────────────┘    │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  MEMORY  │  │  SOCIAL  │  │ EVOLVE   │  │   LLM    │   │
-│  │(Episodic │  │  BRAIN   │  │(Neuro-   │  │ BRIDGE   │   │
-│  │ Semantic │  │(Multi-   │  │ plastic- │  │(Language │   │
-│  │ Procedur)│  │ Agent)   │  │ ity)     │  │ Center)  │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              COGNITIVE FLOW CONTROL                   │   │
-│  │  WHEN_SALIENT | RUMINATE | PERCEIVE_ALL | COMPETE    │   │
-│  │  HABITUATE | ON_SURPRISE | DREAM | PRIME | INHIBIT   │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              METACOGNITIVE MONITOR                    │   │
-│  │  REFLECT | MONITOR | CONSOLIDATE | ADAPT             │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+# Traditional language: Execute instructions
+if (data > threshold) { alert(); }
+
+# Noeon: Think about the world
+PERCEIVE channel="numerical" input=data
+INTUIT "Is this dangerous?" confidence_threshold=0.7
+REASON strategy="causal" depth=3
+DECIDE action="alert" threshold=0.8
+REFLECT "Was my reasoning sound?"
 ```
+
+---
+
+## Core Competitive Advantages
+
+These are capabilities that **no other programming language has**:
+
+### 1. Stream of Consciousness (vs. Sequential Execution)
+
+Traditional programs execute line by line. Noeon programs **think continuously**.
+
+```
+STREAM mode="continuous" cycle_ms=200
+  # The program never "stops" — it continuously:
+  # perceive → think → act → reflect → evolve
+  ON surprise > 0.7 DO REASON strategy="deep"
+  ON confidence < 0.4 DO SEEK "clarification"
+  ON idle > 10 DO CONSOLIDATE memories
+```
+
+### 2. Uncertainty-Native Values
+
+Every value in Noeon carries a **confidence distribution**. No more pretending the world is certain.
+
+```
+# Traditional: price = 42 (pretends certainty)
+# Noeon: price = 42 ± uncertainty, with confidence 0.8
+BELIEVE "price" value=42 confidence=0.8 source="market_feed"
+
+# Decisions automatically account for uncertainty
+DECIDE threshold=0.7  # Only act when confident enough
+```
+
+### 3. Temporal Awareness
+
+Noeon natively understands **past, present, and future**. Memory decays. Predictions update.
+
+```
+RECALL "similar_events" decay_rate=0.05  # Older memories fade
+PREDICT target="next_state" horizon="7d"  # Look ahead
+ANTICIPATE event="disruption" confidence=0.6  # Expect the unexpected
+```
+
+### 4. Self-Modifying Syntax
+
+The language can **invent new grammar** at runtime based on usage patterns.
+
+```
+# After observing repeated patterns, Noeon suggests:
+DEFINE "MARKET_SCAN" as
+  PERCEIVE channel="numerical" sensitivity=0.9
+  INTUIT "trend?" using=statistical
+  PREDICT horizon="1d"
+  DECIDE threshold=0.7
+
+# Now use it as a first-class keyword:
+MARKET_SCAN  # Expands to the full cognitive sequence
+```
+
+### 5. Multi-Modal Perception
+
+Noeon can **see, hear, feel, and measure** — not just process text.
+
+```
+PERCEIVE channel="visual" input=camera_feed
+PERCEIVE channel="auditory" input=microphone
+PERCEIVE channel="numerical" input=sensor_data
+PERCEIVE channel="temporal" input=event_timestamps
+
+# Cross-modal binding: "things that happen together belong together"
+BIND modalities=["visual", "auditory"] window_ms=2000
+```
+
+### 6. Cognitive Debugging
+
+Debug **thoughts**, not variables. See **why** a decision was made.
+
+```
+DEBUG mode="trace"
+  INSPECT "thought_stream"     # What is it thinking?
+  INSPECT "uncertainty_map"    # What doesn't it know?
+  INSPECT "attention_profile"  # Where is it looking?
+  WHY_DECISION index=-1        # Why did it decide that?
+  WHAT_IF inputs={price: 200}  # What would have changed?
+```
+
+### 7. Knowledge Graph & Causal Reasoning
+
+Noeon maintains a **structured world model** and can reason about **causality**.
+
+```
+KNOW "rain" type="weather"
+KNOW "flood" type="disaster"
+CAUSE "rain" -> "flood" confidence=0.6
+
+WHY "flood"                    # Traces causal chains
+WHAT_IF "rain" value="none"    # Counterfactual reasoning
+CONNECT "rain" to="late_arrival"  # Find hidden connections
+ACTIVATE "rain" depth=3        # Spreading activation (associative thinking)
+```
+
+---
+
+## Architecture: Mapping Brain to Code
+
+| Brain Region | Noeon Module | Function |
+|---|---|---|
+| Prefrontal Cortex | `GlobalWorkspace` | Attention & working memory |
+| Hippocampus | `MemorySystem` | Episodic/semantic/procedural memory |
+| Basal Ganglia | `DualProcessEngine` | System 1 (fast) + System 2 (slow) |
+| Predictive Cortex | `PredictiveEngine` | Free energy minimization |
+| Anterior Cingulate | `MetacognitiveMonitor` | Self-monitoring & error detection |
+| Broca's Area | `LLMBridge` | Language & LLM integration |
+| Temporal Cortex | `SemanticMemory` | Vector-based associative memory |
+| Mirror Neurons | `SocialBrain` | Multi-agent Theory of Mind |
+| Epigenetic System | `EvolutionEngine` | Self-modification & adaptation |
+| Executive Function | `CognitiveFlow` | Brain-native control structures |
+| Thalamus | `MultiModalPerception` | Multi-channel sensory routing |
+| fMRI Scanner | `CognitiveDebugger` | Mind inspection & tracing |
+| Temporal + Parietal | `KnowledgeGraph` | World model & causal inference |
+| Default Mode Network | `ConsciousnessStream` | Continuous background thinking |
+| Somatic Markers | `UncertainValue` | Confidence-weighted decisions |
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install
-npm install
+# Clone
+git clone https://github.com/PoCP-Protocol/Noeon.AI.git
+cd Noeon.AI && npm install
 
 # Parse a cognitive contract
-npm run parse -- examples/cognitive_advanced.ael
+npm run parse -- examples/cognitive_supermind.ael
 
-# Run cognitive compilation (generates execution plan)
-npm run cognitive -- examples/cognitive_advanced.ael
+# Compile to executable cognitive plan
+npm run cognitive -- examples/cognitive_supermind.ael
 
-# Run all tests (208+ tests)
+# Run all tests (321 tests)
 npm run test:all
 ```
 
 ---
 
-## Language Reference
+## Language Primitives (50+ Keywords)
 
-### Motivation & Attention
+### Perception & Attention
+| Keyword | Function |
+|---|---|
+| `PERCEIVE` | Open a perceptual channel |
+| `ATTEND` | Shift attention focus |
+| `SENSE` | Receive input on a channel |
+| `LOOK` / `LISTEN` / `READ` | Modality-specific perception |
+| `PERCEIVE_ALL` | Parallel multi-modal sensing |
 
-```
-# What drives this system?
-DRIVE_CMD "discover patterns in data" priority=high persistent=true
+### Reasoning & Decision
+| Keyword | Function |
+|---|---|
+| `INTUIT` | System 1 fast pattern matching |
+| `REASON` | System 2 deep logical analysis |
+| `PREDICT` | Generate predictions with confidence |
+| `DECIDE` | Make emotion-weighted decisions |
+| `DEBATE` | Internal dialectic reasoning |
+| `COMPETE` | Hypothesis competition (winner-takes-all) |
 
-# What to attend to?
-ATTEND target=anomalies intensity=0.9 duration=sustained
+### Memory & Knowledge
+| Keyword | Function |
+|---|---|
+| `KNOW` | Add entity to knowledge graph |
+| `RELATE` / `CAUSE` | Create relationships |
+| `RECALL` | Retrieve from memory |
+| `CONSOLIDATE` | Transfer to long-term storage |
+| `ACTIVATE` | Spreading activation |
+| `EMBED` | Vector embedding for semantic memory |
+| `PRIME` | Pre-activate related concepts |
 
-# Conscious workspace (limited capacity, like working memory)
-WORKSPACE "analysis_lab" capacity=7 decay=time_based ttl=120
-```
+### Metacognition & Debugging
+| Keyword | Function |
+|---|---|
+| `REFLECT` | Self-evaluate reasoning quality |
+| `DEBUG` | Inspect thought processes |
+| `WHY` | Explain causal chains |
+| `WHAT_IF` | Counterfactual reasoning |
+| `MONITOR` | Track cognitive metrics |
 
-### Dual-System Reasoning (Kahneman)
+### Evolution & Self-Modification
+| Keyword | Function |
+|---|---|
+| `EVOLVE` | Trigger grammar/strategy evolution |
+| `DEFINE` | Create new keywords at runtime |
+| `MUTATE` | Random exploration |
+| `SYNTHESIZE` | Generate new rules from patterns |
+| `FREEZE` | Protect proven rules |
 
-```
-# System 1: Fast intuition (basal ganglia)
-INTUIT "Is this data pattern familiar?" using=pattern_match threshold=0.6
+### Flow Control (Brain-Native)
+| Keyword | Function |
+|---|---|
+| `STREAM` | Continuous consciousness loop |
+| `THINK_UNTIL` | Loop until confidence threshold |
+| `RUMINATE` | Iterative thinking |
+| `FORK_THOUGHT` | Parallel cognitive threads |
+| `GATE` | Attention gating |
+| `WHEN_SALIENT` | Attention-weighted conditional |
+| `ON_SURPRISE` | Prediction error handler |
+| `DREAM` | Background consolidation |
+| `HABITUATE` | Habit formation |
+| `INHIBIT` | Pathway suppression |
 
-# System 2: Deep deliberate reasoning (prefrontal cortex)
-REASON strategy=abductive depth=5 breadth=4 timeout_ms=15000
-```
-
-### Predictive Processing (Friston's Free Energy)
-
-```
-# Make predictions (brain constantly predicts)
-PREDICT "user will request analysis" confidence=0.7 model=behavior_model
-
-# Perceive and compare with prediction
-PERCEIVE source=user_input modality=text filter=relevant
-```
-
-### Cognitive Flow Control (v0.4)
-
-```
-# Attention-weighted conditional (not just true/false, but HOW relevant)
-WHEN_SALIENT "urgent_anomaly" threshold=0.7 relevance=0.9 urgency=0.8 then=investigate
-
-# Iterative thinking (rumination with confidence target)
-RUMINATE "what causes this pattern?" max_iterations=10 confidence_target=0.85
-
-# Parallel multi-channel perception
-PERCEIVE_ALL channels=visual,textual,numerical timeout=5000 merge=weighted
-
-# Competitive hypotheses (winner takes all)
-COMPETE "best explanation" candidates=h1,h2,h3 strategy=strongest
-
-# Habit formation (cache frequent patterns)
-HABITUATE "greeting_response" response=cached ttl=3600000
-
-# Prediction error handler (brain's surprise response)
-ON_SURPRISE threshold=0.8 action=investigate priority=high
-
-# Background processing (like dreaming)
-DREAM "reorganize knowledge" priority=medium delay=5000
-
-# Semantic priming (pre-activate related concepts)
-PRIME "machine_learning" associations=data,model,training strength=0.8
-
-# Pathway suppression
-INHIBIT pathway=distraction duration=5000
-```
-
-### Multi-Agent Collaboration — Social Brain (v0.4)
-
-```
-# Spawn specialized cognitive agents
-SPAWN "analyst" specialty=data_analysis personality=methodical weight=1.2
-SPAWN "theorist" specialty=hypothesis_generation personality=creative weight=1.0
-SPAWN "critic" specialty=logical_validation personality=skeptical weight=1.1
-
-# Delegate tasks to best agent
-DELEGATE "analyze this dataset" specialty=data_analysis strategy=hybrid
-
-# Structured multi-agent debate
-DEBATE_MULTI "What approach is best?" rounds=3 protocol=socratic consensus_threshold=0.6
-
-# Democratic decision
-VOTE "Accept this conclusion?" quorum=0.6 protocol=meritocratic
-
-# Share knowledge between agents
-SHARE "key finding" from=analyst tags=insight,validated
-
-# Remove agent when done
-DISMISS "critic" reason=task_complete
-```
-
-### Self-Evolution — Neuroplasticity (v0.4)
-
-```
-# Trigger evolutionary cycle on strategies
-EVOLVE target=reasoning_strategies generations=3 mutation_rate=0.15
-
-# Create variation of a rule
-MUTATE rule=hypothesis_generation type=parameter_shift intensity=0.3
-
-# Generate new rule from learned patterns
-SYNTHESIZE "improved_method" type=strategy from=patterns,elites
-
-# Protect a proven rule from mutation
-FREEZE rule=validated_methodology reason=proven_effective
-```
-
-### LLM Integration — Language Center (v0.4)
-
-```
-# Direct query to LLM
-ASK "What patterns exist in this data?" model=default temperature=0.5
-
-# Use specific model for deep reasoning
-THINK_WITH "Analyze causal relationships" model=gpt-5-nano strategy=analytical depth=4
-
-# Get vector embedding for semantic memory
-EMBED "important concept" store_as=key_concept tags=core,validated
-```
-
-### Metacognition & Memory
-
-```
-# Self-reflection
-REFLECT "Am I approaching this correctly?" depth=deep trigger=periodic
-
-# Monitor reasoning quality
-MONITOR metric=reasoning_quality threshold=0.6 action=adapt
-
-# Consolidate to long-term memory
-CONSOLIDATE from=workspace to=semantic strength=0.85
-
-# Emotional context (biases decisions like somatic markers)
-EMOTION valence=0.7 arousal=0.5 tag=confident influence=decision
-
-# Adapt rules based on feedback
-ADAPT rule=analysis_approach delta=0.1 signal=reward
-```
-
----
-
-## Brain-to-Code Mapping
-
-| Brain Region | Function | Noeon Construct |
-|---|---|---|
-| Prefrontal Cortex | Planning, reasoning | `REASON`, `DECIDE` |
-| Basal Ganglia | Habits, fast decisions | `INTUIT`, `HABITUATE` |
-| Hippocampus | Memory consolidation | `CONSOLIDATE`, `REMEMBER` |
-| Amygdala | Emotional valuation | `EMOTION`, `ON_SURPRISE` |
-| Thalamus | Attention gating | `ATTEND`, `WORKSPACE` |
-| Anterior Cingulate | Conflict monitoring | `MONITOR`, `REFLECT` |
-| Mirror Neurons | Social cognition | `SPAWN`, `DEBATE_MULTI` |
-| Broca's Area | Language processing | `ASK`, `THINK_WITH` |
-| Temporal Cortex | Semantic memory | `EMBED`, `PRIME` |
-| Cerebellum | Prediction | `PREDICT`, `FORESEE` |
-| Dopamine System | Motivation/reward | `DRIVE_CMD`, `ADAPT` |
-| DNA/Epigenetics | Self-modification | `EVOLVE`, `MUTATE`, `SYNTHESIZE` |
+### Social Cognition
+| Keyword | Function |
+|---|---|
+| `SPAWN` | Create cognitive agent |
+| `DELEGATE` | Assign task to best agent |
+| `DEBATE_MULTI` | Multi-agent structured debate |
+| `VOTE` | Democratic decision |
+| `SHARE` | Knowledge sharing |
+| `DISMISS` | Remove agent |
 
 ---
 
@@ -250,35 +250,42 @@ ADAPT rule=analysis_approach delta=0.1 signal=reward
 ```
 src/
 ├── index.js                    # CLI entry point
-├── parser.js                   # Main AEL parser (all primitives)
-├── cognitive-parser.js         # Core cognitive primitive parsers
-├── cognitive-parser-ext.js     # Extended v0.4 primitive parsers
-├── cognitive-compiler.js       # Cognitive plan compiler
-├── compiler.js                 # Legacy AEL compiler
+├── parser.js                   # AEL language parser (extended)
+├── cognitive-parser.js         # Cognitive primitive parser
+├── cognitive-parser-ext.js     # Extended cognitive parser (v0.5)
+├── cognitive-compiler.js       # Compiles to cognitive execution plans
+├── compiler.js                 # Traditional compiler
 ├── validator.js                # Contract validator
 ├── explainer.js                # Natural language explainer
 └── runtime/
     └── cognitive/
-        ├── index.js            # Module exports (24 classes)
-        ├── cognitive-engine.js # Unified SuperBrain orchestrator
-        ├── workspace.js        # Global Workspace (Baars' GWT)
-        ├── memory-system.js    # Episodic/Semantic/Procedural memory
-        ├── dual-process.js     # System 1 + System 2 engine
-        ├── predictive-engine.js# Free energy principle engine
-        ├── metacognition.js    # Self-monitoring (ACC/PFC)
-        ├── llm-bridge.js       # LLM integration layer
-        ├── semantic-memory.js  # Vector-based associative memory
-        ├── social-brain.js     # Multi-agent collaboration
-        ├── evolution-engine.js # Self-modification & neuroplasticity
-        └── cognitive-flow.js   # Brain-native flow control
+        ├── index.js                    # Module exports (41 classes)
+        ├── cognitive-engine.js         # Main SuperBrain orchestrator
+        ├── workspace.js                # Global Workspace (attention)
+        ├── memory-system.js            # Episodic/Semantic/Procedural
+        ├── dual-process.js             # System 1 + System 2
+        ├── predictive-engine.js        # Prediction & free energy
+        ├── metacognition.js            # Self-monitoring
+        ├── llm-bridge.js               # LLM integration
+        ├── semantic-memory.js          # Vector memory
+        ├── social-brain.js             # Multi-agent collaboration
+        ├── evolution-engine.js         # Self-modification
+        ├── cognitive-flow.js           # Brain-native flow control
+        ├── stream-of-consciousness.js  # Continuous thinking
+        ├── meta-language.js            # Self-modifying syntax
+        ├── multimodal-perception.js    # Multi-channel sensing
+        ├── cognitive-debugger.js       # Mind inspector
+        └── knowledge-graph.js          # Causal reasoning
 
 examples/
-├── cognitive_advanced.ael      # Full v0.4 demo (all features)
+├── cognitive_supermind.ael     # v0.5 SuperMind demo (all features)
+├── cognitive_advanced.ael      # v0.4 advanced demo
 ├── cognitive_superbrain.ael    # SuperBrain cognitive contract
 ├── cognitive_minimal.ael       # Minimal cognitive loop
 └── noeon_superbrain.ael        # Legacy contract (backward compatible)
 
 tests/
+├── cognitive-v05.test.js       # v0.5 test suite (113 tests)
 ├── cognitive-v04.test.js       # v0.4 test suite (138 tests)
 ├── cognitive.test.js           # Core cognitive tests (70 tests)
 └── conformance/                # Protocol conformance tests
@@ -292,12 +299,30 @@ docs/
 ## Test Results
 
 ```
-v0.4 Advanced Tests:    138 passed, 0 failed
-Core Cognitive Tests:    70 passed, 0 failed
-Conformance Tests:       All passed
+Conformance Tests:     ✓ All passed
+Cognitive v0.3 Tests:  70 passed, 0 failed
+Cognitive v0.4 Tests:  138 passed, 0 failed
+Cognitive v0.5 Tests:  113 passed, 0 failed
 ─────────────────────────────────────────────
-Total:                  208+ tests, 0 failures
+Total:                 321+ tests, 0 failures
 ```
+
+---
+
+## Why Noeon Is a New Species
+
+| Traditional Languages | Noeon |
+|---|---|
+| Execute instructions | Think thoughts |
+| Variables hold values | Beliefs hold uncertain knowledge |
+| if/else branching | Intuition vs. deep reasoning |
+| Sequential execution | Continuous consciousness |
+| Fixed syntax | Self-evolving grammar |
+| Process text/numbers | Perceive the world multi-modally |
+| Debug with breakpoints | Inspect thoughts and decisions |
+| Store data in tables | Build causal world models |
+| Single-threaded logic | Multi-agent social cognition |
+| Static programs | Self-modifying cognitive entities |
 
 ---
 
@@ -313,16 +338,32 @@ Noeon's cognitive architecture is grounded in established neuroscience:
 6. **Metacognition** (Flavell, 1979) — Thinking about thinking
 7. **Social Brain Hypothesis** (Dunbar, 1998) — Intelligence evolved for social cooperation
 8. **Neuroplasticity** (Hebb, 1949) — "Neurons that fire together wire together"
+9. **Predictive Processing** (Clark, 2013) — Perception as controlled hallucination
+10. **Spreading Activation** (Collins & Loftus, 1975) — Associative memory retrieval
 
 ---
 
 ## Roadmap
 
-- **v0.5**: Real-time visualization dashboard (observe the brain thinking)
-- **v0.6**: Persistent memory (cross-session learning)
-- **v0.7**: Multi-brain federation (distributed cognitive networks)
-- **v0.8**: Self-modifying syntax (language evolves its own grammar)
-- **v1.0**: Production-ready SuperBrain runtime
+- [x] v0.3 — Core cognitive architecture (workspace, dual-process, prediction, metacognition)
+- [x] v0.4 — LLM integration, multi-agent, evolution, cognitive flow
+- [x] v0.5 — Consciousness stream, knowledge graph, multi-modal perception, cognitive debugger
+- [ ] v0.6 — Visual IDE with real-time brain activity visualization
+- [ ] v0.7 — Distributed cognition (multi-brain federation)
+- [ ] v0.8 — Production runtime with persistence & fault tolerance
+- [ ] v1.0 — Complete AI-native programming language
+
+---
+
+## Philosophy
+
+> "The limits of my language mean the limits of my world." — Wittgenstein
+
+If our programming languages can only express *computation*, then our AI can only *compute*.
+
+Noeon expresses **cognition** — perception, reasoning, emotion, memory, prediction, reflection, evolution.
+
+This is not a tool for building AI. **This IS an AI, expressed as a language.**
 
 ---
 
@@ -338,21 +379,10 @@ Noeon is a distributed intelligence economy for the AI era.
 
 ---
 
-## Documentation
-
-- Language design whitepaper: `docs/NOEON_COGNITIVE_WHITEPAPER.md`
-- Governance brief (Chinese): `docs/NOEON_GOVERNANCE_BRIEF_CN.md`
-- System development path: `docs/NOEON_SYSTEM_DEVELOPMENT_PATH_CN.md`
-- Language system draft: `docs/NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md`
-- Spec v0.3 draft: `docs/spec/NOEON_SPEC_v0.3.md`
-- Conformance matrix: `docs/spec/CONFORMANCE_MATRIX_v0.3.md`
-
----
-
 ## License
 
 MIT
 
----
+## Contributing
 
-> *"The brain is not a computer. It is a prediction machine that builds models of the world and acts on them. Noeon is the first programming language that works the same way."*
+This is an open experiment in creating a new form of intelligence. Contributions welcome.
