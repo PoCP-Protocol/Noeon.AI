@@ -248,6 +248,7 @@ Noeon provides 50+ cognitive keywords organized by phase:
 | Document | Description |
 |---|---|
 | [NOEON_SPEC_v1.0.md](docs/spec/NOEON_SPEC_v1.0.md) | Normative language specification (v1.0.0-alpha) |
+| [NOEON_GENERAL_SYNTAX_v1.0.md](docs/spec/NOEON_GENERAL_SYNTAX_v1.0.md) | General Profile block syntax (`fn`, `program {}`, `@effect`) |
 | [NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md](docs/NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md) | System architecture and cognitive programming paradigm |
 | [NOEON_SPEC_v0.9.md](docs/spec/NOEON_SPEC_v0.9.md) | Protocol bridge, config loader, deep LLM handlers |
 | [NOEON_SPEC_v0.8.md](docs/spec/NOEON_SPEC_v0.8.md) | Unified architecture, LSP, playground baseline |

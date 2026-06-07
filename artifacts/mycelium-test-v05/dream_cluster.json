@@ -1,0 +1,52 @@
+{
+  "cells": [
+    {
+      "name": "hypothesis_risk_off",
+      "claim": "Markets entering risk-off regime",
+      "energy": 0.4416,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:28:02.773Z"
+    },
+    {
+      "name": "hypothesis_risk_on",
+      "claim": "Liquidity wave still expanding",
+      "energy": 0.30827499999999997,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:28:02.773Z"
+    },
+    {
+      "name": "hypothesis_soft",
+      "claim": "Soft landing narrative gaining traction",
+      "energy": 0.3084,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:28:02.773Z"
+    },
+    {
+      "name": "cycle_gate",
+      "claim": "Crystallized observe-reason-decide cycle",
+      "energy": 0.63,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:28:02.773Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
+      "energy": 0.548,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:28:02.773Z"
+    }
+  ],
+  "programs": [
+    "genesis"
+  ],
+  "cluster": "dream_cluster",
+  "updated_at": "2026-06-07T22:28:02.774Z"
+}

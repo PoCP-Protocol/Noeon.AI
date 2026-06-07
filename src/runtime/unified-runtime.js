@@ -60,8 +60,39 @@ function readFeedbackBatch(filePath) {
 }
 
 function parseProgram(filePath, options = {}) {
-  const { resolved, source } = readSource(filePath);
+  const resolved = path.resolve(process.cwd(), filePath);
   const { config } = loadProjectConfig({ cwd: path.dirname(resolved), ...options });
+
+  const humanSidecar = resolved.endsWith('.lim.human')
+    ? resolved
+    : `${resolved.endsWith('.lim') ? resolved : `${resolved}.lim`}.human`;
+  const isLiminal =
+    resolved.endsWith('.lim') ||
+    resolved.endsWith('.lim.human') ||
+    fs.existsSync(humanSidecar);
+
+  if (isLiminal) {
+    const { loadLiminalFromFile } = require('../grammar/liminal');
+    const loadTarget = resolved.endsWith('.lim.human')
+      ? resolved.replace(/\.human$/, '')
+      : (resolved.endsWith('.lim') ? resolved : `${resolved}.lim`);
+    if (!fs.existsSync(loadTarget) && !fs.existsSync(humanSidecar)) {
+      throw new Error(`File not found: ${resolved}`);
+    }
+    const ast = loadLiminalFromFile(loadTarget, { filename: loadTarget, ...options });
+    const sourcePath = fs.existsSync(humanSidecar) ? humanSidecar : loadTarget;
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    return { ast, resolved: loadTarget, source, config };
+  }
+
+  if (resolved.endsWith('.next')) {
+    const { readSourceWithEvolved } = require('./next/hot-reload');
+    const loaded = readSourceWithEvolved(resolved, options);
+    const ast = parseAel(loaded.source, { filename: loaded.path, ...options });
+    return { ast, resolved, source: loaded.source, config, evolved: loaded.evolved };
+  }
+
+  const { source } = readSource(filePath);
   const ast = parseAel(source, { filename: resolved, ...options });
   return { ast, resolved, source, config };
 }
@@ -164,30 +195,126 @@ function buildKernelStatus(result) {
   };
 }
 
+function buildNextCycleFromExecution(ast, execution, feedback, cycleAt = new Date().toISOString()) {
+  const steps = [];
+  if (execution.next?.selectedStrategy) {
+    steps.push({
+      name: `strategy:${execution.next.selectedStrategy.name || execution.next.selectedStrategy.objective || 'selected'}`,
+      status: execution.success ? 'done' : 'failed',
+      reason: execution.blocked ? execution.next?.blockReason || 'blocked' : 'selected',
+      failureCategory: execution.blocked ? 'next_block' : null,
+      latencyMs: 0,
+      receipt: {
+        utility: execution.next.selectedStrategy.utility,
+        memoryBias: execution.next.selectedStrategy.memoryBias || 0
+      }
+    });
+  }
+  for (const g of execution.next?.guarantees || []) {
+    steps.push({
+      name: `guarantee:${g.name}`,
+      status: g.status === 'unknown' ? 'failed' : (g.passed ? 'done' : 'failed'),
+      reason: g.status === 'unknown' ? 'unknown' : (g.passed ? 'pass' : 'fail'),
+      failureCategory: g.status === 'unknown' ? 'missing_operand' : (g.passed ? null : 'guarantee_failed'),
+      latencyMs: 0,
+      receipt: g
+    });
+  }
+
+  return {
+    cycleAt,
+    contract: {
+      network: ast.network || 'next-native',
+      task: ast.task || ast.next?.goal?.text || 'next-program',
+      goal: ast.next?.goal?.text || ast.cognition?.goal || null
+    },
+    cognition: {
+      planTrace: {
+        totalNodes: steps.length,
+        steps
+      },
+      metaPolicy: {
+        enabled: false,
+        totalRules: 0,
+        hardened: false,
+        violations: []
+      }
+    },
+    adaptation: {
+      updates: execution.next?.evolution?.applied?.changed
+        ? {
+            mutation: execution.next.evolution.applied.mutation,
+            reason: execution.next.evolution.applied.reason
+          }
+        : {},
+      diagnostics: execution.next?.reflection?.insights || []
+    },
+    next: execution.next,
+    profile: 'next',
+    protocolSuccess: execution.success,
+    blocked: execution.blocked === true,
+    feedback
+  };
+}
+
 async function simulateContract(ast, feedback = {}, outputOptions = {}) {
   const validation = validateAel(ast);
   if (!validation.valid) {
     return { success: false, validation, error: 'Simulation blocked: contract is invalid.' };
   }
 
-  const compiled = compileAel(ast);
-  const cycle = await runProtocolCycle(compiled, feedback, {});
-
+  const isNextProfile = ast.profile === 'next' || ast.languageProfile === 'next';
   const statePath = outputOptions.statePath;
+  const state = statePath ? loadState(statePath) : null;
+  let cycle;
+  let nextMemoryOut = null;
+
+  if (isNextProfile) {
+    const inheritedNextMemory = outputOptions.nextMemoryIn || state?.currentNextMemory || null;
+    const execution = await executeProgram(ast, {
+      with_protocol: outputOptions.withProtocol || 'off',
+      strict_next: outputOptions.strictNext === true,
+      auto_evolve: outputOptions.autoEvolve === true,
+      next_memory: inheritedNextMemory,
+      feedback
+    });
+
+    cycle = buildNextCycleFromExecution(ast, execution, feedback);
+
+    nextMemoryOut = execution.next?.nextMemory || null;
+  } else {
+    const compiled = compileAel(ast);
+    cycle = await runProtocolCycle(compiled, feedback, {});
+  }
+
   if (statePath) {
-    const state = loadState(statePath);
-    state.rounds.push({
+    const round = {
       cycleAt: cycle.cycleAt,
       task: cycle.contract.task,
       feedback,
       updates: cycle.adaptation.updates,
       diagnostics: cycle.adaptation.diagnostics
-    });
+    };
+    if (isNextProfile) {
+      round.next = {
+        blocked: cycle.blocked === true,
+        blockReason: cycle.next?.blockReason || null,
+        selectedStrategy: cycle.next?.selectedStrategy
+          ? (cycle.next.selectedStrategy.name || cycle.next.selectedStrategy.objective || 'strategy')
+          : null,
+        reflectionVerdict: cycle.next?.reflection?.verdict || null,
+        evolutionApplied: cycle.next?.evolution?.applied || null,
+        memoryRunCount: nextMemoryOut?.runCount || 0
+      };
+    }
+    state.rounds.push(round);
     state.currentPolicy = cycle.adaptation.updates;
+    if (isNextProfile && nextMemoryOut) {
+      state.currentNextMemory = nextMemoryOut;
+    }
     saveState(statePath, state);
   }
 
-  const state = statePath ? loadState(statePath) : null;
   const report = state ? generateReport(cycle, state) : generateReport(cycle, { rounds: [], currentPolicy: {} });
 
   if (outputOptions.reportPath) {
@@ -200,13 +327,114 @@ async function simulateContract(ast, feedback = {}, outputOptions = {}) {
     fs.writeFileSync(path.resolve(process.cwd(), outputOptions.cyclePath), JSON.stringify(cycle, null, 2), 'utf8');
   }
 
-  return { success: true, cycle, report, validation };
+  if (isNextProfile && outputOptions.nextMemoryOutPath && nextMemoryOut) {
+    fs.writeFileSync(path.resolve(process.cwd(), outputOptions.nextMemoryOutPath), JSON.stringify(nextMemoryOut, null, 2), 'utf8');
+  }
+
+  return {
+    success: !cycle.blocked,
+    cycle,
+    report,
+    validation,
+    nextMemory: nextMemoryOut
+  };
 }
 
-function trainContract(ast, feedbackBatch, outputOptions = {}) {
+async function trainContract(ast, feedbackBatch, outputOptions = {}) {
   const validation = validateAel(ast);
   if (!validation.valid) {
     return { success: false, validation, error: 'Training blocked: contract is invalid.' };
+  }
+
+  const isNextProfile = ast.profile === 'next' || ast.languageProfile === 'next';
+  const rounds = Array.isArray(feedbackBatch) ? feedbackBatch : [];
+
+  if (isNextProfile) {
+    const statePath = outputOptions.statePath;
+    const state = statePath ? loadState(statePath) : null;
+    let nextMemory = outputOptions.nextMemoryIn || state?.currentNextMemory || null;
+    const trainingRounds = [];
+    let lastCycle = null;
+
+    for (let i = 0; i < rounds.length; i += 1) {
+      const feedback = rounds[i] || {};
+      const execution = await executeProgram(ast, {
+        with_protocol: outputOptions.withProtocol || 'off',
+        strict_next: outputOptions.strictNext === true,
+        auto_evolve: outputOptions.autoEvolve === true,
+        next_memory: nextMemory,
+        feedback
+      });
+
+      const cycle = buildNextCycleFromExecution(ast, execution, feedback, new Date().toISOString());
+      lastCycle = cycle;
+      nextMemory = execution.next?.nextMemory || nextMemory;
+
+      trainingRounds.push({
+        round: i + 1,
+        feedback,
+        plan: {
+          complete: execution.success,
+          haltedReason: execution.blocked ? (execution.next?.blockReason || 'next_block') : null
+        },
+        policy: cycle.adaptation.updates,
+        diagnostics: cycle.adaptation.diagnostics,
+        next: {
+          selectedStrategy: execution.next?.selectedStrategy
+            ? (execution.next.selectedStrategy.name || execution.next.selectedStrategy.objective || 'strategy')
+            : null,
+          reflectionVerdict: execution.next?.reflection?.verdict || null,
+          evolutionApplied: execution.next?.evolution?.applied || null,
+          memoryRunCount: nextMemory?.runCount || 0
+        }
+      });
+
+      if (outputOptions.auditPath) {
+        appendAuditEntries(outputOptions.auditPath, cycle);
+      }
+    }
+
+    const blockedRounds = trainingRounds.filter((r) => r.plan.complete === false).length;
+    const training = {
+      profile: 'next',
+      rounds: trainingRounds,
+      convergence: {
+        totalRounds: trainingRounds.length,
+        blockedRounds,
+        successRounds: trainingRounds.length - blockedRounds,
+        stabilized: blockedRounds === 0
+      },
+      finalPolicy: lastCycle?.adaptation?.updates || {}
+    };
+
+    if (statePath) {
+      for (const round of trainingRounds) {
+        state.rounds.push({
+          cycleAt: new Date().toISOString(),
+          task: ast.task || ast.next?.goal?.text || 'next-program',
+          feedback: round.feedback,
+          updates: round.policy,
+          diagnostics: round.diagnostics,
+          round: round.round,
+          next: round.next
+        });
+      }
+      state.currentPolicy = training.finalPolicy;
+      if (nextMemory) state.currentNextMemory = nextMemory;
+      saveState(statePath, state);
+    }
+
+    if (outputOptions.trainingPath) {
+      fs.writeFileSync(path.resolve(process.cwd(), outputOptions.trainingPath), JSON.stringify(training, null, 2), 'utf8');
+    }
+    if (outputOptions.convergencePath) {
+      fs.writeFileSync(path.resolve(process.cwd(), outputOptions.convergencePath), JSON.stringify(training.convergence, null, 2), 'utf8');
+    }
+    if (outputOptions.nextMemoryOutPath && nextMemory) {
+      fs.writeFileSync(path.resolve(process.cwd(), outputOptions.nextMemoryOutPath), JSON.stringify(nextMemory, null, 2), 'utf8');
+    }
+
+    return { success: true, training, validation, nextMemory };
   }
 
   const compiled = compileAel(ast);

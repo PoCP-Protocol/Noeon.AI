@@ -1,0 +1,33 @@
+profile "next"
+version "0.3.0"
+program "ember"
+module signal_scout
+
+GOAL "Seed the mycelium with public signal cells"
+
+FIELD embers {
+  ingest: [sensor, stream]
+  decay: 30m
+}
+
+CELL ember_volatility_spike {
+  energy: 0.71
+  claim: "Volatility spike confirms risk-off pressure"
+  tags: [public]
+  when energy > 0.5 { emit cluster.pulse }
+}
+
+CELL ember_liquidity_echo {
+  energy: 0.52
+  claim: "Liquidity echo from cross-market flows"
+  tags: [public]
+}
+
+MYCELIUM join "dream_cluster" {
+  share: [ember_*]
+  absorb: tagged=public
+}
+
+ECHO last_run INTO memory.episodic
+
+ACT action=publish_cells capability=runtime channel=mycelium

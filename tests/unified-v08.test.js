@@ -60,6 +60,8 @@ assert(typeof governance.valid === 'boolean', 'governance preflight returns vali
   const doctor = runDoctor({ file: path.join(__dirname, '../examples/cognitive_minimal.ael') });
   assert(doctor.ok === true, 'doctor verifies local toolchain');
   assert(doctor.checks.some((check) => check.name === 'runtime'), 'doctor reports runtime check');
+  const defaultDoctor = runDoctor();
+  assert(defaultDoctor.ok === true, 'doctor default verifies general example');
 
   const staticOk = resolveStaticRequest('/playground.html');
   assert(staticOk.forbidden === false, 'static resolver accepts site file');

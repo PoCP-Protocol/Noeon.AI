@@ -5,12 +5,15 @@
  *
  * ael       — Governance/contract profile (.ael default)
  * general   — AI-era general profile (.noeon, future syntax)
+ * liminal   — Symbiotic profile (.lim): covenant, resonance, proposal, veto
  * cognitive — Cognitive-only scripts (no full contract header)
  */
 
 const PROFILES = {
   AEL: 'ael',
   GENERAL: 'general',
+  NEXT: 'next',
+  LIMINAL: 'liminal',
   COGNITIVE: 'cognitive'
 };
 
@@ -20,7 +23,11 @@ function detectProfile(ast, options = {}) {
   }
 
   const filename = options.filename || options.program_name || '';
+  if (filename.endsWith('.lim')) return PROFILES.LIMINAL;
+  if (filename.endsWith('.next')) return PROFILES.NEXT;
+  if (ast.profile === 'next' || ast.languageProfile === 'next') return PROFILES.NEXT;
   if (filename.endsWith('.noeon')) return PROFILES.GENERAL;
+  if (ast.profile === 'liminal' || ast.languageProfile === 'liminal') return PROFILES.LIMINAL;
   if (ast.profile === 'general' || ast.languageProfile === 'general') return PROFILES.GENERAL;
 
   const hasContractCore = Boolean(ast.task && (ast.budget != null || ast.deadline));
@@ -59,6 +66,10 @@ function resolveExecutionMode(profile, options = {}) {
     case PROFILES.COGNITIVE:
       return options.with_protocol === 'on' ? 'full' : 'cognitive';
     case PROFILES.GENERAL:
+      return options.with_protocol === 'off' ? 'cognitive' : 'full';
+    case PROFILES.NEXT:
+      return options.with_protocol === 'off' ? 'cognitive' : 'full';
+    case PROFILES.LIMINAL:
       return options.with_protocol === 'off' ? 'cognitive' : 'full';
     case PROFILES.AEL:
     default:

@@ -171,6 +171,62 @@ async function handlePlaygroundApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/mycelium/graph' && req.method === 'GET') {
+    const fs = require('fs');
+    const path = require('path');
+    const { buildMyceliumGraph, buildNextFieldGraph, mergeGraphs, formatMermaidGraph } = require('./runtime/next/mycelium-graph');
+    const { runFieldEngine } = require('./runtime/next/field-engine');
+    const { parseNextSource } = require('./grammar');
+
+    const url = new URL(req.url || '/api/mycelium/graph', 'http://localhost');
+    const myceliumDir = url.searchParams.get('dir') || path.join(process.cwd(), 'artifacts', 'mycelium');
+    const fileParam = url.searchParams.get('file');
+    let field = null;
+    let ast = null;
+
+    if (fileParam) {
+      const filePath = path.resolve(process.cwd(), fileParam);
+      if (fs.existsSync(filePath) && filePath.endsWith('.next')) {
+        const source = fs.readFileSync(filePath, 'utf8');
+        ast = parseNextSource(source);
+        if (ast?.next?.cells?.length) {
+          field = runFieldEngine(ast.next, { mycelium_dir: myceliumDir });
+        }
+      }
+    }
+
+    const parts = [];
+    if (ast && field) parts.push(buildNextFieldGraph(ast, field));
+    parts.push(buildMyceliumGraph({ dir: myceliumDir, field }));
+    const graph = mergeGraphs(...parts);
+    const mermaid = formatMermaidGraph(graph);
+
+    sendJson(res, 200, {
+      graph,
+      mermaid,
+      dir: myceliumDir,
+      file: fileParam,
+      nodeCount: graph.nodes.length,
+      edgeCount: graph.edges.length
+    });
+    return true;
+  }
+
+  if (pathname === '/api/mycelium/events' && req.method === 'GET') {
+    const path = require('path');
+    const { readEvents } = require('./runtime/next/mycelium-bus');
+
+    const url = new URL(req.url || '/api/mycelium/events', 'http://localhost');
+    const cluster = url.searchParams.get('cluster') || 'dream_cluster';
+    const myceliumDir = url.searchParams.get('dir') || path.join(process.cwd(), 'artifacts', 'mycelium');
+    const sinceTs = url.searchParams.get('since') || undefined;
+    const limit = url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : 30;
+
+    const events = readEvents(cluster, { dir: myceliumDir, sinceTs, limit });
+    sendJson(res, 200, { cluster, events, count: events.length });
+    return true;
+  }
+
   return false;
 }
 

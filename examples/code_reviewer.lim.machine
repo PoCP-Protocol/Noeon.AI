@@ -1,0 +1,30 @@
+layer "machine"
+
+# AI interpretation layer — updated after diff analysis (merged into human program)
+
+belief pr_intent {
+  confidence: 0.62
+  sources: [diff_summary, commit_messages, static_analysis]
+}
+
+@effect(ai, trace)
+resonate pr_description -> pr_intent {
+  alignment: 0.81
+  mirror: "Author claims refactor, but public API signatures changed"
+  dialogue {
+    ask "Did I understand your intent correctly?"
+  }
+}
+
+hypotheses change_type {
+  observe diff, static_analysis, dependency_graph, test_coverage
+}
+
+@morph(require_human_sign=true)
+evolve {
+  when repeated_pattern "security_relevant + low test coverage" > 3 {
+    suggest lint rule flag_security_gap
+    trial in sandbox
+    promote if resonance_impact > 0.1 && zero_veto_in_7d
+  }
+}

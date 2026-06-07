@@ -8,9 +8,12 @@ const { compileAel } = require('../compiler');
 const { validateAel } = require('../validator');
 const { CognitiveKernel } = require('../core/kernel');
 const { runGovernancePreflight } = require('../core/governance');
-const { detectProfile, resolveExecutionMode } = require('../core/profile');
+const { detectProfile, resolveExecutionMode, PROFILES } = require('../core/profile');
 const { shouldEnrichProtocol } = require('../core/protocol-bridge');
 const { runProtocolCycle } = require('./protocol-phase');
+const { runNextPhase } = require('./next-phase');
+const { runResonanceGate } = require('../runtime/liminal/resonance-gate');
+const { buildTranscript } = require('../runtime/liminal/transcript');
 
 const VM_VERSION = '1.0.0-alpha';
 
@@ -55,6 +58,38 @@ async function executeProgram(ast, options = {}) {
     success: true
   };
 
+  // Phase 0: Next profile world-model gate
+  if (profile === PROFILES.NEXT) {
+    const next = await runNextPhase(ast, { ...options, feedback });
+    result.next = next;
+    result.phases.push('next');
+
+    if (next.blocked) {
+      result.success = false;
+      result.blocked = true;
+      result.error = `Next phase blocked execution (${next.blockReason || 'guarantee'})`;
+      return result;
+    }
+  }
+
+  // Phase 0: Liminal Resonance Gate (hard block before cognition)
+  if (profile === PROFILES.LIMINAL) {
+    const resonance = runResonanceGate(ast, { ...options, feedback });
+    result.resonance = resonance;
+    result.phases.push('resonance');
+
+    if (resonance.blocked) {
+      result.success = false;
+      result.blocked = true;
+      result.error = `Liminal ${resonance.blockReason || 'resonance'} gate blocked execution`;
+      result.transcript = buildTranscript(result, ast, options);
+      if (options.transcript === true || options.export_transcript) {
+        result.transcriptExport = result.transcript;
+      }
+      return result;
+    }
+  }
+
   // Phase 1: Cognitive Kernel
   if (mode === 'full' || mode === 'cognitive') {
     const kernel = buildKernel(options);
@@ -89,6 +124,13 @@ async function executeProgram(ast, options = {}) {
     if (options.strict_protocol && result.protocolSuccess === false) {
       result.success = false;
       result.error = 'Protocol phase failed';
+    }
+  }
+
+  if (profile === PROFILES.LIMINAL) {
+    result.transcript = buildTranscript(result, ast, options);
+    if (options.transcript === true || options.export_transcript) {
+      result.transcriptExport = result.transcript;
     }
   }
 

@@ -1,0 +1,3 @@
+{"id":"1780871506948-gipwy0","cluster":"dream_cluster","ts":"2026-06-07T22:31:46.948Z","type":"field.dominant","dominant":"hypothesis_risk_off","energy":0.8,"program":"peer"}
+{"id":"1780871506966-b3d4xe","cluster":"dream_cluster","ts":"2026-06-07T22:31:46.966Z","type":"cells.published","program":"genesis","count":6,"cell_names":["hypothesis_risk_off","hypothesis_risk_on","hypothesis_soft","cycle_gate","cycle_gate__hypothesis_risk_off_hybrid","hypothesis_risk_off__hypothesis_risk_on_hybrid"]}
+{"id":"1780871506966-c4ljfc","cluster":"dream_cluster","ts":"2026-06-07T22:31:46.966Z","type":"field.dominant","program":"genesis","dominant":"cycle_gate__hypothesis_risk_off_hybrid","energy":0.7591545133698627,"hybrid_dreams":1,"dream_feedback":6}

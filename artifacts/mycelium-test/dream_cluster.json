@@ -1,0 +1,62 @@
+{
+  "cells": [
+    {
+      "name": "ember_volatility_spike",
+      "claim": "Volatility spike confirms risk-off pressure",
+      "energy": 0.69,
+      "tags": [
+        "public"
+      ],
+      "program": "ember",
+      "published_at": "2026-06-07T22:23:33.525Z"
+    },
+    {
+      "name": "ember_liquidity_echo",
+      "claim": "Liquidity echo from cross-market flows",
+      "energy": 0.5,
+      "tags": [
+        "public"
+      ],
+      "program": "ember",
+      "published_at": "2026-06-07T22:23:33.525Z"
+    },
+    {
+      "name": "hypothesis_risk_off",
+      "claim": "Markets entering risk-off regime",
+      "energy": 0.4927965714920563,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:23:33.540Z"
+    },
+    {
+      "name": "hypothesis_risk_on",
+      "claim": "Liquidity wave still expanding",
+      "energy": 0.3480860808103554,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:23:33.541Z"
+    },
+    {
+      "name": "hypothesis_soft",
+      "claim": "Soft landing narrative gaining traction",
+      "energy": 0.31715926925759996,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:23:33.541Z"
+    },
+    {
+      "name": "cycle_gate",
+      "claim": "Crystallized observe-reason-decide cycle",
+      "energy": 0.6214201610879999,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:23:33.541Z"
+    }
+  ],
+  "programs": [
+    "ember",
+    "genesis"
+  ],
+  "cluster": "dream_cluster",
+  "updated_at": "2026-06-07T22:23:33.541Z"
+}

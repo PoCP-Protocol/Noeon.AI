@@ -93,6 +93,67 @@ function appendAuditEntries(filePath, cycle) {
     }
   });
 
+  const next = cycle?.next || null;
+  if (next) {
+    records.push({
+      ts: cycle.cycleAt,
+      network: cycle.contract.network,
+      task: cycle.contract.task,
+      goal: cycle.contract.goal,
+      step: "next:reflection",
+      status: next.blocked ? "failed" : "done",
+      reason: next.reflection?.verdict || null,
+      failureCategory: next.blocked ? (next.blockReason || "next_block") : null,
+      receipt: {
+        verdict: next.reflection?.verdict || null,
+        summary: next.reflection?.summary || null,
+        selectedStrategy: next.selectedStrategy
+          ? {
+              name: next.selectedStrategy.name || next.selectedStrategy.objective || "strategy",
+              risk: next.selectedStrategy.risk || "medium",
+              utility: next.selectedStrategy.utility ?? null,
+              memoryBias: next.selectedStrategy.memoryBias ?? 0
+            }
+          : null
+      }
+    });
+
+    records.push({
+      ts: cycle.cycleAt,
+      network: cycle.contract.network,
+      task: cycle.contract.task,
+      goal: cycle.contract.goal,
+      step: "next:evolution",
+      status: next.evolution?.applied?.changed ? "done" : "warn",
+      reason: next.evolution?.selected?.kind || null,
+      failureCategory: null,
+      receipt: {
+        proposalCount: next.evolution?.count || 0,
+        selected: next.evolution?.selected || null,
+        applied: next.evolution?.applied || null
+      }
+    });
+
+    records.push({
+      ts: cycle.cycleAt,
+      network: cycle.contract.network,
+      task: cycle.contract.task,
+      goal: cycle.contract.goal,
+      step: "next:memory",
+      status: "done",
+      reason: null,
+      failureCategory: null,
+      receipt: {
+        runCount: next.nextMemory?.runCount || 0,
+        lastSelected: next.nextMemory?.lastSelected || null,
+        trackedStrategies: Object.keys(next.nextMemory?.strategyStats || {}).length,
+        evolutionHistorySize: Array.isArray(next.nextMemory?.evolutionHistory)
+          ? next.nextMemory.evolutionHistory.length
+          : 0
+      }
+    });
+  }
+
   const payload = records.map((r) => JSON.stringify(r)).join("\n");
   const prefix = fs.existsSync(resolved) && fs.statSync(resolved).size > 0 ? "\n" : "";
   fs.appendFileSync(resolved, `${prefix}${payload}`, "utf8");

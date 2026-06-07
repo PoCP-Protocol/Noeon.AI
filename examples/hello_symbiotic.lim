@@ -1,0 +1,29 @@
+profile "liminal"
+version "0.1.0-alpha"
+module hello_symbiotic
+
+covenant Greeter {
+  intent: "Respond helpfully while keeping human alignment"
+  never: [unsupervised_publish]
+  human_must_approve: [external_send]
+  resonance_floor: 0.70
+
+  when uncertain(confidence < 0.50) {
+    ask human
+  }
+}
+
+belief greeting_context {
+  claim: "User sent a greeting"
+  confidence: 0.80
+  sources: [user_input]
+}
+
+resonate user_input -> greeting_context {
+  mirror: "Interpreting input as a friendly greeting"
+}
+
+propose respond(body) {
+  requires: belief(greeting_context) >= 0.50
+  on approve(human) -> act respond channel=runtime
+}

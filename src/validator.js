@@ -831,6 +831,107 @@ function validateAgents(ast, errors, warnings) {
   }
 }
 
+function validateNextProfile(ast, errors, warnings) {
+  if (!(ast.profile === 'next' || ast.languageProfile === 'next')) {
+    return;
+  }
+
+  const next = ast.next || {};
+  const models = Array.isArray(next.models) ? next.models : [];
+  const strategies = Array.isArray(next.strategies) ? next.strategies : [];
+  const guarantees = Array.isArray(next.guarantees) ? next.guarantees : [];
+  const acts = Array.isArray(next.acts) ? next.acts : [];
+  const fields = Array.isArray(next.fields) ? next.fields : [];
+  const cells = Array.isArray(next.cells) ? next.cells : [];
+  const weaves = Array.isArray(next.weaves) ? next.weaves : [];
+  const dreams = Array.isArray(next.dreams) ? next.dreams : [];
+  const fluxes = Array.isArray(next.fluxes) ? next.fluxes : [];
+  const echoes = Array.isArray(next.echoes) ? next.echoes : [];
+  const spawns = Array.isArray(next.spawns) ? next.spawns : [];
+
+  const hasStrategicCore = models.length > 0 || strategies.length > 0 || guarantees.length > 0;
+  const hasLivingFieldCore = fields.length > 0 || cells.length > 0 || weaves.length > 0 || dreams.length > 0 || fluxes.length > 0 || echoes.length > 0 || spawns.length > 0;
+  const isStrategicMode = hasStrategicCore && !(hasLivingFieldCore && cells.length > 0);
+
+  if (!hasStrategicCore && !hasLivingFieldCore && acts.length === 0) {
+    errors.push('next profile requires either strategic blocks (MODEL/STRATEGY/GUARANTEE/ACT) or living-field blocks (FIELD/CELL/WEAVE/DREAM/FLUX/ECHO/SPAWN)');
+  }
+
+  if (!next.goal?.text && !ast.cognition?.goal) {
+    errors.push('next profile requires GOAL');
+  }
+
+  if (isStrategicMode) {
+    if (models.length === 0) {
+      errors.push('next strategic mode requires at least one MODEL');
+    }
+    if (strategies.length === 0) {
+      errors.push('next strategic mode requires at least one STRATEGY');
+    }
+    if (guarantees.length === 0) {
+      warnings.push('next strategic mode has no GUARANTEE; execution will run without explicit safety constraints');
+    }
+    if (acts.length === 0) {
+      errors.push('next strategic mode requires at least one ACT');
+    }
+  }
+
+  if (hasLivingFieldCore) {
+    if (cells.length === 0) {
+      warnings.push('next living-field mode usually defines at least one CELL');
+    }
+    if (weaves.length === 0 && dreams.length === 0 && fluxes.length === 0) {
+      warnings.push('next living-field mode has no WEAVE/DREAM/FLUX dynamics');
+    }
+  }
+
+  for (const g of guarantees) {
+    if (!g.name) errors.push('GUARANTEE name is required');
+    if (!g.expr) errors.push(`GUARANTEE '${g.name || 'unknown'}' requires expr`);
+  }
+
+  for (const a of acts) {
+    if (!a.action) errors.push('ACT action is required');
+    if (!a.capability) warnings.push(`ACT '${a.action || 'unknown'}' should declare capability`);
+    if (a.budget_ms !== undefined && Number(a.budget_ms) <= 0) {
+      errors.push(`ACT '${a.action || 'unknown'}' budget_ms must be > 0`);
+    }
+  }
+
+  const seenCellNames = new Set();
+  for (const c of cells) {
+    if (!c.name) {
+      errors.push('CELL name is required');
+      continue;
+    }
+    if (seenCellNames.has(c.name)) {
+      errors.push(`duplicate CELL name '${c.name}'`);
+    }
+    seenCellNames.add(c.name);
+    if (c.energy !== undefined && (Number(c.energy) < 0 || Number(c.energy) > 1)) {
+      errors.push(`CELL '${c.name}' energy must be in [0,1]`);
+    }
+  }
+
+  for (const w of weaves) {
+    if (!w.pattern) errors.push('WEAVE pattern is required');
+    if (!w.into) errors.push('WEAVE INTO target is required');
+    if (w.max !== undefined && Number(w.max) <= 0) {
+      errors.push(`WEAVE '${w.pattern || 'unknown'}' max must be > 0`);
+    }
+  }
+
+  for (const d of dreams) {
+    if (!d.name) errors.push('DREAM name is required');
+    if (d.branches !== undefined && Number(d.branches) <= 0) {
+      errors.push(`DREAM '${d.name || 'unknown'}' branches must be > 0`);
+    }
+    if (d.depth !== undefined && Number(d.depth) <= 0) {
+      errors.push(`DREAM '${d.name || 'unknown'}' depth must be > 0`);
+    }
+  }
+}
+
 function validateAel(ast) {
   const errors = [];
   const warnings = [];
@@ -1225,6 +1326,7 @@ function validateAel(ast) {
 
   validateComputeBlock(ast, errors, warnings);
   validateAgents(ast, errors, warnings);
+  validateNextProfile(ast, errors, warnings);
 
   applyMetaRules(ast, errors, warnings);
 

@@ -1,0 +1,85 @@
+{
+  "cells": [
+    {
+      "name": "peer_cell",
+      "claim": "Peer signal",
+      "energy": 0.66,
+      "tags": [
+        "public"
+      ],
+      "program": "seed",
+      "published_at": "2026-06-07T22:25:57.110Z"
+    },
+    {
+      "name": "hypothesis_risk_off",
+      "claim": "Markets entering risk-off regime",
+      "energy": 0.47760937984,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "hypothesis_risk_on",
+      "claim": "Liquidity wave still expanding",
+      "energy": 0.30676107999999996,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "hypothesis_soft",
+      "claim": "Soft landing narrative gaining traction",
+      "energy": 0.31445568,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "cycle_gate",
+      "claim": "Crystallized observe-reason-decide cycle",
+      "energy": 0.601232256,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "cycle_gate__seed__peer_cell_hybrid",
+      "claim": "Hybrid(cycle_gate, seed__peer_cell): Crystallized observe-reason-decide cycle ⊗ Peer signal",
+      "energy": 0.6335,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "hypothesis_risk_off__seed__peer_cell_hybrid",
+      "claim": "Hybrid(seed__peer_cell, hypothesis_risk_off): Peer signal ⊗ Markets entering risk-off regime",
+      "energy": 0.6385,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
+      "energy": 0.548,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:25:57.142Z"
+    }
+  ],
+  "programs": [
+    "seed",
+    "genesis"
+  ],
+  "cluster": "dream_cluster",
+  "updated_at": "2026-06-07T22:25:57.142Z"
+}

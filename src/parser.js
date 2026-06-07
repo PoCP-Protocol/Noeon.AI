@@ -1056,7 +1056,11 @@ function promoteAgentToAst(ast, agent) {
 }
 
 function parseAel(source, options = {}) {
-  const { tryParseGeneral } = require('./grammar');
+  const { tryParseLiminal, tryParseNext, tryParseGeneral } = require('./grammar');
+  const liminalAst = tryParseLiminal(source, options);
+  if (liminalAst) return liminalAst;
+  const nextAst = tryParseNext(source, options);
+  if (nextAst) return nextAst;
   const generalAst = tryParseGeneral(source, options);
   if (generalAst) return generalAst;
 

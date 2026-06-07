@@ -1,0 +1,140 @@
+{
+  "cells": [
+    {
+      "name": "bus_cell",
+      "claim": "Bus",
+      "energy": 0.55,
+      "tags": [
+        "public"
+      ],
+      "program": "v06",
+      "published_at": "2026-06-07T22:32:05.380Z"
+    },
+    {
+      "name": "hypothesis_risk_off",
+      "claim": "Markets entering risk-off regime",
+      "energy": 0.9421313150101324,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_on",
+      "claim": "Liquidity wave still expanding",
+      "energy": 0.918035479695585,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_soft",
+      "claim": "Soft landing narrative gaining traction",
+      "energy": 0.8675379257886154,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "cycle_gate",
+      "claim": "Crystallized observe-reason-decide cycle",
+      "energy": 0.9440646988135235,
+      "tags": [],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "cycle_gate__v06__bus_cell_hybrid",
+      "claim": "Hybrid(cycle_gate, v06__bus_cell): Crystallized observe-reason-decide cycle ⊗ Bus",
+      "energy": 0.9671990982240107,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_off_hybrid",
+      "claim": "Hybrid(cycle_gate, hypothesis_risk_off): Crystallized observe-reason-decide cycle ⊗ Markets entering risk-off regime",
+      "energy": 0.9813986293295953,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(cycle_gate, hypothesis_risk_on): Crystallized observe-reason-decide cycle ⊗ Liquidity wave still expanding",
+      "energy": 0.986,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_off__v06__bus_cell_hybrid",
+      "claim": "Hybrid(v06__bus_cell, hypothesis_risk_off): Bus ⊗ Markets entering risk-off regime",
+      "energy": 0.9738829116244965,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_on__v06__bus_cell_hybrid",
+      "claim": "Hybrid(v06__bus_cell, hypothesis_risk_on): Bus ⊗ Liquidity wave still expanding",
+      "energy": 0.9824312304064781,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
+      "energy": 0.9715525897484008,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction",
+      "energy": 0.9668648808418295,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    },
+    {
+      "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction",
+      "energy": 0.8797729599011574,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T22:32:05.418Z"
+    }
+  ],
+  "programs": [
+    "v06",
+    "genesis"
+  ],
+  "cluster": "dream_cluster",
+  "updated_at": "2026-06-07T22:32:05.418Z"
+}

@@ -1,0 +1,127 @@
+profile "next"
+version "0.7.0"
+program "genesis"
+module dream_weaver
+
+GOAL "Let narratives emerge from competing hypotheses — no approval, only evolution"
+
+FIELD signals {
+  ingest: [web, code, memory, latent]
+  decay: 1h
+  resonance: adaptive
+}
+
+AUTOBOND {
+  threshold: 0.38
+  max: 8
+  kind: resonates
+  min_similarity: 0.08
+  spawn: true
+  spawn_min_similarity: 0.15
+  dream_feedback: 0.3
+}
+
+CELL hypothesis_risk_off {
+  energy: 0.42
+  claim: "Markets entering risk-off regime"
+  when energy > 0.6 { emit narrative.draft }
+  when energy < 0.15 { split hypothesis_soft, hypothesis_crash }
+}
+
+CELL hypothesis_risk_on {
+  energy: 0.38
+  claim: "Liquidity wave still expanding"
+  when energy > 0.65 { emit narrative.draft }
+  when energy > 0.85 { merge into hypothesis_risk_off }
+}
+
+CELL hypothesis_soft {
+  energy: 0.25
+  claim: "Soft landing narrative gaining traction"
+  when energy > 0.55 { emit narrative.draft }
+}
+
+BOND hypothesis_risk_off <-> hypothesis_soft {
+  strength: 0.4
+  kind: resonates
+}
+
+BOND hypothesis_risk_on -> hypothesis_risk_off {
+  strength: 0.25
+  kind: inhibits
+}
+
+MYCELIUM join "dream_cluster" {
+  share: [hypothesis_*]
+  absorb: tagged=public
+  isolate: [confidential_*]
+  react: true
+  listen: [field.dominant, cells.published]
+  relay: [echo_cluster]
+}
+
+WEAVE hypothesis_* INTO narrative {
+  strategy: competitive
+  max: 8
+}
+
+DREAM alternate_futures {
+  branches: 5
+  depth: 3
+  merge_by: coherence
+}
+
+DREAM hybrid_lineage {
+  on: hybrid
+  branches: 4
+  depth: 2
+  merge_by: energy
+  feedback: true
+}
+
+SPAWN analyst_thread {
+  inherit: [hypothesis_*]
+  goal: "Deep-dive the dominant cell after weave"
+}
+
+ECHO last_run INTO memory.episodic
+
+@cycle(0.65)
+
+FLUX syntax {
+  when friction("observe reason decide") > 0.8 {
+    crystallize macro cycle(threshold)
+    mutate shrink redundant perceive steps
+  }
+}
+
+ACT action=emit_narrative capability=runtime channel=synthesis
+REFLECT target=dominant_cell method=divergent
+
+# --- noeon hot-reload 2026-06-07T22:31:46.991Z ---
+# source: genesis.next
+# flux crystallize from syntax
+# crystallized @cycle({{threshold}})
+CELL cycle_gate {
+  energy: {{threshold}}
+  claim: "Crystallized observe-reason-decide cycle"
+  when energy > 0.5 { emit narrative.cycle }
+}
+
+CELL cycle_gate__hypothesis_risk_off_hybrid {
+  energy: 0.63
+  claim: "Hybrid(cycle_gate, hypothesis_risk_off): Crystallized observe-reason-decide cycle ⊗ Markets entering risk-off regime"
+  tags: ["hybrid", "auto-spawn"]
+  when energy > 0.55 { emit narrative.hybrid } # auto-spawn
+}
+
+CELL hypothesis_risk_off__hypothesis_risk_on_hybrid {
+  energy: 0.50
+  claim: "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+  tags: ["hybrid", "auto-spawn"]
+  when energy > 0.55 { emit narrative.hybrid } # auto-spawn
+}
+
+BOND cycle_gate <-> hypothesis_risk_off strength=0.32 kind=resonates # auto-generated
+
+BOND hypothesis_risk_off <-> hypothesis_risk_on strength=0.32 kind=resonates # auto-generated

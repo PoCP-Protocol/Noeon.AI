@@ -1,0 +1,21 @@
+PROFILE "next"
+VERSION "0.1.0"
+PROGRAM "autonomous_supply_allocator"
+
+GOAL "maximize service level while minimizing stockout risk" priority=0.95
+
+MODEL name=demand_state source=stream_forecast confidence=0.81
+MODEL name=supply_state source=erp_snapshot confidence=0.93
+
+STRATEGY name=aggressive_restock objective=service_level risk=high
+STRATEGY name=balanced_restock objective=service_level risk=medium
+STRATEGY name=conservative_restock objective=cost_control risk=low
+
+GUARANTEE name=budget_guard expr="projected_spend <= approved_budget"
+GUARANTEE name=risk_guard expr="portfolio_risk <= policy.max_risk"
+GUARANTEE name=capacity_guard expr="warehouse_utilization <= 0.90"
+
+ACT action=commit_purchase_orders capability=erp.procurement budget_ms=1200
+
+REFLECT target=commit_purchase_orders method=counterfactual
+EVOLVE scope=strategy guard=risk_guard

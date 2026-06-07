@@ -34,6 +34,20 @@ function generateReport(cycle, state) {
   if (metaPolicy.enabled && metaPolicy.hardened) {
     recommendations.push("Meta policy hardening was triggered; review blocking meta-rule violations.");
   }
+
+  const next = cycle.next || null;
+  if (next) {
+    if (next.blocked) {
+      recommendations.push(`Next gate blocked execution (${next.blockReason || 'unknown'}); apply lower-risk strategy and rerun.`);
+    }
+    if (next.reflection?.verdict === 'needs-observability') {
+      recommendations.push('Next reflection requires observability; add telemetry signals for missing operands.');
+    }
+    if (next.evolution?.applied?.changed) {
+      recommendations.push(`Next evolution applied mutation: ${next.evolution.applied.mutation}`);
+    }
+  }
+
   for (const msg of topMetaMessages) {
     recommendations.push(`Meta-rule: ${msg}`);
   }
@@ -50,6 +64,33 @@ function generateReport(cycle, state) {
       hardened: metaPolicy.hardened,
       violationCount: Array.isArray(metaPolicy.violations) ? metaPolicy.violations.length : 0
     },
+    next: next
+      ? {
+          profile: 'next',
+          blocked: next.blocked === true,
+          blockReason: next.blockReason || null,
+          selectedStrategy: next.selectedStrategy
+            ? {
+                name: next.selectedStrategy.name || next.selectedStrategy.objective || 'strategy',
+                risk: next.selectedStrategy.risk || 'medium',
+                utility: next.selectedStrategy.utility ?? null,
+                memoryBias: next.selectedStrategy.memoryBias ?? 0
+              }
+            : null,
+          reflectionVerdict: next.reflection?.verdict || null,
+          guaranteeSummary: next.reflection?.summary || null,
+          evolution: {
+            proposalCount: next.evolution?.count || 0,
+            selectedKind: next.evolution?.selected?.kind || null,
+            applied: next.evolution?.applied || null
+          },
+          memory: {
+            runCount: next.nextMemory?.runCount || 0,
+            lastSelected: next.nextMemory?.lastSelected || null,
+            trackedStrategies: Object.keys(next.nextMemory?.strategyStats || {}).length
+          }
+        }
+      : null,
     recommendations
   };
 }

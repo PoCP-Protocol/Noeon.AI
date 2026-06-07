@@ -1,0 +1,3 @@
+{"id":"1780871282754-rabmck","cluster":"dream_cluster","ts":"2026-06-07T22:28:02.754Z","type":"cells.published","program":"genesis","count":1,"cell_names":["remote"]}
+{"id":"1780871282774-c92zxa","cluster":"dream_cluster","ts":"2026-06-07T22:28:02.774Z","type":"cells.published","program":"genesis","count":5,"cell_names":["hypothesis_risk_off","hypothesis_risk_on","hypothesis_soft","cycle_gate","hypothesis_risk_off__hypothesis_risk_on_hybrid"]}
+{"id":"1780871282774-2s639s","cluster":"dream_cluster","ts":"2026-06-07T22:28:02.774Z","type":"field.dominant","program":"genesis","dominant":"cycle_gate","energy":0.63,"hybrid_dreams":1}

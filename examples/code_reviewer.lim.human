@@ -1,0 +1,37 @@
+profile "liminal"
+version "0.1.0-alpha"
+module code_reviewer
+
+# Human layer — constitution and intent (authoritative)
+
+covenant CodeReviewer {
+  intent: "Review pull requests and produce actionable feedback"
+  never: [auto_merge, push_to_main]
+  human_must_approve: [post_review_comment]
+  resonance_floor: 0.75
+
+  when uncertain(confidence < 0.55) {
+    ask human with options(min=2)
+  }
+}
+
+belief pr_intent {
+  claim: "This PR introduces a breaking API change"
+  confidence: 0.50
+  sources: [user_input]
+  dispute: open
+}
+
+hypotheses change_type {
+  h1: "safe_refactor"     prior: 0.3
+  h2: "breaking_change"   prior: 0.5
+  h3: "security_relevant" prior: 0.2
+  observe diff, static_analysis, dependency_graph
+  commit above: 0.65 else ask human
+}
+
+propose review_comment(body) {
+  requires: belief(pr_intent) >= 0.65
+  on approve(human) -> act comment channel=github
+  on veto(human) -> reflect reasoning into memory
+}

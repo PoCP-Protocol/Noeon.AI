@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon Mycelium — Field Graph</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      .mycelium-wrap { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+      .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+      .controls input { flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #334; background: #0d1117; color: #e6edf3; }
+      .controls button { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #238636; color: #fff; cursor: pointer; }
+      .stats { font-size: 0.9rem; color: #8b949e; margin-bottom: 1rem; }
+      #graph { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1rem; min-height: 320px; overflow: auto; }
+      .error { color: #f85149; }
+      #events { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1rem; margin-top: 1rem; max-height: 200px; overflow: auto; font-family: monospace; font-size: 0.85rem; }
+      #events li { margin: 0.25rem 0; color: #8b949e; }
+    </style>
+  </head>
+  <body>
+    <div class="mycelium-wrap">
+      <h1>Mycelium Field Graph</h1>
+      <p>实时可视化 Next 场域与 Mycelium 集群 — 自动轮询 <code>/api/mycelium/graph</code></p>
+      <div class="controls">
+        <input id="file" type="text" placeholder="examples/genesis.next (optional)" value="examples/genesis.next" />
+        <input id="dir" type="text" placeholder="mycelium dir (optional)" value="" />
+        <button id="refresh">Refresh</button>
+        <label><input id="auto" type="checkbox" checked /> Auto (5s)</label>
+      </div>
+      <div class="stats" id="stats">Loading…</div>
+      <div id="graph"></div>
+      <h2>Event Bus</h2>
+      <ul id="events"></ul>
+    </div>
+    <script>
+      mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+      const fileEl = document.getElementById('file');
+      const dirEl = document.getElementById('dir');
+      const statsEl = document.getElementById('stats');
+      const graphEl = document.getElementById('graph');
+      const eventsEl = document.getElementById('events');
+      const autoEl = document.getElementById('auto');
+      let timer = null;
+      let lastEventTs = null;
+
+      async function loadEvents() {
+        const params = new URLSearchParams({ cluster: 'dream_cluster', limit: '15' });
+        if (dirEl.value.trim()) params.set('dir', dirEl.value.trim());
+        if (lastEventTs) params.set('since', lastEventTs);
+        try {
+          const res = await fetch('/api/mycelium/events?' + params.toString());
+          const data = await res.json();
+          if (!res.ok) return;
+          for (const e of data.events || []) {
+            const li = document.createElement('li');
+            li.textContent = `${e.ts} [${e.type}] ${e.program || ''} ${e.dominant || e.cell_names?.join(', ') || ''}`;
+            eventsEl.prepend(li);
+            lastEventTs = e.ts;
+          }
+          while (eventsEl.children.length > 30) eventsEl.removeChild(eventsEl.lastChild);
+        } catch { /* ignore */ }
+      }
+
+      async function loadGraph() {
+        const params = new URLSearchParams();
+        if (fileEl.value.trim()) params.set('file', fileEl.value.trim());
+        if (dirEl.value.trim()) params.set('dir', dirEl.value.trim());
+        try {
+          const res = await fetch('/api/mycelium/graph?' + params.toString());
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || res.statusText);
+          statsEl.textContent = `Nodes: ${data.nodeCount} · Edges: ${data.edgeCount} · Dir: ${data.dir}`;
+          graphEl.innerHTML = '';
+          const pre = document.createElement('pre');
+          pre.className = 'mermaid';
+          pre.textContent = data.mermaid;
+          graphEl.appendChild(pre);
+          await mermaid.run({ nodes: [pre] });
+        } catch (e) {
+          statsEl.innerHTML = '<span class="error">' + e.message + '</span>';
+        }
+      }
+
+      function schedule() {
+        if (timer) clearInterval(timer);
+        if (autoEl.checked) timer = setInterval(() => { loadGraph(); loadEvents(); }, 5000);
+      }
+
+      document.getElementById('refresh').addEventListener('click', () => { loadGraph(); loadEvents(); });
+      autoEl.addEventListener('change', schedule);
+      loadGraph();
+      loadEvents();
+      schedule();
+    </script>
+  </body>
+</html>

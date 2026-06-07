@@ -109,7 +109,7 @@ async function main() {
         return;
       }
       const batch = readFeedbackBatch(a2);
-      trainContract(ast, batch, {
+      await trainContract(ast, batch, {
         trainingPath: a3,
         statePath: a4,
         convergencePath: a5,

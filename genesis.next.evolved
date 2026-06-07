@@ -1,0 +1,23 @@
+
+
+# --- noeon hot-reload 2026-06-07T22:23:33.541Z ---
+# source: genesis.next
+# flux crystallize from syntax
+# crystallized @cycle({{threshold}})
+CELL cycle_gate {
+  energy: {{threshold}}
+  claim: "Crystallized observe-reason-decide cycle"
+  when energy > 0.5 { emit narrative.cycle }
+}
+
+BOND cycle_gate <-> ember__ember_volatility_spike strength=0.32 kind=resonates # auto-generated
+
+BOND ember__ember_volatility_spike <-> ember__ember_liquidity_echo strength=0.32 kind=resonates # auto-generated
+
+BOND ember__ember_volatility_spike <-> hypothesis_risk_off strength=0.431 kind=resonates # auto-generated
+
+BOND ember__ember_liquidity_echo <-> hypothesis_risk_off strength=0.32 kind=resonates # auto-generated
+
+BOND ember__ember_liquidity_echo <-> hypothesis_risk_on strength=0.376 kind=resonates # auto-generated
+
+BOND hypothesis_risk_off <-> hypothesis_risk_on strength=0.32 kind=resonates # auto-generated

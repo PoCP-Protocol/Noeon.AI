@@ -32,7 +32,7 @@ function checkConfig(cwd = process.cwd()) {
 }
 
 function checkExample(examplePath) {
-  const rel = examplePath || path.join('examples', 'cognitive_minimal.ael');
+  const rel = examplePath || path.join('examples', 'hello.noeon');
   const resolved = path.resolve(process.cwd(), rel);
   if (!fs.existsSync(resolved)) {
     return {
