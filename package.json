@@ -1,9 +1,13 @@
 {
   "name": "noeon-ael",
-  "version": "0.5.0-supermind",
-  "description": "Noeon AI - The world's first cognitive programming language that thinks like a human brain. Features consciousness stream, uncertainty-native values, causal reasoning, multi-modal perception, self-modifying syntax, and cognitive debugging.",
+  "version": "0.6.0-genesis",
+  "description": "Noeon AI - The world's first cognitive programming language. Features formal type system (Belief, Uncertain, Temporal, Emotion, Intention, Percept, MemoryTrace), standard library (Reasoning, Decision, Learning, Attention, Pattern), module system, interactive REPL, and 472+ passing tests.",
   "type": "commonjs",
   "main": "src/index.js",
+  "bin": {
+    "noeon": "src/index.js",
+    "noeon-repl": "src/repl.js"
+  },
   "scripts": {
     "parse": "node src/index.js",
     "compile": "node src/index.js compile",
@@ -12,10 +16,12 @@
     "train": "node src/index.js train",
     "rollback": "node src/index.js rollback",
     "cognitive": "node src/index.js cognitive",
+    "repl": "node src/repl.js",
     "cognitive:test": "node tests/cognitive.test.js",
     "cognitive:v04": "node tests/cognitive-v04.test.js",
     "cognitive:v05": "node tests/cognitive-v05.test.js",
-    "test:all": "node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && npm run conformance",
+    "cognitive:v06": "node tests/cognitive-v06.test.js",
+    "test:all": "node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && node tests/cognitive-v06.test.js && npm run conformance",
     "site": "node src/serve-site.js",
     "conformance": "node tests/conformance/run.js",
     "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",
@@ -25,5 +31,17 @@
     "metrics": "node scripts/quality-metrics.js",
     "metrics:record": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run metrics"
   },
+  "keywords": [
+    "cognitive-programming",
+    "ai-language",
+    "type-system",
+    "uncertainty",
+    "reasoning",
+    "metacognition",
+    "repl",
+    "belief",
+    "temporal",
+    "emotion"
+  ],
   "license": "MIT"
 }

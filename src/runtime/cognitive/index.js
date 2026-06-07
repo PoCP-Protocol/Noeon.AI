@@ -1,5 +1,5 @@
 /**
- * Noeon AI Cognitive Runtime — v0.5
+ * Noeon AI Cognitive Runtime — v0.6 Genesis
  * 
  * A brain-inspired cognitive architecture for AI programming.
  * The world's first programming language that THINKS like a human brain.
@@ -27,6 +27,11 @@
  * - MultiModalPerception: See, hear, feel (multi-channel sensing)
  * - CognitiveDebugger: Debug thoughts, not variables (mind inspector)
  * - KnowledgeGraph: Structured world model with causal inference
+ * 
+ * Language Infrastructure (v0.6):
+ * - TypeSystem: Formal cognitive types (Belief, Uncertain, Temporal, Emotion, Intention, Percept, MemoryTrace)
+ * - ModuleSystem: Define, import, compose, and reuse cognitive modules
+ * - StandardLibrary: Built-in algorithms (Reasoning, Decision, Learning, Attention, Pattern)
  */
 
 const { GlobalWorkspace, WorkspaceSlot } = require("./workspace");
@@ -42,9 +47,13 @@ const { EvolutionEngine, Genome, Gene } = require("./evolution-engine");
 const { CognitiveFlow } = require("./cognitive-flow");
 const { ConsciousnessStream, Thought, UncertainValue, TemporalAwareness } = require("./stream-of-consciousness");
 const { MetaLanguageEngine, SyntaxRule, MacroDefinition } = require("./meta-language");
-const { MultiModalPerception, PerceptualChannel, Percept } = require("./multimodal-perception");
+const { MultiModalPerception, PerceptualChannel, Percept: MultiPercept } = require("./multimodal-perception");
 const { CognitiveDebugger, ThoughtTrace, DecisionTrace } = require("./cognitive-debugger");
 const { KnowledgeGraph, Entity, Relation, CausalChain } = require("./knowledge-graph");
+
+// v0.6 Language Infrastructure
+const TypeSystem = require("./type-system");
+const { CognitiveModule, ModuleRegistry, ModuleComposer, CognitivePipeline, ModuleLoader, ModuleBuilder, defineModule } = require("./module-system");
 
 module.exports = {
   // Main engine
@@ -87,12 +96,22 @@ module.exports = {
   MacroDefinition,
   MultiModalPerception,
   PerceptualChannel,
-  Percept,
+  MultiPercept,
   CognitiveDebugger,
   ThoughtTrace,
   DecisionTrace,
   KnowledgeGraph,
   Entity,
   Relation,
-  CausalChain
+  CausalChain,
+
+  // Language Infrastructure (v0.6)
+  TypeSystem,
+  CognitiveModule,
+  ModuleRegistry,
+  ModuleComposer,
+  CognitivePipeline,
+  ModuleLoader,
+  ModuleBuilder,
+  defineModule
 };
