@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-06-07T07:52:46.820Z",
+  "title": "Noeon Super Brain Cycle Report",
+  "task": "market.intelligence.settlement",
+  "goal": "Let intelligence compete freely, let value settle automatically",
+  "kpis": {
+    "planCompletionRate": 1,
+    "failedSteps": 0,
+    "totalLatencyMs": 3900,
+    "policyRounds": 1
+  },
+  "policyDelta": {
+    "currentQuorum": 0.6666666666666666,
+    "updatedQuorum": 0.6832266666666666,
+    "delta": 0.01656,
+    "signal": "hybrid",
+    "learningRate": 0.18
+  },
+  "recommendations": [
+    "Plan execution is stable; keep current validation profile.",
+    "Consider lowering reasoning depth or increasing solver parallelism."
+  ]
+}

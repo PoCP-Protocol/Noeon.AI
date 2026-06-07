@@ -1,0 +1,69 @@
+# Noeon = Hayek + Bitcion + AI (extreme risk profile)
+THINK net = "Noeon-Hayek-Bitcion-AI"
+THINK intent = "market.intelligence.settlement.extreme"
+THINK energy = 220000
+
+VERSION "0.3"
+BRAIN "${net}"
+INTENT "${intent}"
+DRIVE "Max safety under adversarial market pressure"
+RULES latency_ms=7000 privacy=high reproducibility=required competition=free settlement=automatic governance=minimal audit_depth=full
+THREAT level=critical profile=conservative impact=systemic
+HIPPOCAMPUS short=1200 long=730 mode=episodic
+PLASTICITY signal=hybrid rate=0.12 window=320
+CONTEXT domain=economy risk=critical priority=p0 reputation=strict
+ENERGY ${energy} msat
+MEMORY_UNTIL 2029-12-31T00:00:00Z
+TRUST quorum=4/5 challenge=1800 mode=manual
+SOLVER_COLLATERAL 50000
+VERIFIER_COLLATERAL 25000
+REWARD solver=52 verifier=38 protocol=10
+PENALTY timeout=20 bad_proof=92 malicious=100
+
+CONSCIOUSNESS mode=hybrid autonomy=sovereign reflection=adaptive selfcheck=true
+METACOG metric=uncertainty threshold=0.22 action=halt
+REASONER strategy=hybrid depth=8 diversity=5
+JUDGE mode=peer strictness=5 veto=true
+
+THEOREM id=adversarial_price_discovery_remains_stable confidence=0.71 type=predictive
+THEOREM id=verifier_competition_reduces_collusion confidence=0.69 type=causal
+PROOF source=market_data quality=high weight=0.90
+PROOF source=verifier_reports quality=high weight=0.87
+PROOF source=forensic_audit quality=high weight=0.84
+FALSIFY id=flash_crash against=adversarial_price_discovery_remains_stable severity=high weight=0.58
+FALSIFY id=cartel_attack against=verifier_competition_reduces_collusion severity=high weight=0.61
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "CHALLENGE" on=challenge
+SYNAPSE "CHALLENGE" -> "SETTLED" on=resolve
+
+CIRCUIT "observe_market" => "price_discovery"
+CIRCUIT "price_discovery" => "cross_verify"
+CIRCUIT "cross_verify" => "adversarial_probe"
+CIRCUIT "adversarial_probe" => "risk_check"
+CIRCUIT "risk_check" => "value_settlement"
+CIRCUIT "value_settlement" => "policy_reflection"
+
+ROUTE "observe_market" plugin=echo version=1.0.0 signature=he742dbe2 message=market_snapshot latencyMs=850
+ROUTE "price_discovery" plugin=echo version=1.0.0 signature=he742dbe2 message=signal_aggregation latencyMs=1050
+ROUTE "cross_verify" plugin=echo version=1.0.0 signature=he742dbe2 message=peer_verification latencyMs=980
+ROUTE "adversarial_probe" plugin=echo version=1.0.0 signature=he742dbe2 message=counterparty_stress_probe latencyMs=1100
+ROUTE "risk_check" plugin=policy_guard version=1.1.0 signature=h6c80f2a8 strict=true latencyMs=950
+ROUTE "value_settlement" plugin=http_call version=0.9.0 signature=h161bf2f4 endpoint=https://api.example.com/settle latencyMs=1200
+ROUTE "policy_reflection" plugin=echo version=1.0.0 signature=he742dbe2 message=policy_updated latencyMs=700
+
+CHAIN step=observe_market hypothesis=adversarial_price_discovery_remains_stable evidence=market_data note=critical_signal_snapshot
+CHAIN step=price_discovery hypothesis=adversarial_price_discovery_remains_stable evidence=verifier_reports note=consensus_window_evaluated
+CHAIN step=cross_verify hypothesis=verifier_competition_reduces_collusion evidence=forensic_audit note=independent_peer_check
+CHAIN step=adversarial_probe counterexample=cartel_attack evidence=forensic_audit note=attack_surface_expansion
+CHAIN step=risk_check counterexample=flash_crash evidence=market_data note=fail_safe_guard
+CHAIN step=value_settlement hypothesis=verifier_competition_reduces_collusion evidence=verifier_reports note=settlement_committed
+
+META_REQUIRE path=contract.cognition.goal level=error
+META_ENUM path=runtime.adaptiveProfile.verificationMode values=auto,manual level=error
+META_RANGE path=runtime.learning.updates.verify.challengeSeconds min=900 max=3600 level=warning
+META_REQUIRE path=feedback.proofHash level=warning

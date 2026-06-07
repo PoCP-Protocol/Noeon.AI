@@ -1,0 +1,52 @@
+name: quality-gate
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "feature/**"
+  pull_request:
+
+jobs:
+  conformance-and-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run Conformance
+        run: npm run conformance
+
+      - name: Record Metrics
+        run: npm run metrics:record
+
+      - name: Print Conformance Summary
+        run: npm run conformance:summary -- --init
+
+      - name: Run Strict Gate
+        run: npm run gate:strict
+
+      - name: Upload Conformance Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-last-node-${{ matrix.node-version }}
+          path: |
+            artifacts/conformance.last.txt
+            artifacts/conformance.baseline.txt
+            artifacts/conformance.summary.json
+          if-no-files-found: ignore

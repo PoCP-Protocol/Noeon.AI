@@ -1,0 +1,60 @@
+# Noeon native-mind contract
+THINK net = "NoeonNet"
+THINK intent = "ai.native.reasoning"
+THINK energy = 88000
+
+VERSION "0.2"
+BRAIN "${net}"
+INTENT "${intent}"
+DRIVE "Reason like human experts and self-correct before commit"
+RULES latency_ms=9000 privacy=high explainability=required
+THREAT level=high profile=conservative impact=systemic
+HIPPOCAMPUS short=1200 long=365 mode=semantic
+PLASTICITY signal=hybrid rate=0.18 window=180
+CONSCIOUSNESS mode=hybrid autonomy=sovereign reflection=adaptive selfcheck=true
+METACOG metric=uncertainty threshold=0.32 action=escalate
+REASONER strategy=hybrid depth=6 diversity=4
+JUDGE mode=peer strictness=4 veto=true
+THEOREM id=macro_shift confidence=0.72 type=predictive
+THEOREM id=risk_spike confidence=0.68 type=diagnostic
+PROOF source=dataset quality=high weight=0.8
+PROOF source=simulation quality=medium weight=0.6
+FALSIFY id=alt_regime against=macro_shift severity=medium weight=0.45
+FALSIFY id=tail_event against=risk_spike severity=high weight=0.5
+CHAIN step=sense_context hypothesis=macro_shift evidence=dataset note=observe_signals
+CHAIN step=generate_hypothesis hypothesis=macro_shift evidence=simulation note=build_candidate
+CHAIN step=self_reflect hypothesis=risk_spike counterexample=tail_event note=stress_test
+CHAIN step=risk_gate hypothesis=risk_spike counterexample=alt_regime note=governance_gate
+FORUM topic=macro_regime sides=3 rounds=3 protocol=socratic
+COURT mode=jury accept=0.68 revise=0.48 fallback=escalate
+PANEL id=judge_alpha weight=0.4 role=domain
+PANEL id=judge_beta weight=0.35 role=risk
+PANEL id=judge_gamma weight=0.25 role=ethics
+
+CONTEXT domain=platform risk=high priority=p0
+ENERGY ${energy} msat
+MEMORY_UNTIL 2027-01-01T00:00:00Z
+TRUST quorum=3/4 challenge=1400 mode=manual
+SOLVER_COLLATERAL 26000
+VERIFIER_COLLATERAL 12000
+REWARD solver=60 verifier=30 protocol=10
+PENALTY timeout=15 bad_proof=85 malicious=100
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "CHALLENGE" on=challenge
+SYNAPSE "CHALLENGE" -> "SETTLED" on=resolve
+
+CIRCUIT "sense_context" => "generate_hypothesis"
+CIRCUIT "generate_hypothesis" => "self_reflect"
+CIRCUIT "self_reflect" => "risk_gate"
+CIRCUIT "risk_gate" => "commit_decision"
+
+ROUTE "sense_context" plugin=echo version=1.0.0 message=context_sensed latencyMs=700
+ROUTE "generate_hypothesis" plugin=echo version=1.0.0 message=hypothesis_generated latencyMs=1200
+ROUTE "self_reflect" plugin=echo version=1.0.0 message=reflection_complete latencyMs=900
+ROUTE "risk_gate" plugin=policy_guard version=1.1.0 strict=true latencyMs=1000
+ROUTE "commit_decision" plugin=http_call version=0.9.0 endpoint=https://api.example.com/commit latencyMs=600

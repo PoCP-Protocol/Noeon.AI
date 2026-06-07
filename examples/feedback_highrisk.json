@@ -1,0 +1,22 @@
+{
+  "successRate": 0.74,
+  "disputeRate": 0.18,
+  "maliciousRate": 0.06,
+  "observedLatencyMs": 8600,
+  "failedSteps": ["risk_review"],
+  "stepLatencyMs": {
+    "collect_signals": 800,
+    "cross_validate": 1200,
+    "synthesize_hypothesis": 1500,
+    "risk_review": 1600,
+    "finalize_report": 700
+  },
+  "actionResults": {
+    "risk_review": {
+      "status": "failed",
+      "latencyMs": 1700,
+      "errorCode": "POLICY_BLOCK_GUARD",
+      "reason": "risk guard rejected unresolved contradiction"
+    }
+  }
+}

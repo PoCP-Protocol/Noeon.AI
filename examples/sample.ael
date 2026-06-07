@@ -1,0 +1,10 @@
+# Sample AEL contract for distributed AI task settlement
+NETWORK "NoeonNet"
+TASK "doc.extract"
+BUDGET 50000 msat
+DEADLINE 2026-12-31T00:00:00Z
+VERIFY quorum=2/3 challenge=600
+SOLVER_COLLATERAL 10000
+VERIFIER_COLLATERAL 5000
+ON_SUCCESS solver=70 verifier=20 protocol=10
+ON_SLASH timeout=10 bad_proof=80 malicious=100

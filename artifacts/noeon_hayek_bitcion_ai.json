@@ -1,0 +1,225 @@
+{
+  "spec": {
+    "name": "Noeon Contract Language",
+    "version": "0.2"
+  },
+  "contract": {
+    "network": "Noeon-Hayek-Bitcion-AI",
+    "task": "market.intelligence.settlement",
+    "tags": {
+      "domain": "economy",
+      "risk": "medium",
+      "priority": "p0",
+      "reputation": "enabled"
+    },
+    "cognition": {
+      "goal": "Let intelligence compete freely, let value settle automatically",
+      "constraints": {
+        "latency_ms": "6000",
+        "privacy": "high",
+        "reproducibility": "required",
+        "competition": "free",
+        "settlement": "automatic",
+        "governance": "minimal"
+      },
+      "risk": {
+        "level": "medium",
+        "profile": "adaptive",
+        "impact": "economic"
+      },
+      "memory": {
+        "shortSeconds": 720,
+        "longDays": 365,
+        "mode": "episodic"
+      },
+      "learn": {
+        "signal": "hybrid",
+        "rate": 0.18,
+        "windowTasks": 180
+      },
+      "nativeAI": {
+        "mode": "hybrid",
+        "autonomy": "sovereign",
+        "reflection": "adaptive",
+        "selfCheck": true
+      },
+      "selfCheck": {
+        "metric": "uncertainty",
+        "threshold": 0.3,
+        "action": "escalate"
+      },
+      "infer": {
+        "strategy": "hybrid",
+        "depth": 6,
+        "diversity": 4
+      },
+      "critic": {
+        "mode": "peer",
+        "strictness": 4,
+        "veto": true
+      },
+      "hypotheses": [
+        {
+          "id": "price_discovery_is_stable",
+          "confidence": 0.74,
+          "type": "predictive"
+        }
+      ],
+      "evidences": [
+        {
+          "source": "market_data",
+          "quality": "high",
+          "weight": 0.8
+        },
+        {
+          "source": "verifier_reports",
+          "quality": "medium",
+          "weight": 0.6
+        }
+      ],
+      "plan": [
+        {
+          "from": "observe_market",
+          "to": "price_discovery"
+        },
+        {
+          "from": "price_discovery",
+          "to": "risk_check"
+        },
+        {
+          "from": "risk_check",
+          "to": "value_settlement"
+        },
+        {
+          "from": "value_settlement",
+          "to": "policy_reflection"
+        }
+      ],
+      "actions": {
+        "observe_market": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "message": "market_snapshot",
+          "latencyMs": "700"
+        },
+        "price_discovery": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "message": "signal_aggregation",
+          "latencyMs": "900"
+        },
+        "risk_check": {
+          "plugin": "policy_guard",
+          "version": "1.1.0",
+          "strict": "true",
+          "latencyMs": "800"
+        },
+        "value_settlement": {
+          "plugin": "http_call",
+          "version": "0.9.0",
+          "endpoint": "https://api.example.com/settle",
+          "latencyMs": "1000"
+        },
+        "policy_reflection": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "message": "policy_updated",
+          "latencyMs": "500"
+        }
+      }
+    },
+    "budget": {
+      "amount": 150000,
+      "unit": "msat"
+    },
+    "deadline": "2027-12-31T00:00:00.000Z",
+    "verify": {
+      "quorum": {
+        "numerator": 2,
+        "denominator": 3
+      },
+      "challengeSeconds": 900,
+      "mode": "auto"
+    },
+    "collateral": {
+      "solver": 25000,
+      "verifier": 10000
+    },
+    "settlement": {
+      "success": {
+        "solver": 62,
+        "verifier": 28,
+        "protocol": 10
+      },
+      "slash": {
+        "timeout": 12,
+        "bad_proof": 80,
+        "malicious": 100
+      }
+    }
+  },
+  "runtime": {
+    "transitions": [
+      {
+        "from": "CREATED",
+        "to": "BIDDING",
+        "event": "publish"
+      },
+      {
+        "from": "BIDDING",
+        "to": "ASSIGNED",
+        "event": "assign"
+      },
+      {
+        "from": "ASSIGNED",
+        "to": "RUNNING",
+        "event": "start"
+      },
+      {
+        "from": "RUNNING",
+        "to": "PROVED",
+        "event": "prove"
+      },
+      {
+        "from": "PROVED",
+        "to": "VERIFYING",
+        "event": "verify"
+      },
+      {
+        "from": "VERIFYING",
+        "to": "CHALLENGE",
+        "event": "challenge"
+      },
+      {
+        "from": "CHALLENGE",
+        "to": "SETTLED",
+        "event": "resolve"
+      }
+    ],
+    "initialState": "CREATED",
+    "terminalStates": [
+      "SETTLED",
+      "SLASHED",
+      "DISPUTED",
+      "EXPIRED"
+    ],
+    "neuralLoops": {
+      "perception": "tags + context",
+      "intention": "goal + task",
+      "control": "verify + constraints",
+      "memory": "short-term + long-term memory buffers",
+      "learning": "feedback-driven parameter updates",
+      "planning": "plan graph edges",
+      "reward": "onSuccess",
+      "inhibition": "onSlash"
+    },
+    "adaptiveHints": [
+      "Use balanced verification with random sampling.",
+      "Store high-fidelity event traces for dispute replay.",
+      "Blend reward and penalty updates for stable adaptation.",
+      "Sovereign autonomy requires stronger self-check thresholds and audit depth.",
+      "Peer critic mode benefits from independent verifier diversity."
+    ]
+  },
+  "emittedAt": "2026-06-07T07:52:46.325Z"
+}

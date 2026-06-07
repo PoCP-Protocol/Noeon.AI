@@ -1,0 +1,86 @@
+{
+  "spec": {
+    "name": "Noeon Contract Language",
+    "version": "0.2"
+  },
+  "contract": {
+    "network": "NoeonNet",
+    "task": "agent.arbitrage",
+    "tags": {
+      "domain": "defi",
+      "risk": "high",
+      "priority": "p1"
+    },
+    "budget": {
+      "amount": 90000,
+      "unit": "msat"
+    },
+    "deadline": "2026-12-31T00:00:00.000Z",
+    "verify": {
+      "quorum": {
+        "numerator": 2,
+        "denominator": 3
+      },
+      "challengeSeconds": 900,
+      "mode": "auto"
+    },
+    "collateral": {
+      "solver": 15000,
+      "verifier": 6000
+    },
+    "settlement": {
+      "success": {
+        "solver": 68,
+        "verifier": 22,
+        "protocol": 10
+      },
+      "slash": {
+        "timeout": 15,
+        "bad_proof": 80,
+        "malicious": 100
+      }
+    }
+  },
+  "runtime": {
+    "transitions": [
+      {
+        "from": "CREATED",
+        "to": "BIDDING",
+        "event": "publish"
+      },
+      {
+        "from": "BIDDING",
+        "to": "ASSIGNED",
+        "event": "assign"
+      },
+      {
+        "from": "ASSIGNED",
+        "to": "RUNNING",
+        "event": "start"
+      },
+      {
+        "from": "RUNNING",
+        "to": "PROVED",
+        "event": "prove"
+      },
+      {
+        "from": "PROVED",
+        "to": "VERIFYING",
+        "event": "verify"
+      },
+      {
+        "from": "VERIFYING",
+        "to": "SETTLED",
+        "event": "settle"
+      }
+    ],
+    "initialState": "CREATED",
+    "terminalStates": [
+      "SETTLED",
+      "SLASHED",
+      "DISPUTED",
+      "EXPIRED"
+    ]
+  },
+  "emittedAt": "2026-06-07T07:06:00.804Z"
+}

@@ -1,0 +1,1525 @@
+{
+  "version": 1,
+  "rounds": [
+    {
+      "cycleAt": "2026-06-07T07:18:06.008Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:18:08.417Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:19:05.411Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:19:05.411Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:19:05.411Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:20:57.683Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:20:57.683Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:20:57.683Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:24:03.406Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:24:07.161Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:24:07.161Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:24:07.161Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:26:22.264Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:26:24.226Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:26:24.226Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:26:24.226Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:27:52.294Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:27:54.890Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:27:54.890Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:27:54.890Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:29:39.209Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:29:40.586Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:29:40.586Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:29:40.586Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:36:16.815Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1546
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7684,
+        "delta": 0.0184,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:36:19.028Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:36:19.028Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:36:19.028Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:38:22.863Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 1
+    },
+    {
+      "cycleAt": "2026-06-07T07:38:22.863Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 2
+    },
+    {
+      "cycleAt": "2026-06-07T07:38:22.863Z",
+      "task": "macro.research.synthesis",
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "round": 3
+    },
+    {
+      "cycleAt": "2026-06-07T07:40:11.230Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:44:03.020Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:45:56.482Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:55:53.412Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:57:43.156Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T07:59:15.440Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:02:05.112Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:06:46.065Z",
+      "task": "ai.native.reasoning",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1800
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76656,
+        "delta": 0.01656,
+        "signal": "hybrid",
+        "learningRate": 0.18
+      }
+    }
+  ],
+  "currentPolicy": {
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 4
+      },
+      "challengeSeconds": 1800
+    },
+    "slash": {
+      "timeout": 15,
+      "bad_proof": 85,
+      "malicious": 100
+    }
+  },
+  "updatedAt": "2026-06-07T08:06:46.065Z"
+}

@@ -1,0 +1,239 @@
+{
+  "cycleAt": "2026-06-07T07:36:16.815Z",
+  "contract": {
+    "network": "NoeonNet",
+    "task": "macro.research.synthesis",
+    "goal": "Produce a high-confidence macro synthesis with explicit uncertainty bands"
+  },
+  "cognition": {
+    "memory": {
+      "shortSeconds": 900,
+      "longDays": 180,
+      "mode": "episodic"
+    },
+    "learningSignal": "hybrid",
+    "executionProfile": {
+      "riskLevel": "high",
+      "profileName": "careful",
+      "maxPlanSteps": null,
+      "verificationMode": "manual",
+      "latencyScale": 1.1
+    },
+    "planTrace": {
+      "started": true,
+      "entries": [
+        "collect_signals"
+      ],
+      "orderedSteps": [
+        "collect_signals",
+        "cross_validate",
+        "synthesize_hypothesis",
+        "risk_review"
+      ],
+      "visitedCount": 4,
+      "complete": false,
+      "totalNodes": 5,
+      "steps": [
+        {
+          "name": "collect_signals",
+          "status": "done",
+          "latencyMs": 700,
+          "startedAtMs": 0,
+          "endedAtMs": 700,
+          "reason": "echo-sense-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "sense",
+            "stepName": "collect_signals",
+            "task": "macro.research.synthesis",
+            "network": "NoeonNet",
+            "evidenceHash": "h1be6a5ff",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "signals_collected"
+            }
+          }
+        },
+        {
+          "name": "cross_validate",
+          "status": "done",
+          "latencyMs": 1000,
+          "startedAtMs": 700,
+          "endedAtMs": 1700,
+          "reason": "echo-validate-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "validate",
+            "stepName": "cross_validate",
+            "task": "macro.research.synthesis",
+            "network": "NoeonNet",
+            "evidenceHash": "h5e56daa8",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "cross_validated"
+            }
+          }
+        },
+        {
+          "name": "synthesize_hypothesis",
+          "status": "done",
+          "latencyMs": 1300,
+          "startedAtMs": 1700,
+          "endedAtMs": 3000,
+          "reason": "echo-reason-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "reason",
+            "stepName": "synthesize_hypothesis",
+            "task": "macro.research.synthesis",
+            "network": "NoeonNet",
+            "evidenceHash": "h38ed6782",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "hypothesis_synthesized"
+            }
+          }
+        },
+        {
+          "name": "risk_review",
+          "status": "failed",
+          "latencyMs": 1700,
+          "startedAtMs": 3000,
+          "endedAtMs": 4700,
+          "reason": "risk guard rejected unresolved contradiction",
+          "failureCategory": "policy_block",
+          "receipt": {
+            "actionType": "safety",
+            "stepName": "risk_review",
+            "task": "macro.research.synthesis",
+            "network": "NoeonNet",
+            "evidenceHash": "h8cb16c49",
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "plugin": "policy_guard",
+            "pluginVersion": "1.1.0",
+            "signatureVerified": false,
+            "expectedSignature": "h46eda742",
+            "pluginMeta": {
+              "template": "policy_guard",
+              "decision": "allow"
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "step": "collect_signals",
+          "type": "running",
+          "atMs": 0
+        },
+        {
+          "step": "collect_signals",
+          "type": "done",
+          "atMs": 700
+        },
+        {
+          "step": "cross_validate",
+          "type": "running",
+          "atMs": 700
+        },
+        {
+          "step": "cross_validate",
+          "type": "done",
+          "atMs": 1700
+        },
+        {
+          "step": "synthesize_hypothesis",
+          "type": "running",
+          "atMs": 1700
+        },
+        {
+          "step": "synthesize_hypothesis",
+          "type": "done",
+          "atMs": 3000
+        },
+        {
+          "step": "risk_review",
+          "type": "running",
+          "atMs": 3000
+        },
+        {
+          "step": "risk_review",
+          "type": "failed",
+          "atMs": 4700
+        }
+      ],
+      "haltedAt": "risk_review",
+      "haltedReason": "step-failed"
+    }
+  },
+  "adaptation": {
+    "feedback": {
+      "successRate": 0.74,
+      "disputeRate": 0.18,
+      "maliciousRate": 0.06,
+      "observedLatencyMs": 8600,
+      "failedSteps": [
+        "risk_review"
+      ],
+      "stepLatencyMs": {
+        "collect_signals": 800,
+        "cross_validate": 1200,
+        "synthesize_hypothesis": 1500,
+        "risk_review": 1600,
+        "finalize_report": 700
+      },
+      "actionResults": {
+        "risk_review": {
+          "status": "failed",
+          "latencyMs": 1700,
+          "errorCode": "POLICY_BLOCK_GUARD",
+          "reason": "risk guard rejected unresolved contradiction"
+        }
+      }
+    },
+    "updates": {
+      "verify": {
+        "quorum": {
+          "numerator": 3,
+          "denominator": 4
+        },
+        "challengeSeconds": 1546
+      },
+      "slash": {
+        "timeout": 15,
+        "bad_proof": 85,
+        "malicious": 100
+      }
+    },
+    "diagnostics": {
+      "currentQuorum": 0.75,
+      "updatedQuorum": 0.7684,
+      "delta": 0.0184,
+      "signal": "hybrid",
+      "learningRate": 0.2
+    }
+  },
+  "execution": {
+    "failureSummary": {
+      "totalFailed": 1,
+      "byCategory": {
+        "policy_block": 1
+      }
+    }
+  }
+}

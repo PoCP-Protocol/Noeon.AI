@@ -1,0 +1,25 @@
+# Noeon Contract Language v0.2 example
+SET net = "NoeonNet"
+SET task_name = "agent.arbitrage"
+SET budget_msat = 90000
+SET solver_col = 15000
+SET verifier_col = 6000
+
+VERSION "0.2"
+NETWORK "${net}"
+TASK "${task_name}"
+TAGS domain=defi risk=high priority=p1
+BUDGET ${budget_msat} msat
+DEADLINE 2026-12-31T00:00:00Z
+VERIFY quorum=2/3 challenge=900 mode=auto
+SOLVER_COLLATERAL ${solver_col}
+VERIFIER_COLLATERAL ${verifier_col}
+ON_SUCCESS solver=68 verifier=22 protocol=10
+ON_SLASH timeout=15 bad_proof=80 malicious=100
+
+FLOW "CREATED" -> "BIDDING" on=publish
+FLOW "BIDDING" -> "ASSIGNED" on=assign
+FLOW "ASSIGNED" -> "RUNNING" on=start
+FLOW "RUNNING" -> "PROVED" on=prove
+FLOW "PROVED" -> "VERIFYING" on=verify
+FLOW "VERIFYING" -> "SETTLED" on=settle

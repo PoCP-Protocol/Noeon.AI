@@ -1,0 +1,236 @@
+{
+  "trainedAt": "2026-06-07T07:38:22.862Z",
+  "rounds": [
+    {
+      "round": 1,
+      "feedback": {
+        "successRate": 0.76,
+        "disputeRate": 0.15,
+        "maliciousRate": 0.05,
+        "observedLatencyMs": 8200,
+        "failedSteps": [
+          "risk_review"
+        ]
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7596,
+        "delta": 0.009599999999999997,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "policy": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1533
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "plan": {
+        "complete": false,
+        "haltedReason": "step-failed",
+        "visitedCount": 4,
+        "totalNodes": 5
+      }
+    },
+    {
+      "round": 2,
+      "feedback": {
+        "successRate": 0.81,
+        "disputeRate": 0.11,
+        "maliciousRate": 0.03,
+        "observedLatencyMs": 7000
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.7456,
+        "delta": -0.004400000000000004,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "policy": {
+        "verify": {
+          "quorum": {
+            "numerator": 2,
+            "denominator": 3
+          },
+          "challengeSeconds": 1679
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 100
+        }
+      },
+      "plan": {
+        "complete": true,
+        "haltedReason": null,
+        "visitedCount": 5,
+        "totalNodes": 5
+      }
+    },
+    {
+      "round": 3,
+      "feedback": {
+        "successRate": 0.86,
+        "disputeRate": 0.08,
+        "maliciousRate": 0.02,
+        "observedLatencyMs": 5900
+      },
+      "diagnostics": {
+        "currentQuorum": 0.6666666666666666,
+        "updatedQuorum": 0.6522666666666667,
+        "delta": -0.014400000000000003,
+        "signal": "hybrid",
+        "learningRate": 0.2
+      },
+      "policy": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 5
+          },
+          "challengeSeconds": 1820
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 85,
+          "malicious": 99
+        }
+      },
+      "plan": {
+        "complete": true,
+        "haltedReason": null,
+        "visitedCount": 5,
+        "totalNodes": 5
+      }
+    }
+  ],
+  "finalPolicy": {
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 5
+      },
+      "challengeSeconds": 1820
+    },
+    "slash": {
+      "timeout": 15,
+      "bad_proof": 85,
+      "malicious": 99
+    }
+  },
+  "totalRounds": 3,
+  "convergence": {
+    "generatedAt": "2026-06-07T07:38:22.863Z",
+    "totalRounds": 3,
+    "metrics": {
+      "quorumFraction": [
+        {
+          "round": 1,
+          "value": 0.75
+        },
+        {
+          "round": 2,
+          "value": 0.6667
+        },
+        {
+          "round": 3,
+          "value": 0.6
+        }
+      ],
+      "challengeSeconds": [
+        {
+          "round": 1,
+          "value": 1533
+        },
+        {
+          "round": 2,
+          "value": 1679
+        },
+        {
+          "round": 3,
+          "value": 1820
+        }
+      ],
+      "maliciousSlash": [
+        {
+          "round": 1,
+          "value": 100
+        },
+        {
+          "round": 2,
+          "value": 100
+        },
+        {
+          "round": 3,
+          "value": 99
+        }
+      ],
+      "planCompletionRate": [
+        {
+          "round": 1,
+          "value": 0.8
+        },
+        {
+          "round": 2,
+          "value": 1
+        },
+        {
+          "round": 3,
+          "value": 1
+        }
+      ],
+      "learningDelta": [
+        {
+          "round": 1,
+          "value": 0.009599999999999997
+        },
+        {
+          "round": 2,
+          "value": -0.004400000000000004
+        },
+        {
+          "round": 3,
+          "value": -0.014400000000000003
+        }
+      ]
+    },
+    "points": [
+      {
+        "round": 1,
+        "quorumFraction": 0.75,
+        "challengeSeconds": 1533,
+        "maliciousSlash": 100,
+        "planCompletionRate": 0.8,
+        "learningDelta": 0.009599999999999997,
+        "haltedReason": "step-failed"
+      },
+      {
+        "round": 2,
+        "quorumFraction": 0.6667,
+        "challengeSeconds": 1679,
+        "maliciousSlash": 100,
+        "planCompletionRate": 1,
+        "learningDelta": -0.004400000000000004,
+        "haltedReason": null
+      },
+      {
+        "round": 3,
+        "quorumFraction": 0.6,
+        "challengeSeconds": 1820,
+        "maliciousSlash": 99,
+        "planCompletionRate": 1,
+        "learningDelta": -0.014400000000000003,
+        "haltedReason": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "spec": {
+    "name": "Noeon Contract Language",
+    "version": "0.2"
+  },
+  "contract": {
+    "network": "NoeonNet",
+    "task": "macro.research.synthesis",
+    "tags": {
+      "domain": "research",
+      "risk": "high",
+      "priority": "p0"
+    },
+    "cognition": {
+      "goal": "Produce a high-confidence macro synthesis with explicit uncertainty bands",
+      "constraints": {
+        "latency_ms": "8000",
+        "privacy": "high",
+        "reproducibility": "required"
+      },
+      "risk": {
+        "level": "high",
+        "profile": "conservative",
+        "impact": "systemic"
+      },
+      "memory": {
+        "shortSeconds": 900,
+        "longDays": 180,
+        "mode": "episodic"
+      },
+      "learn": {
+        "signal": "hybrid",
+        "rate": 0.2,
+        "windowTasks": 200
+      },
+      "plan": [
+        {
+          "from": "collect_signals",
+          "to": "cross_validate"
+        },
+        {
+          "from": "cross_validate",
+          "to": "synthesize_hypothesis"
+        },
+        {
+          "from": "synthesize_hypothesis",
+          "to": "risk_review"
+        },
+        {
+          "from": "risk_review",
+          "to": "finalize_report"
+        }
+      ]
+    },
+    "budget": {
+      "amount": 120000,
+      "unit": "msat"
+    },
+    "deadline": "2026-12-31T00:00:00.000Z",
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 4
+      },
+      "challengeSeconds": 1200,
+      "mode": "manual"
+    },
+    "collateral": {
+      "solver": 30000,
+      "verifier": 12000
+    },
+    "settlement": {
+      "success": {
+        "solver": 64,
+        "verifier": 26,
+        "protocol": 10
+      },
+      "slash": {
+        "timeout": 15,
+        "bad_proof": 85,
+        "malicious": 100
+      }
+    }
+  },
+  "runtime": {
+    "transitions": [
+      {
+        "from": "CREATED",
+        "to": "BIDDING",
+        "event": "publish"
+      },
+      {
+        "from": "BIDDING",
+        "to": "ASSIGNED",
+        "event": "assign"
+      },
+      {
+        "from": "ASSIGNED",
+        "to": "RUNNING",
+        "event": "start"
+      },
+      {
+        "from": "RUNNING",
+        "to": "PROVED",
+        "event": "prove"
+      },
+      {
+        "from": "PROVED",
+        "to": "VERIFYING",
+        "event": "verify"
+      },
+      {
+        "from": "VERIFYING",
+        "to": "CHALLENGE",
+        "event": "challenge"
+      },
+      {
+        "from": "CHALLENGE",
+        "to": "SETTLED",
+        "event": "resolve"
+      }
+    ],
+    "initialState": "CREATED",
+    "terminalStates": [
+      "SETTLED",
+      "SLASHED",
+      "DISPUTED",
+      "EXPIRED"
+    ],
+    "neuralLoops": {
+      "perception": "tags + context",
+      "intention": "goal + task",
+      "control": "verify + constraints",
+      "memory": "short-term + long-term memory buffers",
+      "learning": "feedback-driven parameter updates",
+      "planning": "plan graph edges",
+      "reward": "onSuccess",
+      "inhibition": "onSlash"
+    },
+    "adaptiveHints": [
+      "Use dual-verifier path for high-risk tasks.",
+      "Increase challenge window and maintain quorum >= 2/3.",
+      "Store high-fidelity event traces for dispute replay.",
+      "Blend reward and penalty updates for stable adaptation."
+    ]
+  },
+  "emittedAt": "2026-06-07T07:13:07.603Z"
+}

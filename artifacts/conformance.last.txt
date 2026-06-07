@@ -1,0 +1,37 @@
+
+> noeon-ael@0.1.0 conformance
+> node tests/conformance/run.js
+
+PASS parser and validator accept reference contract
+PASS parser accepts native cognition directives
+PASS compute directives parse and validate
+PASS compute DEF signatures parse and compile
+PASS compute DEF validation rejects duplicate parameters
+PASS compute DEF can be executed in runtime expressions
+PASS compute DEF reports undefined function usage
+PASS compute IF parses and executes selected branch
+PASS compute IF validation rejects non-boolean condition
+PASS compute validation fails on undefined symbol
+PASS compute validation enforces CALL policy fields
+PASS simulate emits compute receipts for CALL
+PASS meta rules can validate runtime.compute.env
+PASS meta rules can validate runtime.compute.receipts
+PASS meta rules can gate runtime.compute.summary.callFailureRate
+PASS meta rules can gate runtime.compute.summary.callFailed
+PASS meta rules can gate runtime.compute.summary.diagnosticCount
+PASS meta rules drive dynamic validation
+PASS meta profile advisory downgrades rule severity in validator
+PASS meta conflict uses last-win in validator
+PASS compiler emits required artifact contract fields
+PASS parser and compiler preserve meta rules
+PASS meta policy hardens runtime when blocking rules fail
+PASS external meta policy file can harden runtime
+PASS external profile inheritance loads parent rules
+PASS external profile inheritance cycle emits warning
+PASS meta profile advisory prevents runtime hardening for advisory violations
+PASS meta conflict uses last-win in runtime engine
+PASS runtime denies when version is required but missing
+PASS runtime denies plugin version mismatch
+PASS runtime denies when signature is required but missing
+PASS runtime accepts valid signature and reports verification
+All conformance checks passed.

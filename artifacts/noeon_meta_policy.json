@@ -1,0 +1,31 @@
+{
+  "profile": {
+    "name": "governance-strict",
+    "namespace": "noeon.meta",
+    "version": "1.0",
+    "mode": "enforce"
+  },
+  "rules": [
+    {
+      "kind": "require",
+      "path": "feedback.proofHash",
+      "level": "warning",
+      "message": "feedback proof hash is recommended"
+    },
+    {
+      "kind": "relation",
+      "when": {
+        "path": "contract.cognition.risk.level",
+        "op": "eq",
+        "value": "critical"
+      },
+      "target": {
+        "path": "contract.verify.mode",
+        "op": "eq",
+        "value": "manual"
+      },
+      "level": "error",
+      "message": "critical risk requires manual verification"
+    }
+  ]
+}

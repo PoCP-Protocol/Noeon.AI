@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "rounds": [
+    {
+      "cycleAt": "2026-06-07T08:17:46.825Z",
+      "task": "system.development.lifecycle",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1538
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 90,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76288,
+        "delta": 0.01288,
+        "signal": "hybrid",
+        "learningRate": 0.14
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:18:18.267Z",
+      "task": "system.development.lifecycle",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1538
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 90,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76288,
+        "delta": 0.01288,
+        "signal": "hybrid",
+        "learningRate": 0.14
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:23:28.340Z",
+      "task": "system.development.lifecycle",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 1538
+        },
+        "slash": {
+          "timeout": 15,
+          "bad_proof": 90,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.75,
+        "updatedQuorum": 0.76288,
+        "delta": 0.01288,
+        "signal": "hybrid",
+        "learningRate": 0.14
+      }
+    }
+  ],
+  "currentPolicy": {
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 4
+      },
+      "challengeSeconds": 1538
+    },
+    "slash": {
+      "timeout": 15,
+      "bad_proof": 90,
+      "malicious": 100
+    }
+  },
+  "updatedAt": "2026-06-07T08:23:28.341Z"
+}

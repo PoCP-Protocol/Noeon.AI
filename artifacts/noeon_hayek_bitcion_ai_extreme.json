@@ -1,0 +1,334 @@
+{
+  "spec": {
+    "name": "Noeon Contract Language",
+    "version": "0.3"
+  },
+  "contract": {
+    "network": "Noeon-Hayek-Bitcion-AI",
+    "task": "market.intelligence.settlement.extreme",
+    "tags": {
+      "domain": "economy",
+      "risk": "critical",
+      "priority": "p0",
+      "reputation": "strict"
+    },
+    "cognition": {
+      "goal": "Max safety under adversarial market pressure",
+      "constraints": {
+        "latency_ms": "7000",
+        "privacy": "high",
+        "reproducibility": "required",
+        "competition": "free",
+        "settlement": "automatic",
+        "governance": "minimal",
+        "audit_depth": "full"
+      },
+      "risk": {
+        "level": "critical",
+        "profile": "conservative",
+        "impact": "systemic"
+      },
+      "memory": {
+        "shortSeconds": 1200,
+        "longDays": 730,
+        "mode": "episodic"
+      },
+      "learn": {
+        "signal": "hybrid",
+        "rate": 0.12,
+        "windowTasks": 320
+      },
+      "nativeAI": {
+        "mode": "hybrid",
+        "autonomy": "sovereign",
+        "reflection": "adaptive",
+        "selfCheck": true
+      },
+      "selfCheck": {
+        "metric": "uncertainty",
+        "threshold": 0.22,
+        "action": "halt"
+      },
+      "infer": {
+        "strategy": "hybrid",
+        "depth": 8,
+        "diversity": 5
+      },
+      "critic": {
+        "mode": "peer",
+        "strictness": 5,
+        "veto": true
+      },
+      "hypotheses": [
+        {
+          "id": "adversarial_price_discovery_remains_stable",
+          "confidence": 0.71,
+          "type": "predictive"
+        },
+        {
+          "id": "verifier_competition_reduces_collusion",
+          "confidence": 0.69,
+          "type": "causal"
+        }
+      ],
+      "evidences": [
+        {
+          "source": "market_data",
+          "quality": "high",
+          "weight": 0.9
+        },
+        {
+          "source": "verifier_reports",
+          "quality": "high",
+          "weight": 0.87
+        },
+        {
+          "source": "forensic_audit",
+          "quality": "high",
+          "weight": 0.84
+        }
+      ],
+      "counterexamples": [
+        {
+          "id": "flash_crash",
+          "against": "adversarial_price_discovery_remains_stable",
+          "severity": "high",
+          "weight": 0.58
+        },
+        {
+          "id": "cartel_attack",
+          "against": "verifier_competition_reduces_collusion",
+          "severity": "high",
+          "weight": 0.61
+        }
+      ],
+      "traces": [
+        {
+          "step": "observe_market",
+          "hypothesis": "adversarial_price_discovery_remains_stable",
+          "evidence": "market_data",
+          "counterexample": null,
+          "note": "critical_signal_snapshot"
+        },
+        {
+          "step": "price_discovery",
+          "hypothesis": "adversarial_price_discovery_remains_stable",
+          "evidence": "verifier_reports",
+          "counterexample": null,
+          "note": "consensus_window_evaluated"
+        },
+        {
+          "step": "cross_verify",
+          "hypothesis": "verifier_competition_reduces_collusion",
+          "evidence": "forensic_audit",
+          "counterexample": null,
+          "note": "independent_peer_check"
+        },
+        {
+          "step": "adversarial_probe",
+          "hypothesis": null,
+          "evidence": "forensic_audit",
+          "counterexample": "cartel_attack",
+          "note": "attack_surface_expansion"
+        },
+        {
+          "step": "risk_check",
+          "hypothesis": null,
+          "evidence": "market_data",
+          "counterexample": "flash_crash",
+          "note": "fail_safe_guard"
+        },
+        {
+          "step": "value_settlement",
+          "hypothesis": "verifier_competition_reduces_collusion",
+          "evidence": "verifier_reports",
+          "counterexample": null,
+          "note": "settlement_committed"
+        }
+      ],
+      "debate": {
+        "topic": "default",
+        "sides": 2,
+        "rounds": 2,
+        "protocol": "adversarial"
+      },
+      "arbitration": {
+        "mode": "threshold",
+        "accept": 0.68,
+        "revise": 0.48,
+        "fallback": "escalate"
+      },
+      "plan": [
+        {
+          "from": "observe_market",
+          "to": "price_discovery"
+        },
+        {
+          "from": "price_discovery",
+          "to": "cross_verify"
+        },
+        {
+          "from": "cross_verify",
+          "to": "adversarial_probe"
+        },
+        {
+          "from": "adversarial_probe",
+          "to": "risk_check"
+        },
+        {
+          "from": "risk_check",
+          "to": "value_settlement"
+        },
+        {
+          "from": "value_settlement",
+          "to": "policy_reflection"
+        }
+      ],
+      "actions": {
+        "observe_market": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "market_snapshot",
+          "latencyMs": "850"
+        },
+        "price_discovery": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "signal_aggregation",
+          "latencyMs": "1050"
+        },
+        "cross_verify": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "peer_verification",
+          "latencyMs": "980"
+        },
+        "adversarial_probe": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "counterparty_stress_probe",
+          "latencyMs": "1100"
+        },
+        "risk_check": {
+          "plugin": "policy_guard",
+          "version": "1.1.0",
+          "signature": "h6c80f2a8",
+          "strict": "true",
+          "latencyMs": "950"
+        },
+        "value_settlement": {
+          "plugin": "http_call",
+          "version": "0.9.0",
+          "signature": "h161bf2f4",
+          "endpoint": "https://api.example.com/settle",
+          "latencyMs": "1200"
+        },
+        "policy_reflection": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "policy_updated",
+          "latencyMs": "700"
+        }
+      }
+    },
+    "budget": {
+      "amount": 220000,
+      "unit": "msat"
+    },
+    "deadline": "2029-12-31T00:00:00.000Z",
+    "verify": {
+      "quorum": {
+        "numerator": 4,
+        "denominator": 5
+      },
+      "challengeSeconds": 1800,
+      "mode": "manual"
+    },
+    "collateral": {
+      "solver": 50000,
+      "verifier": 25000
+    },
+    "settlement": {
+      "success": {
+        "solver": 52,
+        "verifier": 38,
+        "protocol": 10
+      },
+      "slash": {
+        "timeout": 20,
+        "bad_proof": 92,
+        "malicious": 100
+      }
+    }
+  },
+  "runtime": {
+    "transitions": [
+      {
+        "from": "CREATED",
+        "to": "BIDDING",
+        "event": "publish"
+      },
+      {
+        "from": "BIDDING",
+        "to": "ASSIGNED",
+        "event": "assign"
+      },
+      {
+        "from": "ASSIGNED",
+        "to": "RUNNING",
+        "event": "start"
+      },
+      {
+        "from": "RUNNING",
+        "to": "PROVED",
+        "event": "prove"
+      },
+      {
+        "from": "PROVED",
+        "to": "VERIFYING",
+        "event": "verify"
+      },
+      {
+        "from": "VERIFYING",
+        "to": "CHALLENGE",
+        "event": "challenge"
+      },
+      {
+        "from": "CHALLENGE",
+        "to": "SETTLED",
+        "event": "resolve"
+      }
+    ],
+    "initialState": "CREATED",
+    "terminalStates": [
+      "SETTLED",
+      "SLASHED",
+      "DISPUTED",
+      "EXPIRED"
+    ],
+    "neuralLoops": {
+      "perception": "tags + context",
+      "intention": "goal + task",
+      "control": "verify + constraints",
+      "memory": "short-term + long-term memory buffers",
+      "learning": "feedback-driven parameter updates",
+      "planning": "plan graph edges",
+      "reward": "onSuccess",
+      "inhibition": "onSlash"
+    },
+    "adaptiveHints": [
+      "Use dual-verifier path for high-risk tasks.",
+      "Increase challenge window and maintain quorum >= 2/3.",
+      "Store high-fidelity event traces for dispute replay.",
+      "Blend reward and penalty updates for stable adaptation.",
+      "Sovereign autonomy requires stronger self-check thresholds and audit depth.",
+      "Peer critic mode benefits from independent verifier diversity."
+    ]
+  },
+  "emittedAt": "2026-06-07T08:02:17.146Z"
+}

@@ -1,0 +1,21 @@
+# Noeon self-hosting seed: language-level meta rules
+VERSION "0.3"
+NETWORK "NoeonNet"
+TASK "language.self_improvement"
+TAGS domain=core risk=high priority=p0
+BUDGET 50000 msat
+DEADLINE 2026-12-31T00:00:00Z
+VERIFY quorum=2/3 challenge=400 mode=auto
+SOLVER_COLLATERAL 10000
+VERIFIER_COLLATERAL 5000
+ON_SUCCESS solver=70 verifier=20 protocol=10
+ON_SLASH timeout=10 bad_proof=80 malicious=100
+RISK level=high profile=balanced impact=systemic
+GOAL "Use meta rules to harden the language contract"
+META_PROFILE name=strict_core namespace=noeon.policy version=1.0 mode=enforce extends=baseline_guard
+META_REQUIRE path=cognition.risk level=error message=meta_require_risk_mandatory
+META_RANGE path=verify.challengeSeconds min=600 max=86400 level=error message=meta_enforce_high_challenge_window
+META_ENUM path=cognition.risk.profile values=strict,conservative level=warning message="meta warn: risk profile should be strict"
+META_RELATION when_path=cognition.risk.level when_op=eq when_value=high target_path=verify.challengeSeconds target_op=gte target_value=600 level=error message="meta relation: high risk requires challenge >= 600"
+FLOW "CREATED" -> "BIDDING" on=publish
+FLOW "BIDDING" -> "ASSIGNED" on=assign

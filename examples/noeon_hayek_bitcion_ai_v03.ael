@@ -1,0 +1,61 @@
+# Noeon = Hayek + Bitcion + AI (v0.3-aligned draft contract)
+THINK net = "Noeon-Hayek-Bitcion-AI"
+THINK intent = "market.intelligence.settlement.v03"
+THINK energy = 180000
+
+VERSION "0.3"
+BRAIN "${net}"
+INTENT "${intent}"
+DRIVE "Let intelligence compete freely, let value settle automatically"
+RULES latency_ms=5500 privacy=high reproducibility=required competition=free settlement=automatic governance=minimal
+THREAT level=high profile=conservative impact=systemic
+HIPPOCAMPUS short=900 long=365 mode=episodic
+PLASTICITY signal=hybrid rate=0.16 window=240
+CONTEXT domain=economy risk=high priority=p0 reputation=enabled
+ENERGY ${energy} msat
+MEMORY_UNTIL 2028-12-31T00:00:00Z
+TRUST quorum=3/4 challenge=1200 mode=manual
+SOLVER_COLLATERAL 32000
+VERIFIER_COLLATERAL 15000
+REWARD solver=58 verifier=32 protocol=10
+PENALTY timeout=15 bad_proof=88 malicious=100
+
+CONSCIOUSNESS mode=hybrid autonomy=sovereign reflection=adaptive selfcheck=true
+METACOG metric=uncertainty threshold=0.28 action=escalate
+REASONER strategy=hybrid depth=7 diversity=4
+JUDGE mode=peer strictness=5 veto=true
+
+THEOREM id=price_discovery_is_stable confidence=0.76 type=predictive
+THEOREM id=verifier_market_reduces_fraud confidence=0.72 type=causal
+PROOF source=market_data quality=high weight=0.85
+PROOF source=verifier_reports quality=high weight=0.80
+PROOF source=historical_disputes quality=medium weight=0.62
+FALSIFY id=latency_shock against=price_discovery_is_stable severity=high weight=0.45
+FALSIFY id=collusion_cluster against=verifier_market_reduces_fraud severity=medium weight=0.34
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "CHALLENGE" on=challenge
+SYNAPSE "CHALLENGE" -> "SETTLED" on=resolve
+
+CIRCUIT "observe_market" => "price_discovery"
+CIRCUIT "price_discovery" => "cross_verify"
+CIRCUIT "cross_verify" => "risk_check"
+CIRCUIT "risk_check" => "value_settlement"
+CIRCUIT "value_settlement" => "policy_reflection"
+
+ROUTE "observe_market" plugin=echo version=1.0.0 message=market_snapshot latencyMs=700
+ROUTE "price_discovery" plugin=echo version=1.0.0 message=signal_aggregation latencyMs=950
+ROUTE "cross_verify" plugin=echo version=1.0.0 message=peer_verification latencyMs=900
+ROUTE "risk_check" plugin=policy_guard version=1.1.0 strict=true latencyMs=850
+ROUTE "value_settlement" plugin=http_call version=0.9.0 endpoint=https://api.example.com/settle latencyMs=1050
+ROUTE "policy_reflection" plugin=echo version=1.0.0 message=policy_updated latencyMs=550
+
+CHAIN step=observe_market hypothesis=price_discovery_is_stable evidence=market_data note=signal_snapshot_locked
+CHAIN step=price_discovery hypothesis=price_discovery_is_stable evidence=verifier_reports note=consensus_window_evaluated
+CHAIN step=cross_verify hypothesis=verifier_market_reduces_fraud evidence=verifier_reports note=independent_peer_check
+CHAIN step=risk_check counterexample=collusion_cluster evidence=historical_disputes note=adversarial_guard
+CHAIN step=value_settlement hypothesis=verifier_market_reduces_fraud evidence=market_data note=settlement_committed

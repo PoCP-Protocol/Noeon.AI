@@ -1,0 +1,48 @@
+# Noeon = Hayek + Bitcion + AI
+THINK net = "Noeon-Hayek-Bitcion-AI"
+THINK intent = "market.intelligence.settlement"
+THINK energy = 150000
+
+VERSION "0.2"
+BRAIN "${net}"
+INTENT "${intent}"
+DRIVE "Let intelligence compete freely, let value settle automatically"
+RULES latency_ms=6000 privacy=high reproducibility=required competition=free settlement=automatic governance=minimal
+THREAT level=medium profile=adaptive impact=economic
+HIPPOCAMPUS short=720 long=365 mode=episodic
+PLASTICITY signal=hybrid rate=0.18 window=180
+CONTEXT domain=economy risk=medium priority=p0 reputation=enabled
+ENERGY ${energy} msat
+MEMORY_UNTIL 2027-12-31T00:00:00Z
+TRUST quorum=2/3 challenge=900 mode=auto
+SOLVER_COLLATERAL 25000
+VERIFIER_COLLATERAL 10000
+REWARD solver=62 verifier=28 protocol=10
+PENALTY timeout=12 bad_proof=80 malicious=100
+
+CONSCIOUSNESS mode=hybrid autonomy=sovereign reflection=adaptive selfcheck=true
+METACOG metric=uncertainty threshold=0.30 action=escalate
+REASONER strategy=hybrid depth=6 diversity=4
+JUDGE mode=peer strictness=4 veto=true
+THEOREM id=price_discovery_is_stable confidence=0.74 type=predictive
+PROOF source=market_data quality=high weight=0.8
+PROOF source=verifier_reports quality=medium weight=0.6
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "CHALLENGE" on=challenge
+SYNAPSE "CHALLENGE" -> "SETTLED" on=resolve
+
+CIRCUIT "observe_market" => "price_discovery"
+CIRCUIT "price_discovery" => "risk_check"
+CIRCUIT "risk_check" => "value_settlement"
+CIRCUIT "value_settlement" => "policy_reflection"
+
+ROUTE "observe_market" plugin=echo version=1.0.0 message=market_snapshot latencyMs=700
+ROUTE "price_discovery" plugin=echo version=1.0.0 message=signal_aggregation latencyMs=900
+ROUTE "risk_check" plugin=policy_guard version=1.1.0 strict=true latencyMs=800
+ROUTE "value_settlement" plugin=http_call version=0.9.0 endpoint=https://api.example.com/settle latencyMs=1000
+ROUTE "policy_reflection" plugin=echo version=1.0.0 message=policy_updated latencyMs=500

@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-06-07T07:36:16.816Z",
+  "title": "Noeon Super Brain Cycle Report",
+  "task": "macro.research.synthesis",
+  "goal": "Produce a high-confidence macro synthesis with explicit uncertainty bands",
+  "kpis": {
+    "planCompletionRate": 0.6,
+    "failedSteps": 1,
+    "totalLatencyMs": 4700,
+    "policyRounds": 25
+  },
+  "policyDelta": {
+    "currentQuorum": 0.75,
+    "updatedQuorum": 0.7684,
+    "delta": 0.0184,
+    "signal": "hybrid",
+    "learningRate": 0.2
+  },
+  "recommendations": [
+    "Increase validation depth and inspect failed plan step traces.",
+    "Consider lowering reasoning depth or increasing solver parallelism."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "noeon-ael",
+  "version": "0.1.0",
+  "description": "Noeon AEL parser and validator for distributed AI contracts",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "parse": "node src/index.js",
+    "compile": "node src/index.js compile",
+    "explain": "node src/index.js explain",
+    "simulate": "node src/index.js simulate",
+    "train": "node src/index.js train",
+    "rollback": "node src/index.js rollback",
+    "site": "node src/serve-site.js",
+    "conformance": "node tests/conformance/run.js",
+    "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",
+    "conformance:summary": "node scripts/conformance-diff-summary.js",
+    "conformance:baseline:update": "npm run conformance:summary -- --update-baseline",
+    "gate:strict": "node scripts/strict-gate.js",
+    "metrics": "node scripts/quality-metrics.js",
+    "metrics:record": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run metrics"
+  },
+  "license": "MIT"
+}

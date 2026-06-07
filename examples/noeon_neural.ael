@@ -1,0 +1,23 @@
+# Neural-style Noeon contract (human-friendly syntax)
+THINK net = "NoeonNet"
+THINK intent = "edu.tutor.plan"
+THINK energy = 42000
+
+VERSION "0.2"
+BRAIN "${net}"
+INTENT "${intent}"
+CONTEXT domain=education risk=medium priority=p2
+ENERGY ${energy} msat
+MEMORY_UNTIL 2026-10-01T00:00:00Z
+TRUST quorum=2/3 challenge=600 mode=auto
+SOLVER_COLLATERAL 8000
+VERIFIER_COLLATERAL 4000
+REWARD solver=70 verifier=20 protocol=10
+PENALTY timeout=10 bad_proof=75 malicious=100
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "SETTLED" on=settle

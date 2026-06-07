@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "rounds": [
+    {
+      "cycleAt": "2026-06-07T08:02:17.577Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:09:10.872Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:09:20.931Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:11:13.135Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:11:57.882Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:12:07.580Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    },
+    {
+      "cycleAt": "2026-06-07T08:12:27.382Z",
+      "task": "market.intelligence.settlement.extreme",
+      "feedback": {
+        "successRate": 0.74,
+        "disputeRate": 0.18,
+        "maliciousRate": 0.06,
+        "observedLatencyMs": 8600,
+        "failedSteps": [
+          "risk_review"
+        ],
+        "stepLatencyMs": {
+          "collect_signals": 800,
+          "cross_validate": 1200,
+          "synthesize_hypothesis": 1500,
+          "risk_review": 1600,
+          "finalize_report": 700
+        },
+        "actionResults": {
+          "risk_review": {
+            "status": "failed",
+            "latencyMs": 1700,
+            "errorCode": "POLICY_BLOCK_GUARD",
+            "reason": "risk guard rejected unresolved contradiction"
+          }
+        }
+      },
+      "updates": {
+        "verify": {
+          "quorum": {
+            "numerator": 3,
+            "denominator": 4
+          },
+          "challengeSeconds": 2093
+        },
+        "slash": {
+          "timeout": 20,
+          "bad_proof": 92,
+          "malicious": 100
+        }
+      },
+      "diagnostics": {
+        "currentQuorum": 0.8,
+        "updatedQuorum": 0.8,
+        "delta": 0.01104,
+        "signal": "hybrid",
+        "learningRate": 0.12
+      }
+    }
+  ],
+  "currentPolicy": {
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 4
+      },
+      "challengeSeconds": 2093
+    },
+    "slash": {
+      "timeout": 20,
+      "bad_proof": 92,
+      "malicious": 100
+    }
+  },
+  "updatedAt": "2026-06-07T08:12:27.382Z"
+}

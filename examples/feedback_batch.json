@@ -1,0 +1,23 @@
+{
+  "rounds": [
+    {
+      "successRate": 0.76,
+      "disputeRate": 0.15,
+      "maliciousRate": 0.05,
+      "observedLatencyMs": 8200,
+      "failedSteps": ["risk_review"]
+    },
+    {
+      "successRate": 0.81,
+      "disputeRate": 0.11,
+      "maliciousRate": 0.03,
+      "observedLatencyMs": 7000
+    },
+    {
+      "successRate": 0.86,
+      "disputeRate": 0.08,
+      "maliciousRate": 0.02,
+      "observedLatencyMs": 5900
+    }
+  ]
+}

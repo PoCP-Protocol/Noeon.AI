@@ -1,0 +1,40 @@
+# Noeon Super Brain Contract
+THINK net = "NoeonNet"
+THINK intent = "macro.research.synthesis"
+THINK energy = 120000
+
+VERSION "0.2"
+BRAIN "${net}"
+INTENT "${intent}"
+GOAL "Produce a high-confidence macro synthesis with explicit uncertainty bands"
+CONSTRAINT latency_ms=8000 privacy=high reproducibility=required
+RISK level=high profile=conservative impact=systemic
+MEMORY short=900 long=180 mode=episodic
+LEARN signal=hybrid rate=0.2 window=200
+CONTEXT domain=research risk=high priority=p0
+ENERGY ${energy} msat
+MEMORY_UNTIL 2026-12-31T00:00:00Z
+TRUST quorum=3/4 challenge=1200 mode=manual
+SOLVER_COLLATERAL 30000
+VERIFIER_COLLATERAL 12000
+REWARD solver=64 verifier=26 protocol=10
+PENALTY timeout=15 bad_proof=85 malicious=100
+
+SYNAPSE "CREATED" -> "BIDDING" on=publish
+SYNAPSE "BIDDING" -> "ASSIGNED" on=assign
+SYNAPSE "ASSIGNED" -> "RUNNING" on=start
+SYNAPSE "RUNNING" -> "PROVED" on=prove
+SYNAPSE "PROVED" -> "VERIFYING" on=verify
+SYNAPSE "VERIFYING" -> "CHALLENGE" on=challenge
+SYNAPSE "CHALLENGE" -> "SETTLED" on=resolve
+
+PLAN "collect_signals" => "cross_validate"
+PLAN "cross_validate" => "synthesize_hypothesis"
+PLAN "synthesize_hypothesis" => "risk_review"
+PLAN "risk_review" => "finalize_report"
+
+ACTION "collect_signals" plugin=echo version=1.0.0 message=signals_collected latencyMs=700
+ACTION "cross_validate" plugin=echo version=1.0.0 message=cross_validated latencyMs=1000
+ACTION "synthesize_hypothesis" plugin=echo version=1.0.0 message=hypothesis_synthesized latencyMs=1300
+ACTION "risk_review" plugin=policy_guard version=1.1.0 strict=true latencyMs=900
+ACTION "finalize_report" plugin=http_call version=0.9.0 endpoint=https://api.example.com/finalize latencyMs=600

@@ -1,0 +1,411 @@
+{
+  "cycleAt": "2026-06-07T08:06:46.065Z",
+  "contract": {
+    "network": "NoeonNet",
+    "task": "ai.native.reasoning",
+    "goal": "Reason like human experts and self-correct before commit"
+  },
+  "cognition": {
+    "memory": {
+      "shortSeconds": 1200,
+      "longDays": 365,
+      "mode": "semantic"
+    },
+    "learningSignal": "hybrid",
+    "executionProfile": {
+      "riskLevel": "high",
+      "profileName": "careful",
+      "maxPlanSteps": null,
+      "verificationMode": "manual",
+      "latencyScale": 1.1
+    },
+    "planTrace": {
+      "started": true,
+      "entries": [
+        "sense_context"
+      ],
+      "orderedSteps": [
+        "sense_context",
+        "generate_hypothesis",
+        "self_reflect",
+        "risk_gate",
+        "commit_decision"
+      ],
+      "visitedCount": 5,
+      "complete": true,
+      "totalNodes": 5,
+      "steps": [
+        {
+          "name": "sense_context",
+          "status": "done",
+          "latencyMs": 700,
+          "startedAtMs": 0,
+          "endedAtMs": 700,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "sense_context",
+            "task": "ai.native.reasoning",
+            "network": "NoeonNet",
+            "evidenceHash": "h6216a8e8",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "context_sensed"
+            }
+          }
+        },
+        {
+          "name": "generate_hypothesis",
+          "status": "done",
+          "latencyMs": 1200,
+          "startedAtMs": 700,
+          "endedAtMs": 1900,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "generate_hypothesis",
+            "task": "ai.native.reasoning",
+            "network": "NoeonNet",
+            "evidenceHash": "h5eccdb60",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "hypothesis_generated"
+            }
+          }
+        },
+        {
+          "name": "self_reflect",
+          "status": "done",
+          "latencyMs": 900,
+          "startedAtMs": 1900,
+          "endedAtMs": 2800,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "self_reflect",
+            "task": "ai.native.reasoning",
+            "network": "NoeonNet",
+            "evidenceHash": "h4460082e",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": false,
+            "expectedSignature": "h13f692ec",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "reflection_complete"
+            }
+          }
+        },
+        {
+          "name": "risk_gate",
+          "status": "done",
+          "latencyMs": 1000,
+          "startedAtMs": 2800,
+          "endedAtMs": 3800,
+          "reason": "policy guard passed",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "safety",
+            "stepName": "risk_gate",
+            "task": "ai.native.reasoning",
+            "network": "NoeonNet",
+            "evidenceHash": "hc526d270",
+            "errorCode": null,
+            "plugin": "policy_guard",
+            "pluginVersion": "1.1.0",
+            "signatureVerified": false,
+            "expectedSignature": "h46eda742",
+            "pluginMeta": {
+              "template": "policy_guard",
+              "decision": "allow"
+            }
+          }
+        },
+        {
+          "name": "commit_decision",
+          "status": "done",
+          "latencyMs": 600,
+          "startedAtMs": 3800,
+          "endedAtMs": 4400,
+          "reason": "http call succeeded",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "commit",
+            "stepName": "commit_decision",
+            "task": "ai.native.reasoning",
+            "network": "NoeonNet",
+            "evidenceHash": "h31c85f95",
+            "errorCode": null,
+            "plugin": "http_call",
+            "pluginVersion": "0.9.0",
+            "signatureVerified": false,
+            "expectedSignature": "h596ef4e6",
+            "pluginMeta": {
+              "template": "http_call",
+              "endpoint": "https://api.example.com/commit",
+              "mocked": true
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "step": "sense_context",
+          "type": "running",
+          "atMs": 0
+        },
+        {
+          "step": "sense_context",
+          "type": "done",
+          "atMs": 700
+        },
+        {
+          "step": "generate_hypothesis",
+          "type": "running",
+          "atMs": 700
+        },
+        {
+          "step": "generate_hypothesis",
+          "type": "done",
+          "atMs": 1900
+        },
+        {
+          "step": "self_reflect",
+          "type": "running",
+          "atMs": 1900
+        },
+        {
+          "step": "self_reflect",
+          "type": "done",
+          "atMs": 2800
+        },
+        {
+          "step": "risk_gate",
+          "type": "running",
+          "atMs": 2800
+        },
+        {
+          "step": "risk_gate",
+          "type": "done",
+          "atMs": 3800
+        },
+        {
+          "step": "commit_decision",
+          "type": "running",
+          "atMs": 3800
+        },
+        {
+          "step": "commit_decision",
+          "type": "done",
+          "atMs": 4400
+        }
+      ]
+    },
+    "nativeMind": {
+      "mode": "hybrid",
+      "autonomy": "sovereign",
+      "reflection": "adaptive",
+      "selfCheck": {
+        "metric": "uncertainty",
+        "threshold": 0.32,
+        "action": "escalate"
+      },
+      "infer": {
+        "strategy": "hybrid",
+        "depth": 6,
+        "diversity": 4
+      },
+      "critic": {
+        "mode": "peer",
+        "strictness": 4,
+        "veto": true
+      },
+      "hypotheses": [
+        {
+          "id": "macro_shift",
+          "confidence": 0.72,
+          "type": "predictive"
+        },
+        {
+          "id": "risk_spike",
+          "confidence": 0.68,
+          "type": "diagnostic"
+        }
+      ],
+      "evidences": [
+        {
+          "source": "dataset",
+          "quality": "high",
+          "weight": 0.8
+        },
+        {
+          "source": "simulation",
+          "quality": "medium",
+          "weight": 0.6
+        }
+      ],
+      "counterexamples": [
+        {
+          "id": "alt_regime",
+          "against": "macro_shift",
+          "severity": "medium",
+          "weight": 0.45
+        },
+        {
+          "id": "tail_event",
+          "against": "risk_spike",
+          "severity": "high",
+          "weight": 0.5
+        }
+      ],
+      "traces": [
+        {
+          "step": "sense_context",
+          "hypothesis": "macro_shift",
+          "evidence": "dataset",
+          "counterexample": null,
+          "note": "observe_signals"
+        },
+        {
+          "step": "generate_hypothesis",
+          "hypothesis": "macro_shift",
+          "evidence": "simulation",
+          "counterexample": null,
+          "note": "build_candidate"
+        },
+        {
+          "step": "self_reflect",
+          "hypothesis": "risk_spike",
+          "evidence": null,
+          "counterexample": "tail_event",
+          "note": "stress_test"
+        },
+        {
+          "step": "risk_gate",
+          "hypothesis": "risk_spike",
+          "evidence": null,
+          "counterexample": "alt_regime",
+          "note": "governance_gate"
+        }
+      ],
+      "debate": {
+        "topic": "macro_regime",
+        "sides": 3,
+        "rounds": 3,
+        "protocol": "socratic"
+      },
+      "arbitration": {
+        "mode": "jury",
+        "accept": 0.68,
+        "revise": 0.48,
+        "fallback": "escalate"
+      },
+      "jurors": [
+        {
+          "id": "judge_alpha",
+          "weight": 0.4,
+          "role": "domain"
+        },
+        {
+          "id": "judge_beta",
+          "weight": 0.35,
+          "role": "risk"
+        },
+        {
+          "id": "judge_gamma",
+          "weight": 0.25,
+          "role": "ethics"
+        }
+      ],
+      "inferred": {
+        "confidence": 1,
+        "uncertainty": 0.1571,
+        "completionRate": 1,
+        "inferBoost": 0.142,
+        "criticPenalty": 0.08,
+        "hypothesisCoverage": 0.6667,
+        "hypothesisConfidence": 0.7,
+        "evidenceStrength": 0.58,
+        "counterexamplePressure": 0.3962,
+        "traceCoverage": 0.8,
+        "traceConsistency": 1,
+        "debateConsensus": 0.659,
+        "debateFriction": 0.341,
+        "juryScore": 0.4459,
+        "juryWeightsUsed": 3,
+        "reflectionTriggered": false,
+        "decision": "continue",
+        "verdict": "reject"
+      }
+    }
+  },
+  "adaptation": {
+    "feedback": {
+      "successRate": 0.74,
+      "disputeRate": 0.18,
+      "maliciousRate": 0.06,
+      "observedLatencyMs": 8600,
+      "failedSteps": [
+        "risk_review"
+      ],
+      "stepLatencyMs": {
+        "collect_signals": 800,
+        "cross_validate": 1200,
+        "synthesize_hypothesis": 1500,
+        "risk_review": 1600,
+        "finalize_report": 700
+      },
+      "actionResults": {
+        "risk_review": {
+          "status": "failed",
+          "latencyMs": 1700,
+          "errorCode": "POLICY_BLOCK_GUARD",
+          "reason": "risk guard rejected unresolved contradiction"
+        }
+      }
+    },
+    "updates": {
+      "verify": {
+        "quorum": {
+          "numerator": 3,
+          "denominator": 4
+        },
+        "challengeSeconds": 1800
+      },
+      "slash": {
+        "timeout": 15,
+        "bad_proof": 85,
+        "malicious": 100
+      }
+    },
+    "diagnostics": {
+      "currentQuorum": 0.75,
+      "updatedQuorum": 0.76656,
+      "delta": 0.01656,
+      "signal": "hybrid",
+      "learningRate": 0.18
+    }
+  },
+  "execution": {
+    "failureSummary": {
+      "totalFailed": 0,
+      "byCategory": {}
+    },
+    "recommendation": "reject",
+    "controlDecision": "continue"
+  }
+}

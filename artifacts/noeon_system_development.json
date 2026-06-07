@@ -1,0 +1,377 @@
+{
+  "spec": {
+    "name": "Noeon Contract Language",
+    "version": "0.3",
+    "metaRules": [
+      {
+        "kind": "require",
+        "path": "cognition.goal",
+        "level": "error",
+        "message": "meta_goal_required"
+      },
+      {
+        "kind": "require",
+        "path": "cognition.traces",
+        "level": "error",
+        "message": "meta_trace_required"
+      },
+      {
+        "kind": "range",
+        "path": "verify.challengeSeconds",
+        "min": 900,
+        "max": 7200,
+        "level": "error",
+        "message": "meta_challenge_window_policy"
+      },
+      {
+        "kind": "relation",
+        "when": {
+          "path": "cognition.risk.level",
+          "op": "eq",
+          "value": "high"
+        },
+        "target": {
+          "path": "verify.quorum.numerator",
+          "op": "gte",
+          "value": 3
+        },
+        "level": "error",
+        "message": "meta relation: high risk requires quorum numerator >= 3"
+      }
+    ],
+    "metaProfile": {
+      "name": "system_build_guard",
+      "namespace": "noeon.policy",
+      "version": "1.0",
+      "mode": "enforce",
+      "extends": []
+    }
+  },
+  "contract": {
+    "network": "Noeon-System-DevNet",
+    "task": "system.development.lifecycle",
+    "tags": {
+      "domain": "engineering",
+      "risk": "high",
+      "priority": "p0",
+      "stage": "build"
+    },
+    "cognition": {
+      "goal": "Build reliable systems through verifiable multi-agent development",
+      "constraints": {
+        "latency_ms": "6000",
+        "privacy": "high",
+        "reproducibility": "required",
+        "delivery": "incremental",
+        "governance": "strict"
+      },
+      "risk": {
+        "level": "high",
+        "profile": "strict",
+        "impact": "systemic"
+      },
+      "memory": {
+        "shortSeconds": 900,
+        "longDays": 365,
+        "mode": "episodic"
+      },
+      "learn": {
+        "signal": "hybrid",
+        "rate": 0.14,
+        "windowTasks": 200
+      },
+      "nativeAI": {
+        "mode": "hybrid",
+        "autonomy": "sovereign",
+        "reflection": "adaptive",
+        "selfCheck": true
+      },
+      "selfCheck": {
+        "metric": "uncertainty",
+        "threshold": 0.26,
+        "action": "escalate"
+      },
+      "infer": {
+        "strategy": "hybrid",
+        "depth": 7,
+        "diversity": 4
+      },
+      "critic": {
+        "mode": "peer",
+        "strictness": 5,
+        "veto": true
+      },
+      "hypotheses": [
+        {
+          "id": "requirements_traceability_maintained",
+          "confidence": 0.77,
+          "type": "diagnostic"
+        },
+        {
+          "id": "runtime_regression_risk_controlled",
+          "confidence": 0.73,
+          "type": "predictive"
+        }
+      ],
+      "evidences": [
+        {
+          "source": "spec_artifacts",
+          "quality": "high",
+          "weight": 0.82
+        },
+        {
+          "source": "test_reports",
+          "quality": "high",
+          "weight": 0.86
+        },
+        {
+          "source": "runtime_audit",
+          "quality": "medium",
+          "weight": 0.7
+        }
+      ],
+      "counterexamples": [
+        {
+          "id": "spec_drift",
+          "against": "requirements_traceability_maintained",
+          "severity": "high",
+          "weight": 0.5
+        },
+        {
+          "id": "hidden_regression",
+          "against": "runtime_regression_risk_controlled",
+          "severity": "high",
+          "weight": 0.56
+        }
+      ],
+      "traces": [
+        {
+          "step": "spec_define",
+          "hypothesis": "requirements_traceability_maintained",
+          "evidence": "spec_artifacts",
+          "counterexample": null,
+          "note": "req_to_design_trace"
+        },
+        {
+          "step": "architecture_design",
+          "hypothesis": "requirements_traceability_maintained",
+          "evidence": "spec_artifacts",
+          "counterexample": null,
+          "note": "design_constraints_locked"
+        },
+        {
+          "step": "implementation",
+          "hypothesis": "runtime_regression_risk_controlled",
+          "evidence": "test_reports",
+          "counterexample": null,
+          "note": "change_scope_measured"
+        },
+        {
+          "step": "test_validation",
+          "hypothesis": null,
+          "evidence": "test_reports",
+          "counterexample": "hidden_regression",
+          "note": "regression_barrier"
+        },
+        {
+          "step": "release_gating",
+          "hypothesis": null,
+          "evidence": "runtime_audit",
+          "counterexample": "spec_drift",
+          "note": "pre_release_guard"
+        },
+        {
+          "step": "runtime_observability",
+          "hypothesis": "runtime_regression_risk_controlled",
+          "evidence": "runtime_audit",
+          "counterexample": null,
+          "note": "post_release_feedback"
+        }
+      ],
+      "debate": {
+        "topic": "default",
+        "sides": 2,
+        "rounds": 2,
+        "protocol": "adversarial"
+      },
+      "arbitration": {
+        "mode": "threshold",
+        "accept": 0.68,
+        "revise": 0.48,
+        "fallback": "escalate"
+      },
+      "jurors": [],
+      "plan": [
+        {
+          "from": "spec_define",
+          "to": "architecture_design"
+        },
+        {
+          "from": "architecture_design",
+          "to": "implementation"
+        },
+        {
+          "from": "implementation",
+          "to": "test_validation"
+        },
+        {
+          "from": "test_validation",
+          "to": "release_gating"
+        },
+        {
+          "from": "release_gating",
+          "to": "runtime_observability"
+        }
+      ],
+      "actions": {
+        "spec_define": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "spec_locked",
+          "latencyMs": "700"
+        },
+        "architecture_design": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "design_reviewed",
+          "latencyMs": "900"
+        },
+        "implementation": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "code_integrated",
+          "latencyMs": "1200"
+        },
+        "test_validation": {
+          "plugin": "policy_guard",
+          "version": "1.1.0",
+          "signature": "h6c80f2a8",
+          "strict": "true",
+          "latencyMs": "1000"
+        },
+        "release_gating": {
+          "plugin": "http_call",
+          "version": "0.9.0",
+          "signature": "h161bf2f4",
+          "endpoint": "https://api.example.com/release-gate",
+          "latencyMs": "1100"
+        },
+        "runtime_observability": {
+          "plugin": "echo",
+          "version": "1.0.0",
+          "signature": "he742dbe2",
+          "message": "runtime_metrics_published",
+          "latencyMs": "800"
+        }
+      }
+    },
+    "budget": {
+      "amount": 160000,
+      "unit": "msat"
+    },
+    "deadline": "2028-12-31T00:00:00.000Z",
+    "verify": {
+      "quorum": {
+        "numerator": 3,
+        "denominator": 4
+      },
+      "challengeSeconds": 1200,
+      "mode": "manual"
+    },
+    "collateral": {
+      "solver": 28000,
+      "verifier": 14000
+    },
+    "settlement": {
+      "success": {
+        "solver": 58,
+        "verifier": 32,
+        "protocol": 10
+      },
+      "slash": {
+        "timeout": 15,
+        "bad_proof": 90,
+        "malicious": 100
+      }
+    }
+  },
+  "runtime": {
+    "transitions": [
+      {
+        "from": "CREATED",
+        "to": "BIDDING",
+        "event": "publish"
+      },
+      {
+        "from": "BIDDING",
+        "to": "ASSIGNED",
+        "event": "assign"
+      },
+      {
+        "from": "ASSIGNED",
+        "to": "RUNNING",
+        "event": "start"
+      },
+      {
+        "from": "RUNNING",
+        "to": "PROVED",
+        "event": "prove"
+      },
+      {
+        "from": "PROVED",
+        "to": "VERIFYING",
+        "event": "verify"
+      },
+      {
+        "from": "VERIFYING",
+        "to": "CHALLENGE",
+        "event": "challenge"
+      },
+      {
+        "from": "CHALLENGE",
+        "to": "SETTLED",
+        "event": "resolve"
+      }
+    ],
+    "initialState": "CREATED",
+    "terminalStates": [
+      "SETTLED",
+      "SLASHED",
+      "DISPUTED",
+      "EXPIRED"
+    ],
+    "metaPolicy": {
+      "enabled": true,
+      "ruleCount": 4,
+      "profile": {
+        "name": "system_build_guard",
+        "namespace": "noeon.policy",
+        "version": "1.0",
+        "mode": "enforce",
+        "extends": []
+      }
+    },
+    "neuralLoops": {
+      "perception": "tags + context",
+      "intention": "goal + task",
+      "control": "verify + constraints",
+      "memory": "short-term + long-term memory buffers",
+      "learning": "feedback-driven parameter updates",
+      "planning": "plan graph edges",
+      "reward": "onSuccess",
+      "inhibition": "onSlash"
+    },
+    "adaptiveHints": [
+      "Use dual-verifier path for high-risk tasks.",
+      "Increase challenge window and maintain quorum >= 2/3.",
+      "Store high-fidelity event traces for dispute replay.",
+      "Blend reward and penalty updates for stable adaptation.",
+      "Sovereign autonomy requires stronger self-check thresholds and audit depth.",
+      "Peer critic mode benefits from independent verifier diversity."
+    ]
+  },
+  "emittedAt": "2026-06-07T08:18:17.869Z"
+}

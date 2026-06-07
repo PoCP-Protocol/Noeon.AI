@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon | 策略收敛看板</title>
+    <meta name="description" content="Noeon 超级大脑训练收敛可视化看板" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="container nav-wrap">
+        <div class="brand">Noeon</div>
+        <nav>
+          <a href="./index.html">返回首页</a>
+          <a href="#overview">总览</a>
+          <a href="#charts">曲线</a>
+          <a href="#points">明细</a>
+          <a href="#meta">元规则</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero" id="overview">
+        <p class="eyebrow">Super Brain Analytics</p>
+        <h1>策略收敛看板</h1>
+        <p class="lead">
+          基于 artifacts/noeon_convergence.json 展示 Noeon 超级大脑训练轮次中的策略变化趋势。
+        </p>
+        <div class="hero-cta">
+          <button id="reloadBtn" class="btn primary">刷新数据</button>
+          <a class="btn ghost" href="./index.html">回到协议首页</a>
+        </div>
+      </section>
+
+      <section id="overviewCards">
+        <h2>训练总览</h2>
+        <div class="cards three" id="summaryCards"></div>
+      </section>
+
+      <section id="charts">
+        <h2>收敛曲线</h2>
+        <p class="section-lead">每个图按训练轮次展示策略参数和执行效果变化。</p>
+        <div class="cards two" id="chartGrid"></div>
+      </section>
+
+      <section id="points">
+        <h2>轮次明细</h2>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table" id="pointsTable">
+              <thead>
+                <tr>
+                  <th>Round</th>
+                  <th>Quorum</th>
+                  <th>Challenge(s)</th>
+                  <th>Malicious Slash</th>
+                  <th>Plan Completion</th>
+                  <th>Learning Delta</th>
+                  <th>Halt Reason</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="meta">
+        <h2>元规则治理</h2>
+        <p class="section-lead">展示运行时 META 规则配置、加固状态与最近违规条目。</p>
+        <div class="cards four" id="metaSummaryCards"></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table" id="metaViolationTable">
+              <thead>
+                <tr>
+                  <th>Level</th>
+                  <th>Kind</th>
+                  <th>Path</th>
+                  <th>Expected</th>
+                  <th>Actual</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="audit">
+        <h2>审计回放</h2>
+        <p class="section-lead">来自 artifacts/noeon_audit.jsonl 的步骤级执行回执与失败分类。</p>
+        <div class="card">
+          <div class="audit-toolbar">
+            <label>
+              状态
+              <select id="auditStatusFilter">
+                <option value="all">全部</option>
+                <option value="done">done</option>
+                <option value="failed">failed</option>
+              </select>
+            </label>
+            <label>
+              失败类别
+              <select id="auditFailureFilter">
+                <option value="all">全部</option>
+              </select>
+            </label>
+            <label>
+              轮次
+              <select id="auditRoundFilter">
+                <option value="all">全部</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="cards three" id="auditSummaryCards"></div>
+
+          <div class="table-wrap">
+            <table class="data-table" id="auditTable">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Round</th>
+                  <th>Step</th>
+                  <th>Status</th>
+                  <th>Plugin</th>
+                  <th>Version</th>
+                  <th>Failure Category</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-wrap">
+        <p>Noeon · Convergence Dashboard</p>
+        <p id="year"></p>
+      </div>
+    </footer>
+
+    <script src="./convergence.js"></script>
+  </body>
+</html>

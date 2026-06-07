@@ -1,0 +1,502 @@
+{
+  "cycleAt": "2026-06-07T08:12:27.382Z",
+  "contract": {
+    "network": "Noeon-Hayek-Bitcion-AI",
+    "task": "market.intelligence.settlement.extreme",
+    "goal": "Max safety under adversarial market pressure"
+  },
+  "cognition": {
+    "memory": {
+      "shortSeconds": 1200,
+      "longDays": 730,
+      "mode": "episodic"
+    },
+    "learningSignal": "hybrid",
+    "executionProfile": {
+      "riskLevel": "critical",
+      "profileName": "strict",
+      "maxPlanSteps": null,
+      "verificationMode": "manual",
+      "latencyScale": 1.2
+    },
+    "planTrace": {
+      "started": true,
+      "entries": [
+        "observe_market"
+      ],
+      "orderedSteps": [
+        "observe_market",
+        "price_discovery",
+        "cross_verify",
+        "adversarial_probe",
+        "risk_check",
+        "value_settlement",
+        "policy_reflection"
+      ],
+      "visitedCount": 7,
+      "complete": true,
+      "totalNodes": 7,
+      "steps": [
+        {
+          "name": "observe_market",
+          "status": "done",
+          "latencyMs": 850,
+          "startedAtMs": 0,
+          "endedAtMs": 850,
+          "reason": "echo-sense-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "sense",
+            "stepName": "observe_market",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "h8d4ea25b",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": true,
+            "expectedSignature": "he742dbe2",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "market_snapshot"
+            }
+          }
+        },
+        {
+          "name": "price_discovery",
+          "status": "done",
+          "latencyMs": 1050,
+          "startedAtMs": 850,
+          "endedAtMs": 1900,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "price_discovery",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "hbe6f1387",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": true,
+            "expectedSignature": "he742dbe2",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "signal_aggregation"
+            }
+          }
+        },
+        {
+          "name": "cross_verify",
+          "status": "done",
+          "latencyMs": 980,
+          "startedAtMs": 1900,
+          "endedAtMs": 2880,
+          "reason": "echo-validate-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "validate",
+            "stepName": "cross_verify",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "h446b2852",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": true,
+            "expectedSignature": "he742dbe2",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "peer_verification"
+            }
+          }
+        },
+        {
+          "name": "adversarial_probe",
+          "status": "done",
+          "latencyMs": 1100,
+          "startedAtMs": 2880,
+          "endedAtMs": 3980,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "adversarial_probe",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "h66bcbd8a",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": true,
+            "expectedSignature": "he742dbe2",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "counterparty_stress_probe"
+            }
+          }
+        },
+        {
+          "name": "risk_check",
+          "status": "done",
+          "latencyMs": 950,
+          "startedAtMs": 3980,
+          "endedAtMs": 4930,
+          "reason": "policy guard passed",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "safety",
+            "stepName": "risk_check",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "hd8666b7a",
+            "errorCode": null,
+            "plugin": "policy_guard",
+            "pluginVersion": "1.1.0",
+            "signatureVerified": true,
+            "expectedSignature": "h6c80f2a8",
+            "pluginMeta": {
+              "template": "policy_guard",
+              "decision": "allow"
+            }
+          }
+        },
+        {
+          "name": "value_settlement",
+          "status": "done",
+          "latencyMs": 1200,
+          "startedAtMs": 4930,
+          "endedAtMs": 6130,
+          "reason": "http call succeeded",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "value_settlement",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "h51070d65",
+            "errorCode": null,
+            "plugin": "http_call",
+            "pluginVersion": "0.9.0",
+            "signatureVerified": true,
+            "expectedSignature": "h161bf2f4",
+            "pluginMeta": {
+              "template": "http_call",
+              "endpoint": "https://api.example.com/settle",
+              "mocked": true
+            }
+          }
+        },
+        {
+          "name": "policy_reflection",
+          "status": "done",
+          "latencyMs": 700,
+          "startedAtMs": 6130,
+          "endedAtMs": 6830,
+          "reason": "echo-generic-ok",
+          "failureCategory": null,
+          "receipt": {
+            "actionType": "generic",
+            "stepName": "policy_reflection",
+            "task": "market.intelligence.settlement.extreme",
+            "network": "Noeon-Hayek-Bitcion-AI",
+            "evidenceHash": "hf1d45569",
+            "errorCode": null,
+            "plugin": "echo",
+            "pluginVersion": "1.0.0",
+            "signatureVerified": true,
+            "expectedSignature": "he742dbe2",
+            "pluginMeta": {
+              "template": "echo",
+              "message": "policy_updated"
+            }
+          }
+        }
+      ],
+      "events": [
+        {
+          "step": "observe_market",
+          "type": "running",
+          "atMs": 0
+        },
+        {
+          "step": "observe_market",
+          "type": "done",
+          "atMs": 850
+        },
+        {
+          "step": "price_discovery",
+          "type": "running",
+          "atMs": 850
+        },
+        {
+          "step": "price_discovery",
+          "type": "done",
+          "atMs": 1900
+        },
+        {
+          "step": "cross_verify",
+          "type": "running",
+          "atMs": 1900
+        },
+        {
+          "step": "cross_verify",
+          "type": "done",
+          "atMs": 2880
+        },
+        {
+          "step": "adversarial_probe",
+          "type": "running",
+          "atMs": 2880
+        },
+        {
+          "step": "adversarial_probe",
+          "type": "done",
+          "atMs": 3980
+        },
+        {
+          "step": "risk_check",
+          "type": "running",
+          "atMs": 3980
+        },
+        {
+          "step": "risk_check",
+          "type": "done",
+          "atMs": 4930
+        },
+        {
+          "step": "value_settlement",
+          "type": "running",
+          "atMs": 4930
+        },
+        {
+          "step": "value_settlement",
+          "type": "done",
+          "atMs": 6130
+        },
+        {
+          "step": "policy_reflection",
+          "type": "running",
+          "atMs": 6130
+        },
+        {
+          "step": "policy_reflection",
+          "type": "done",
+          "atMs": 6830
+        }
+      ]
+    },
+    "nativeMind": {
+      "mode": "hybrid",
+      "autonomy": "sovereign",
+      "reflection": "adaptive",
+      "selfCheck": {
+        "metric": "uncertainty",
+        "threshold": 0.22,
+        "action": "halt"
+      },
+      "infer": {
+        "strategy": "hybrid",
+        "depth": 8,
+        "diversity": 5
+      },
+      "critic": {
+        "mode": "peer",
+        "strictness": 5,
+        "veto": true
+      },
+      "hypotheses": [
+        {
+          "id": "adversarial_price_discovery_remains_stable",
+          "confidence": 0.71,
+          "type": "predictive"
+        },
+        {
+          "id": "verifier_competition_reduces_collusion",
+          "confidence": 0.69,
+          "type": "causal"
+        }
+      ],
+      "evidences": [
+        {
+          "source": "market_data",
+          "quality": "high",
+          "weight": 0.9
+        },
+        {
+          "source": "verifier_reports",
+          "quality": "high",
+          "weight": 0.87
+        },
+        {
+          "source": "forensic_audit",
+          "quality": "high",
+          "weight": 0.84
+        }
+      ],
+      "counterexamples": [
+        {
+          "id": "flash_crash",
+          "against": "adversarial_price_discovery_remains_stable",
+          "severity": "high",
+          "weight": 0.58
+        },
+        {
+          "id": "cartel_attack",
+          "against": "verifier_competition_reduces_collusion",
+          "severity": "high",
+          "weight": 0.61
+        }
+      ],
+      "traces": [
+        {
+          "step": "observe_market",
+          "hypothesis": "adversarial_price_discovery_remains_stable",
+          "evidence": "market_data",
+          "counterexample": null,
+          "note": "critical_signal_snapshot"
+        },
+        {
+          "step": "price_discovery",
+          "hypothesis": "adversarial_price_discovery_remains_stable",
+          "evidence": "verifier_reports",
+          "counterexample": null,
+          "note": "consensus_window_evaluated"
+        },
+        {
+          "step": "cross_verify",
+          "hypothesis": "verifier_competition_reduces_collusion",
+          "evidence": "forensic_audit",
+          "counterexample": null,
+          "note": "independent_peer_check"
+        },
+        {
+          "step": "adversarial_probe",
+          "hypothesis": null,
+          "evidence": "forensic_audit",
+          "counterexample": "cartel_attack",
+          "note": "attack_surface_expansion"
+        },
+        {
+          "step": "risk_check",
+          "hypothesis": null,
+          "evidence": "market_data",
+          "counterexample": "flash_crash",
+          "note": "fail_safe_guard"
+        },
+        {
+          "step": "value_settlement",
+          "hypothesis": "verifier_competition_reduces_collusion",
+          "evidence": "verifier_reports",
+          "counterexample": null,
+          "note": "settlement_committed"
+        }
+      ],
+      "debate": {
+        "topic": "default",
+        "sides": 2,
+        "rounds": 2,
+        "protocol": "adversarial"
+      },
+      "arbitration": {
+        "mode": "threshold",
+        "accept": 0.68,
+        "revise": 0.48,
+        "fallback": "escalate"
+      },
+      "jurors": [],
+      "inferred": {
+        "confidence": 1,
+        "uncertainty": 0.2572,
+        "completionRate": 1,
+        "inferBoost": 0.17,
+        "criticPenalty": 0.1,
+        "hypothesisCoverage": 0.6667,
+        "hypothesisConfidence": 0.7,
+        "evidenceStrength": 0.87,
+        "counterexamplePressure": 0.595,
+        "traceCoverage": 0.8571,
+        "traceConsistency": 1,
+        "debateConsensus": 0.596,
+        "debateFriction": 0.404,
+        "juryScore": null,
+        "juryWeightsUsed": null,
+        "reflectionTriggered": true,
+        "decision": "halt",
+        "verdict": "revise"
+      }
+    },
+    "metaPolicy": {
+      "enabled": true,
+      "profile": null,
+      "totalRules": 4,
+      "hardened": false,
+      "violations": [
+        {
+          "kind": "require",
+          "level": "warning",
+          "path": "feedback.proofHash",
+          "expected": "value must exist",
+          "actual": "missing",
+          "message": "meta require failed at 'feedback.proofHash'"
+        }
+      ]
+    }
+  },
+  "adaptation": {
+    "feedback": {
+      "successRate": 0.74,
+      "disputeRate": 0.18,
+      "maliciousRate": 0.06,
+      "observedLatencyMs": 8600,
+      "failedSteps": [
+        "risk_review"
+      ],
+      "stepLatencyMs": {
+        "collect_signals": 800,
+        "cross_validate": 1200,
+        "synthesize_hypothesis": 1500,
+        "risk_review": 1600,
+        "finalize_report": 700
+      },
+      "actionResults": {
+        "risk_review": {
+          "status": "failed",
+          "latencyMs": 1700,
+          "errorCode": "POLICY_BLOCK_GUARD",
+          "reason": "risk guard rejected unresolved contradiction"
+        }
+      }
+    },
+    "updates": {
+      "verify": {
+        "quorum": {
+          "numerator": 3,
+          "denominator": 4
+        },
+        "challengeSeconds": 2093
+      },
+      "slash": {
+        "timeout": 20,
+        "bad_proof": 92,
+        "malicious": 100
+      }
+    },
+    "diagnostics": {
+      "currentQuorum": 0.8,
+      "updatedQuorum": 0.8,
+      "delta": 0.01104,
+      "signal": "hybrid",
+      "learningRate": 0.12
+    }
+  },
+  "execution": {
+    "failureSummary": {
+      "totalFailed": 0,
+      "byCategory": {}
+    },
+    "recommendation": "revise",
+    "controlDecision": "halt"
+  }
+}

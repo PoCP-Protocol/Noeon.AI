@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-06-07T08:12:27.383Z",
+  "title": "Noeon Super Brain Cycle Report",
+  "task": "market.intelligence.settlement.extreme",
+  "goal": "Max safety under adversarial market pressure",
+  "kpis": {
+    "planCompletionRate": 1,
+    "failedSteps": 0,
+    "totalLatencyMs": 6830,
+    "policyRounds": 7
+  },
+  "policyDelta": {
+    "currentQuorum": 0.8,
+    "updatedQuorum": 0.8,
+    "delta": 0.01104,
+    "signal": "hybrid",
+    "learningRate": 0.12
+  },
+  "metaPolicy": {
+    "enabled": true,
+    "hardened": false,
+    "violationCount": 1
+  },
+  "recommendations": [
+    "Plan execution is stable; keep current validation profile.",
+    "Consider lowering reasoning depth or increasing solver parallelism.",
+    "Meta-rule: meta require failed at 'feedback.proofHash'"
+  ]
+}

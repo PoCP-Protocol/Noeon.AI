@@ -1,0 +1,32 @@
+name: Noeon Gate
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  strict-governance-gate:
+    runs-on: ubuntu-latest
+
+    env:
+      NOEON_REQUIRE_PLUGIN_VERSION: "true"
+      NOEON_REQUIRE_PLUGIN_SIGNATURE: "true"
+      NOEON_PLUGIN_SIGNING_KEY: "noeon-hardened-key"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-fund --no-audit
+
+      - name: Run strict governance gate
+        run: npm run gate:strict
