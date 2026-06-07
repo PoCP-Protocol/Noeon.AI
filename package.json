@@ -1,7 +1,7 @@
 {
   "name": "noeon-ael",
-  "version": "0.1.0",
-  "description": "Noeon AEL parser and validator for distributed AI contracts",
+  "version": "0.3.0-cognitive",
+  "description": "Noeon AI - Brain-inspired cognitive programming language for building SuperBrains",
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
@@ -11,6 +11,8 @@
     "simulate": "node src/index.js simulate",
     "train": "node src/index.js train",
     "rollback": "node src/index.js rollback",
+    "cognitive": "node src/index.js cognitive",
+    "cognitive:test": "node tests/cognitive.test.js",
     "site": "node src/serve-site.js",
     "conformance": "node tests/conformance/run.js",
     "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",

@@ -1,0 +1,361 @@
+{
+  "mode": "hybrid",
+  "metadata": {
+    "language": "Noeon Contract Language",
+    "version": "0.3-cognitive",
+    "task": "autonomous_market_analyst",
+    "compiledAt": "2026-06-07T10:13:32.737Z"
+  },
+  "results": {
+    "drives": [
+      {
+        "description": "maximize insight quality for portfolio decisions",
+        "priority": "high",
+        "energy": 1,
+        "activatedAt": 1780827212753,
+        "status": "active"
+      },
+      {
+        "description": "minimize prediction errors over time",
+        "priority": "medium",
+        "energy": 1,
+        "activatedAt": 1780827212753,
+        "status": "active"
+      }
+    ],
+    "predictions": [
+      {
+        "id": "pred_1780827212754_dvatmz",
+        "statement": "AI sector will outperform market by 15% this quarter",
+        "confidence": 0.7
+      },
+      {
+        "id": "pred_1780827212754_ubidr8",
+        "statement": "Interest rate hike will suppress growth stocks",
+        "confidence": 0.4
+      }
+    ],
+    "thoughts": [
+      {
+        "type": "intuition",
+        "query": "Is the current market sentiment bullish?",
+        "judgment": null,
+        "confidence": 0,
+        "latency": 0,
+        "source": "none",
+        "system": 1
+      },
+      {
+        "type": "reasoning",
+        "strategy": "abductive",
+        "conclusion": {
+          "id": 1,
+          "explanation": null,
+          "supportingEvidence": [],
+          "plausibility": 0
+        },
+        "confidence": 0,
+        "chain": [
+          {
+            "step": 1,
+            "hypothesis": {
+              "id": 1,
+              "explanation": null,
+              "supportingEvidence": [],
+              "plausibility": 0
+            }
+          },
+          {
+            "step": 2,
+            "hypothesis": {
+              "id": 2,
+              "explanation": null,
+              "supportingEvidence": [],
+              "plausibility": 0
+            }
+          },
+          {
+            "step": 3,
+            "hypothesis": {
+              "id": 3,
+              "explanation": null,
+              "supportingEvidence": [],
+              "plausibility": 0
+            }
+          }
+        ],
+        "latency": 0,
+        "source": "strategy:abductive",
+        "system": 2
+      }
+    ],
+    "decisions": [
+      {
+        "action": "generate_buy_signal",
+        "threshold": 0.75,
+        "confidence": 0.06,
+        "approved": false,
+        "mode": "satisfice",
+        "reasoning": {
+          "thoughtConfidence": 0,
+          "emotionalBias": 0.06,
+          "effectiveConfidence": 0.06,
+          "threshold": 0.75
+        },
+        "fallbackAction": "escalate"
+      }
+    ],
+    "reflections": [
+      {
+        "id": "ref_1780827212756",
+        "subject": "prediction accuracy for tech sector",
+        "depth": "deep",
+        "timestamp": 1780827212756,
+        "insights": [],
+        "recommendations": [
+          {
+            "type": "learning",
+            "description": "System 1 (intuition) has low hit rate. More pattern learning needed.",
+            "priority": "medium"
+          }
+        ]
+      }
+    ],
+    "adaptations": [
+      {
+        "type": "semantic",
+        "memoryId": "mem_1780827212756_mcwf0g",
+        "strength": 0.8,
+        "itemsConsolidated": 7
+      },
+      {
+        "type": "adaptation",
+        "timestamp": 1780827212756,
+        "rule": "bullish_tech_bias",
+        "signal": "reward",
+        "delta": 0.05,
+        "oldWeight": 0.5,
+        "newWeight": 0.55
+      },
+      {
+        "type": "adaptation",
+        "timestamp": 1780827212756,
+        "rule": "ignore_macro_signals",
+        "signal": "punish",
+        "delta": -0.1,
+        "oldWeight": 0.5,
+        "newWeight": 0.4
+      }
+    ],
+    "finalState": {
+      "cognitiveState": {
+        "drives": [
+          {
+            "description": "maximize insight quality for portfolio decisions",
+            "priority": "high",
+            "energy": 1,
+            "activatedAt": 1780827212753,
+            "status": "active"
+          },
+          {
+            "description": "minimize prediction errors over time",
+            "priority": "medium",
+            "energy": 1,
+            "activatedAt": 1780827212753,
+            "status": "active"
+          }
+        ],
+        "emotions": [
+          {
+            "valence": 0.2,
+            "arousal": 0.6,
+            "tag": "cautiously_optimistic",
+            "influence": "decision",
+            "setAt": 1780827212754
+          }
+        ],
+        "focus": null,
+        "phase": "complete",
+        "energy": 1,
+        "cycle": 1
+      },
+      "workspaceSnapshot": {
+        "name": "market_intelligence",
+        "capacity": 7,
+        "used": 7,
+        "items": [
+          {
+            "key": "perception:perc_1780827212754_h6s18x",
+            "value": {
+              "type": "perception",
+              "data": "market_api",
+              "source": "text",
+              "surpriseLevel": 0
+            },
+            "weight": 1,
+            "age": 2,
+            "accessCount": 0
+          },
+          {
+            "key": "perception:perc_1780827212754_tntbyd",
+            "value": {
+              "type": "perception",
+              "data": "news_api",
+              "source": "text",
+              "surpriseLevel": 0
+            },
+            "weight": 1,
+            "age": 2,
+            "accessCount": 0
+          },
+          {
+            "key": "attention:news_feed",
+            "value": {
+              "type": "attention_filter",
+              "source": "news_feed",
+              "filter": "technology",
+              "weight": 0.9
+            },
+            "weight": 0.9,
+            "age": 2,
+            "accessCount": 0
+          },
+          {
+            "key": "AI_semiconductor_sector",
+            "value": {
+              "type": "focus_point",
+              "intensity": 0.9,
+              "duration": "sustained"
+            },
+            "weight": 0.9,
+            "age": 1,
+            "accessCount": 0
+          },
+          {
+            "key": "attention:price_stream",
+            "value": {
+              "type": "attention_filter",
+              "source": "price_stream",
+              "filter": "large_cap",
+              "weight": 0.7
+            },
+            "weight": 0.7,
+            "age": 2,
+            "accessCount": 0
+          },
+          {
+            "key": "prediction:pred_1780827212754_dvatmz",
+            "value": {
+              "type": "prediction",
+              "statement": "AI sector will outperform market by 15% this quarter",
+              "confidence": 0.7
+            },
+            "weight": 0.7,
+            "age": 2,
+            "accessCount": 0
+          },
+          {
+            "key": "prediction:pred_1780827212754_ubidr8",
+            "value": {
+              "type": "prediction",
+              "statement": "Interest rate hike will suppress growth stocks",
+              "confidence": 0.4
+            },
+            "weight": 0.4,
+            "age": 2,
+            "accessCount": 0
+          }
+        ]
+      },
+      "memoryStats": {
+        "episodic": 1,
+        "semantic": 8,
+        "procedural": 0,
+        "total": 9,
+        "recentRetrievals": [
+          {
+            "query": "Is the current market sentiment bullish?",
+            "timestamp": 1780827212755,
+            "resultsCount": 0
+          },
+          {
+            "query": "workspace",
+            "timestamp": 1780827212755,
+            "resultsCount": 0
+          },
+          {
+            "query": "prediction accuracy for tech sector",
+            "timestamp": 1780827212756,
+            "resultsCount": 0
+          }
+        ]
+      },
+      "metacognitiveAssessment": {
+        "timestamp": 1780827212756,
+        "metrics": {
+          "uncertainty": 0,
+          "confidence": 1,
+          "cognitiveLoad": 0.2857142857142857,
+          "performanceScore": 1,
+          "errorRate": 0
+        },
+        "workspace": {
+          "utilization": 0.2857142857142857,
+          "topItems": [
+            "drive:maximize insight quality for portfolio decisions",
+            "drive:minimize prediction errors over time"
+          ]
+        },
+        "memory": {
+          "episodic": 1,
+          "semantic": 8,
+          "procedural": 0,
+          "total": 9,
+          "recentRetrievals": [
+            {
+              "query": "Is the current market sentiment bullish?",
+              "timestamp": 1780827212755,
+              "resultsCount": 0
+            },
+            {
+              "query": "workspace",
+              "timestamp": 1780827212755,
+              "resultsCount": 0
+            },
+            {
+              "query": "prediction accuracy for tech sector",
+              "timestamp": 1780827212756,
+              "resultsCount": 0
+            }
+          ]
+        },
+        "reasoning": {
+          "system1": {
+            "calls": 1,
+            "hits": 0,
+            "misses": 1
+          },
+          "system2": {
+            "calls": 1,
+            "completed": 1,
+            "timeouts": 0
+          },
+          "conflicts": 0,
+          "totalThoughts": 0
+        },
+        "prediction": {
+          "modelAccuracy": 0.5,
+          "activePredictions": 2
+        },
+        "overallHealth": 1
+      },
+      "predictiveModelState": {
+        "accuracy": 0.5,
+        "activePredictions": 2,
+        "totalPredictions": 0,
+        "beliefs": {},
+        "recentHistory": []
+      }
+    }
+  }
+}

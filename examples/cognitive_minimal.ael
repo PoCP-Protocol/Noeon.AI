@@ -1,0 +1,32 @@
+# ============================================================
+# Noeon AI - Minimal Cognitive Contract
+# 
+# Demonstrates the simplest possible cognitive loop:
+# DRIVE -> PREDICT -> PERCEIVE -> THINK -> DECIDE -> REFLECT
+# ============================================================
+
+VERSION "0.3-cognitive"
+NETWORK "noeon-testnet"
+TASK "simple_decision_maker"
+
+# What drives this brain?
+DRIVE_CMD "answer user questions accurately" priority=high
+
+# Set up a small workspace
+WORKSPACE "query_processing" capacity=5 decay=time_based ttl=30
+
+# Make a prediction about what the answer might be
+PREDICT "The user wants a factual answer" confidence=0.8
+
+# Try fast intuition first (System 1)
+INTUIT "What is the most relevant answer?" using=pattern_match threshold=0.7
+
+# If uncertain, use deep reasoning (System 2)
+REASON strategy=deductive depth=3 breadth=2 context=workspace timeout_ms=5000
+
+# Make a decision
+DECIDE action=respond_to_user threshold=0.6 mode=satisfice fallback=ask_clarification valence_weight=0.1
+
+# Learn from the interaction
+REFLECT "response quality" depth=shallow trigger=uncertainty
+CONSOLIDATE from=workspace to=episodic strength=0.6 decay_rate=0.02

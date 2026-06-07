@@ -1,0 +1,65 @@
+# ============================================================
+# Noeon AI - Cognitive SuperBrain Contract
+# 
+# This contract demonstrates the full cognitive architecture:
+# Human brain-inspired thinking loop with predictive processing,
+# dual-system reasoning, and metacognitive self-monitoring.
+# ============================================================
+
+VERSION "0.3-cognitive"
+NETWORK "noeon-mainnet"
+TASK "autonomous_market_analyst"
+
+# --- Traditional Contract Fields (backward compatible) ---
+GOAL "Analyze market trends and generate actionable insights"
+BUDGET 50000 msat
+DEADLINE 2026-12-31T23:59:59Z
+
+# --- Phase 1: Motivation & Drive (Prefrontal Cortex) ---
+# What motivates this brain? What keeps it running?
+DRIVE_CMD "maximize insight quality for portfolio decisions" priority=high
+DRIVE_CMD "minimize prediction errors over time" priority=medium
+
+# --- Phase 2: Workspace & Attention (Global Workspace Theory) ---
+# Set up the conscious workspace - limited capacity, just like human WM
+WORKSPACE "market_intelligence" capacity=7 decay=time_based ttl=60
+
+# Configure attention filters - what signals to watch
+ATTEND source=news_feed filter=technology weight=0.9 decay=time_based
+ATTEND source=price_stream filter=large_cap weight=0.7 decay=access_based
+
+# --- Phase 3: Emotional Context (Amygdala + OFC) ---
+# Set the emotional tone - influences decision thresholds
+EMOTION valence=0.2 arousal=0.6 tag=cautiously_optimistic influence=decision
+
+# --- Phase 4: Predictive Processing (Free Energy Principle) ---
+# The brain predicts before it perceives
+PREDICT "AI sector will outperform market by 15% this quarter" confidence=0.7 model=trend_model
+PREDICT "Interest rate hike will suppress growth stocks" confidence=0.4 model=macro_model
+
+# --- Phase 5: Perception (Sensory Cortex) ---
+# Gather actual data to compare against predictions
+PERCEIVE source=market_api modality=text filter=earnings_reports timeout_ms=5000
+PERCEIVE source=news_api modality=text filter=fed_announcements timeout_ms=3000
+
+# --- Phase 6: Dual-System Thinking (Kahneman) ---
+# System 1: Quick gut feeling
+INTUIT "Is the current market sentiment bullish?" using=sentiment_heuristic threshold=0.6
+
+# System 2: Deep logical analysis (only if System 1 is uncertain)
+REASON strategy=abductive depth=5 breadth=3 context=workspace timeout_ms=15000
+
+# --- Phase 7: Focus & Monitoring (ACC) ---
+FOCUS target=AI_semiconductor_sector intensity=0.9 duration=sustained
+MONITOR metric=uncertainty threshold=0.5 action=alert window=10 continuous=true
+
+# --- Phase 8: Decision (Orbitofrontal Cortex) ---
+DECIDE action=generate_buy_signal threshold=0.75 mode=satisfice fallback=escalate valence_weight=0.3
+
+# --- Phase 9: Reflection & Learning (Metacognition) ---
+REFLECT "prediction accuracy for tech sector" depth=deep trigger=periodic
+CONSOLIDATE from=workspace to=semantic strength=0.8 decay_rate=0.01
+
+# --- Phase 10: Neuroplasticity (Adaptation) ---
+ADAPT rule=bullish_tech_bias delta=0.05 signal=reward
+ADAPT rule=ignore_macro_signals delta=-0.1 signal=punish

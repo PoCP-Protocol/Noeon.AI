@@ -787,18 +787,32 @@ function validateAel(ast) {
   const errors = [];
   const warnings = [];
 
-  const required = [
-    ["network", ast.network],
-    ["task", ast.task],
-    ["version", ast.version],
-    ["budget", ast.budget],
-    ["deadline", ast.deadline],
-    ["verify", ast.verify],
-    ["collateral.solver", ast.collateral?.solver],
-    ["collateral.verifier", ast.collateral?.verifier],
-    ["onSuccess", ast.onSuccess],
-    ["onSlash", ast.onSlash]
-  ];
+  // Cognitive-mode contracts have relaxed protocol requirements
+  const isCognitiveMode = ast.cognitive && (
+    ast.cognitive.drives.length > 0 ||
+    ast.cognitive.predictions.length > 0 ||
+    ast.cognitive.intuitions.length > 0 ||
+    ast.cognitive.reasonings.length > 0
+  );
+
+  const required = isCognitiveMode
+    ? [
+        ["network", ast.network],
+        ["task", ast.task],
+        ["version", ast.version]
+      ]
+    : [
+        ["network", ast.network],
+        ["task", ast.task],
+        ["version", ast.version],
+        ["budget", ast.budget],
+        ["deadline", ast.deadline],
+        ["verify", ast.verify],
+        ["collateral.solver", ast.collateral?.solver],
+        ["collateral.verifier", ast.collateral?.verifier],
+        ["onSuccess", ast.onSuccess],
+        ["onSlash", ast.onSlash]
+      ];
 
   for (const [name, value] of required) {
     if (value === null || value === undefined) {
@@ -844,7 +858,7 @@ function validateAel(ast) {
     errors.push("budget must be > 0");
   }
 
-  if (ast.collateral) {
+  if (ast.collateral && !isCognitiveMode) {
     if (ast.collateral.solver <= 0) {
       errors.push("solver collateral must be > 0");
     }

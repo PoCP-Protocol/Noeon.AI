@@ -9,6 +9,7 @@ const { runTraining } = require("./runtime/trainer");
 const { loadState, saveState, rollbackState } = require("./runtime/state-store");
 const { generateReport } = require("./runtime/report");
 const { appendAuditEntries } = require("./runtime/audit-logger");
+const { compileCognitive, executeCognitivePlan } = require("./cognitive-compiler");
 
 function printUsage() {
   console.log("Usage:");
@@ -22,6 +23,7 @@ function printUsage() {
     "  npm run train -- <path-to-contract-file> <feedback-batch-json> [output-json] [state-json] [convergence-json] [audit-jsonl]"
   );
   console.log("  npm run rollback -- <state-json> [steps]");
+  console.log("  npm run cognitive -- <path-to-contract-file> [output-json]");
 }
 
 function readJsonFileIfExists(filePath) {
@@ -55,6 +57,7 @@ function main() {
     argv[0] === "explain" ||
     argv[0] === "simulate" ||
     argv[0] === "train" ||
+    argv[0] === "cognitive" ||
     argv[0] === "rollback";
   const command = explicitCommand ? argv[0] : "parse";
   const inputPath = explicitCommand ? argv[1] : argv[0];
@@ -251,6 +254,42 @@ function main() {
 
       console.log("\n=== Validation ===");
       console.log(JSON.stringify(validation, null, 2));
+    }
+
+    if (command === "cognitive") {
+      const compiled = compileCognitive(ast);
+      if (compiled.mode === "legacy") {
+        console.log("No cognitive primitives found. Use legacy commands.");
+        return;
+      }
+
+      console.log("=== Cognitive Execution ===");
+      executeCognitivePlan(compiled).then((result) => {
+        const output = {
+          mode: result.mode,
+          metadata: result.metadata,
+          results: {
+            drives: result.results.drives,
+            predictions: result.results.predictions,
+            thoughts: result.results.thoughts,
+            decisions: result.results.decisions,
+            reflections: result.results.reflections,
+            adaptations: result.results.adaptations,
+            finalState: result.results.finalState
+          }
+        };
+
+        if (commandArg2) {
+          const resolvedOut = path.resolve(process.cwd(), commandArg2);
+          fs.writeFileSync(resolvedOut, JSON.stringify(output, null, 2), "utf8");
+          console.log(`Cognitive execution artifact written to: ${resolvedOut}`);
+        } else {
+          console.log(JSON.stringify(output, null, 2));
+        }
+      }).catch((err) => {
+        console.error(`Cognitive execution failed: ${err.message}`);
+        process.exitCode = 2;
+      });
     }
 
     if (!validation.valid) {

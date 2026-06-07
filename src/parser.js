@@ -1,3 +1,21 @@
+const {
+  parseDrive: parseCogDrive,
+  parseAttend,
+  parseWorkspace,
+  parsePredict,
+  parsePerceive,
+  parseIntuit,
+  parseReason,
+  parseReflect,
+  parseConsolidate,
+  parseDecide,
+  parseEmotion,
+  parseMonitor: parseCogMonitor,
+  parseFocus,
+  parseAdapt
+} = require("./cognitive-parser");
+
+
 function parseQuoted(value, lineNo) {
   const m = value.match(/^"([\s\S]*)"$/);
   if (!m) {
@@ -809,6 +827,22 @@ function parseAel(source) {
       assertions: [],
       calls: [],
       returnExpr: null
+    },
+    cognitive: {
+      drives: [],
+      attentions: [],
+      workspace: null,
+      predictions: [],
+      perceptions: [],
+      intuitions: [],
+      reasonings: [],
+      reflections: [],
+      consolidations: [],
+      decisions: [],
+      emotions: [],
+      monitors: [],
+      focuses: [],
+      adaptations: []
     }
   };
 
@@ -842,7 +876,18 @@ function parseAel(source) {
     ROUTE: "ACTION",
     REWARD: "ON_SUCCESS",
     PENALTY: "ON_SLASH",
-    SYNAPSE: "FLOW"
+    SYNAPSE: "FLOW",
+    IMPULSE: "DRIVE_CMD",
+    SENSE: "PERCEIVE",
+    FOCUS_ON: "FOCUS",
+    FEEL: "EMOTION",
+    REMEMBER: "CONSOLIDATE",
+    CHOOSE: "DECIDE",
+    ADAPT_RULE: "ADAPT",
+    FORESEE: "PREDICT",
+    GUT: "INTUIT",
+    THINK_DEEP: "REASON",
+    INTROSPECT: "REFLECT"
   };
 
   for (let i = 0; i < lines.length; i += 1) {
@@ -1014,6 +1059,48 @@ function parseAel(source) {
         break;
       case "CALL":
         ast.compute.calls.push(parseComputeCall(value, lineNo));
+        break;
+      case "DRIVE_CMD":
+        ast.cognitive.drives.push(parseCogDrive(value, lineNo));
+        break;
+      case "ATTEND":
+        ast.cognitive.attentions.push(parseAttend(value, lineNo));
+        break;
+      case "WORKSPACE":
+        ast.cognitive.workspace = parseWorkspace(value, lineNo);
+        break;
+      case "PREDICT":
+        ast.cognitive.predictions.push(parsePredict(value, lineNo));
+        break;
+      case "PERCEIVE":
+        ast.cognitive.perceptions.push(parsePerceive(value, lineNo));
+        break;
+      case "INTUIT":
+        ast.cognitive.intuitions.push(parseIntuit(value, lineNo));
+        break;
+      case "REASON":
+        ast.cognitive.reasonings.push(parseReason(value, lineNo));
+        break;
+      case "REFLECT":
+        ast.cognitive.reflections.push(parseReflect(value, lineNo));
+        break;
+      case "CONSOLIDATE":
+        ast.cognitive.consolidations.push(parseConsolidate(value, lineNo));
+        break;
+      case "DECIDE":
+        ast.cognitive.decisions.push(parseDecide(value, lineNo));
+        break;
+      case "EMOTION":
+        ast.cognitive.emotions.push(parseEmotion(value, lineNo));
+        break;
+      case "MONITOR":
+        ast.cognitive.monitors.push(parseCogMonitor(value, lineNo));
+        break;
+      case "FOCUS":
+        ast.cognitive.focuses.push(parseFocus(value, lineNo));
+        break;
+      case "ADAPT":
+        ast.cognitive.adaptations.push(parseAdapt(value, lineNo));
         break;
       default:
         throw new Error(`Line ${lineNo}: unknown keyword '${keyword}'`);
