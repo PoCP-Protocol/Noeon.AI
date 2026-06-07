@@ -1,0 +1,59 @@
+{
+  "name": "noeon-language",
+  "displayName": "Noeon AI — Cognitive Programming Language",
+  "description": "Syntax highlighting, code snippets, and hover documentation for the Noeon cognitive programming language (.ael files)",
+  "version": "0.7.0",
+  "publisher": "PoCP-Protocol",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Themes"
+  ],
+  "keywords": [
+    "noeon",
+    "ael",
+    "cognitive",
+    "ai",
+    "brain",
+    "programming-language"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "noeon",
+        "aliases": ["Noeon", "AEL", "noeon"],
+        "extensions": [".ael", ".noeon"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "noeon",
+        "scopeName": "source.noeon",
+        "path": "./syntaxes/noeon.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "noeon",
+        "path": "./snippets/noeon.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "Noeon Cognitive Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noeon-dark.json"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PoCP-Protocol/Noeon.AI"
+  },
+  "license": "MIT"
+}

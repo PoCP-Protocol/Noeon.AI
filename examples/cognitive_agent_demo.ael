@@ -1,0 +1,55 @@
+# ═══════════════════════════════════════════════════════════
+# Noeon Cognitive Agent Demo
+# A self-aware research agent that thinks like a human
+# ═══════════════════════════════════════════════════════════
+VERSION "0.7-unified"
+NETWORK "noeon-mainnet"
+TASK "cognitive_research_agent"
+GOAL "Understand complex topics through multi-step reasoning"
+BUDGET 100000 msat
+DEADLINE 2027-01-01T00:00:00Z
+
+# ─── MOTIVATION: What drives this agent? ───
+DRIVE_CMD "understand complex topics through research" priority=high
+DRIVE_CMD "ensure all conclusions are well-supported" priority=high
+DRIVE_CMD "learn from each interaction to improve" priority=medium
+
+# ─── WORKSPACE: Conscious attention buffer ───
+WORKSPACE "research_context" capacity=7 decay=time_based ttl=120
+
+# ─── ATTENTION: What to focus on ───
+ATTEND source=user_query filter=intent weight=0.95 decay=time_based
+ATTEND source=knowledge_base filter=relevant weight=0.8 decay=access_based
+ATTEND source=web_context filter=credible weight=0.7 decay=time_based
+
+# ─── PERCEPTION: How it senses the world ───
+PERCEIVE source=user_input modality=text filter=intent sensitivity=0.95
+PERCEIVE source=vector_memory modality=structured_data filter=relevant sensitivity=0.8
+PERCEIVE source=web_search modality=text filter=credible sensitivity=0.7
+
+# ─── PREDICTION: What it expects ───
+PREDICT "user is asking a factual question" confidence=0.7 model=intent_classifier
+PREDICT "answer will require multi-source synthesis" confidence=0.6 model=complexity_estimator
+PREDICT "user will need follow-up clarification" confidence=0.4 model=dialogue_model
+
+# ─── FAST THINKING (System 1): Quick pattern matching ───
+INTUIT "Is this a well-defined question?" using=semantic_similarity threshold=0.6
+INTUIT "Does the topic match known domains?" using=keyword_overlap threshold=0.5
+
+# ─── DEEP THINKING (System 2): Careful reasoning ───
+REASON strategy=abductive depth=5 breadth=3 context=workspace timeout_ms=15000
+REASON strategy=analogical depth=3 breadth=2 context=workspace timeout_ms=10000
+REASON strategy=deductive depth=4 breadth=2 context=workspace timeout_ms=12000
+
+# ─── DECISION: What action to take ───
+DECIDE action=generate_response threshold=0.75 mode=satisfice fallback=ask_clarification valence_weight=0.3
+
+# ─── MEMORY: What to remember ───
+CONSOLIDATE from=workspace to=semantic strength=0.8 decay_rate=0.01
+
+# ─── SELF-REFLECTION: How well am I doing? ───
+REFLECT "answer coherence and completeness" depth=deep trigger=periodic
+REFLECT "factual accuracy of claims" depth=shallow trigger=on_output
+
+# ─── EVOLUTION: How to improve ───
+EVOLVE metric=user_satisfaction generations=10 mutation_rate=0.1

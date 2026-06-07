@@ -1,0 +1,36 @@
+{
+  "comments": {
+    "lineComment": "#",
+    "blockComment": ["/*", "*/"]
+  },
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+  ],
+  "autoClosingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"", "notIn": ["string"] },
+    { "open": "'", "close": "'", "notIn": ["string"] }
+  ],
+  "surroundingPairs": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["\"", "\""],
+    ["'", "'"]
+  ],
+  "folding": {
+    "markers": {
+      "start": "^\\s*(TASK|BUDGET|COMPUTE|VERIFY|REWARD|DRIVE|PERCEIVE|PREDICT|INTUIT|REASON|REFLECT|DECIDE|STREAM|DEFINE|KNOW)\\b",
+      "end": "^\\s*$"
+    }
+  },
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*(TASK|BUDGET|COMPUTE|VERIFY|REWARD|DRIVE|PERCEIVE|PREDICT|INTUIT|REASON|REFLECT|DECIDE|CONSOLIDATE|STREAM|DEFINE|KNOW|CAUSE|DEBATE|CONSULT|SPAWN)\\b",
+    "decreaseIndentPattern": "^\\s*$"
+  },
+  "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)"
+}

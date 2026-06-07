@@ -1,0 +1,206 @@
+{
+  "Cognitive Contract": {
+    "prefix": "contract",
+    "body": [
+      "# ${1:Contract Name}",
+      "",
+      "TASK \"${2:task_name}\"",
+      "  DESCRIPTION \"${3:What this contract does}\"",
+      "",
+      "BUDGET",
+      "  MAX ${4:10000} tokens",
+      "",
+      "DRIVE ${5:main_goal}",
+      "  GOAL \"${6:What the brain wants to achieve}\"",
+      "  IMPORTANCE ${7:0.9}",
+      "",
+      "PERCEIVE ${8:input}",
+      "  MODALITY ${9:structured_data}",
+      "  SOURCE \"${10:data_source}\"",
+      "",
+      "REASON ${11:analysis}",
+      "  STRATEGY ${12:abductive}",
+      "  DEPTH ${13:3}",
+      "",
+      "DECIDE ${14:action}",
+      "  OPTIONS [\"${15:option_a}\", \"${16:option_b}\"]",
+      "  THRESHOLD ${17:0.7}",
+      "",
+      "REFLECT ${18:quality}",
+      "  CRITERIA ${19:coherence}",
+      "",
+      "VERIFY ${20:output}",
+      "  METHOD ${21:consistency_check}",
+      "  THRESHOLD ${22:0.85}"
+    ],
+    "description": "Full cognitive contract template"
+  },
+  "Drive": {
+    "prefix": "drive",
+    "body": [
+      "DRIVE ${1:goal_name}",
+      "  GOAL \"${2:description}\"",
+      "  IMPORTANCE ${3:0.9}"
+    ],
+    "description": "Define a cognitive drive (motivation)"
+  },
+  "Perceive": {
+    "prefix": "perceive",
+    "body": [
+      "PERCEIVE ${1:source_name}",
+      "  MODALITY ${2:structured_data}",
+      "  SOURCE \"${3:data_source}\"",
+      "  SENSITIVITY ${4:0.8}"
+    ],
+    "description": "Open a perceptual channel"
+  },
+  "Predict": {
+    "prefix": "predict",
+    "body": [
+      "PREDICT ${1:prediction_name}",
+      "  TARGET \"${2:what_to_predict}\"",
+      "  HORIZON ${3:24h}",
+      "  MODEL ${4:bayesian}",
+      "  CONFIDENCE ${5:0.7}"
+    ],
+    "description": "Generate a prediction"
+  },
+  "Intuit": {
+    "prefix": "intuit",
+    "body": [
+      "INTUIT ${1:pattern_name}",
+      "  HEURISTIC \"${2:pattern_description}\"",
+      "  CONFIDENCE ${3:0.5}"
+    ],
+    "description": "System 1 fast pattern matching"
+  },
+  "Reason": {
+    "prefix": "reason",
+    "body": [
+      "REASON ${1:analysis_name}",
+      "  STRATEGY ${2|deductive,inductive,abductive,analogical,bayesian|}",
+      "  PREMISES [\"${3:premise_1}\", \"${4:premise_2}\"]",
+      "  DEPTH ${5:3}"
+    ],
+    "description": "System 2 deep reasoning"
+  },
+  "Decide": {
+    "prefix": "decide",
+    "body": [
+      "DECIDE ${1:decision_name}",
+      "  OPTIONS [\"${2:option_a}\", \"${3:option_b}\", \"${4:option_c}\"]",
+      "  STRATEGY ${5|satisfice,maximize,minimax|}",
+      "  THRESHOLD ${6:0.7}"
+    ],
+    "description": "Make a decision"
+  },
+  "Reflect": {
+    "prefix": "reflect",
+    "body": [
+      "REFLECT ${1:reflection_name}",
+      "  TARGET ${2:previous_step}",
+      "  CRITERIA ${3|coherence,accuracy,completeness,efficiency|}"
+    ],
+    "description": "Self-evaluate reasoning quality"
+  },
+  "Consolidate": {
+    "prefix": "consolidate",
+    "body": [
+      "CONSOLIDATE ${1:memory_name}",
+      "  TARGET \"${2:what_to_remember}\"",
+      "  STRENGTH ${3:0.8}"
+    ],
+    "description": "Transfer to long-term memory"
+  },
+  "Know": {
+    "prefix": "know",
+    "body": [
+      "KNOW \"${1:entity}\" type=\"${2:category}\"",
+      "RELATE \"${1:entity}\" -> \"${3:related}\" rel=\"${4:relationship}\"",
+      "CAUSE \"${5:cause}\" -> \"${6:effect}\" confidence=${7:0.7}"
+    ],
+    "description": "Knowledge graph operations"
+  },
+  "Stream": {
+    "prefix": "stream",
+    "body": [
+      "STREAM mode=\"continuous\" cycle_ms=${1:200}",
+      "  ON surprise > ${2:0.7} DO REASON strategy=\"deep\"",
+      "  ON confidence < ${3:0.4} DO SEEK \"clarification\"",
+      "  ON idle > ${4:10} DO CONSOLIDATE memories"
+    ],
+    "description": "Continuous consciousness stream"
+  },
+  "Think Until": {
+    "prefix": "thinkuntil",
+    "body": [
+      "THINK_UNTIL confidence >= ${1:0.8} max_cycles=${2:10}",
+      "  PERCEIVE ${3:new_evidence}",
+      "  REASON strategy=${4:bayesian}",
+      "  REFLECT criteria=coherence"
+    ],
+    "description": "Loop until confidence threshold"
+  },
+  "Debate": {
+    "prefix": "debate",
+    "body": [
+      "DEBATE ${1:topic}",
+      "  THESIS \"${2:position_for}\"",
+      "  ANTITHESIS \"${3:position_against}\"",
+      "  MAX_ROUNDS ${4:5}"
+    ],
+    "description": "Internal dialectic reasoning"
+  },
+  "Social Debate": {
+    "prefix": "debatemulti",
+    "body": [
+      "DEBATE_MULTI ${1:topic}",
+      "  AGENTS [\"${2:agent_1}\", \"${3:agent_2}\", \"${4:agent_3}\"]",
+      "  STRATEGY ${5|consensus,majority,expert_weighted|}",
+      "  MAX_ROUNDS ${6:5}"
+    ],
+    "description": "Multi-agent structured debate"
+  },
+  "Define New Keyword": {
+    "prefix": "define",
+    "body": [
+      "DEFINE \"${1:NEW_KEYWORD}\" as",
+      "  ${2:PERCEIVE channel=\"${3:data}\" sensitivity=0.9}",
+      "  ${4:INTUIT \"${5:pattern}\" using=${6:statistical}}",
+      "  ${7:DECIDE threshold=${8:0.7}}"
+    ],
+    "description": "Create a new keyword at runtime"
+  },
+  "Evolve": {
+    "prefix": "evolve",
+    "body": [
+      "EVOLVE ${1:target}",
+      "  STRATEGY ${2|mutate,crossover,synthesize|}",
+      "  FITNESS \"${3:fitness_criteria}\"",
+      "  GENERATIONS ${4:10}"
+    ],
+    "description": "Trigger evolutionary optimization"
+  },
+  "Minimal Cognitive Loop": {
+    "prefix": "cogloop",
+    "body": [
+      "# Minimal Cognitive Loop",
+      "",
+      "PERCEIVE ${1:input}",
+      "  MODALITY ${2:structured_data}",
+      "",
+      "INTUIT ${3:quick_assessment}",
+      "  CONFIDENCE ${4:0.5}",
+      "",
+      "REASON ${5:deep_analysis}",
+      "  STRATEGY ${6:abductive}",
+      "",
+      "DECIDE ${7:action}",
+      "  THRESHOLD ${8:0.7}",
+      "",
+      "REFLECT ${9:quality}",
+      "  CRITERIA coherence"
+    ],
+    "description": "Minimal perceive-think-decide-reflect loop"
+  }
+}

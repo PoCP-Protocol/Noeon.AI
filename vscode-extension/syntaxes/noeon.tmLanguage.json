@@ -1,0 +1,179 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Noeon",
+  "scopeName": "source.noeon",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords-contract" },
+    { "include": "#keywords-perception" },
+    { "include": "#keywords-reasoning" },
+    { "include": "#keywords-memory" },
+    { "include": "#keywords-metacognition" },
+    { "include": "#keywords-flow" },
+    { "include": "#keywords-social" },
+    { "include": "#keywords-evolution" },
+    { "include": "#parameters" },
+    { "include": "#operators" },
+    { "include": "#constants" },
+    { "include": "#types" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.hash.noeon",
+          "match": "#.*$"
+        },
+        {
+          "name": "comment.block.noeon",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.noeon",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.noeon",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.noeon",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.noeon",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.noeon",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.noeon",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords-contract": {
+      "patterns": [
+        {
+          "name": "keyword.control.contract.noeon",
+          "match": "\\b(TASK|BUDGET|COLLATERAL|VERIFY|REWARD|COMPUTE|FLOW|PLUGIN|META_RULE|SIGNATURE|DESCRIPTION|ACCEPTANCE|DEADLINE|MAX|MIN|CURRENCY|AMOUNT|METHOD|THRESHOLD|MODEL|STEP|RETURN|FROM|TO|EVENT)\\b"
+        }
+      ]
+    },
+    "keywords-perception": {
+      "patterns": [
+        {
+          "name": "keyword.control.perception.noeon",
+          "match": "\\b(PERCEIVE|ATTEND|SENSE|LOOK|LISTEN|READ|PERCEIVE_ALL|WORKSPACE|FOCUS|MODALITY|SOURCE|SENSITIVITY|CHANNEL)\\b"
+        }
+      ]
+    },
+    "keywords-reasoning": {
+      "patterns": [
+        {
+          "name": "keyword.control.reasoning.noeon",
+          "match": "\\b(INTUIT|REASON|PREDICT|DECIDE|DEBATE|HYPOTHESIS|DRIVE|GOAL|IMPORTANCE|STRATEGY|PREMISES|DEPTH|HEURISTIC|CONFIDENCE|OPTIONS|HORIZON|TARGET)\\b"
+        }
+      ]
+    },
+    "keywords-memory": {
+      "patterns": [
+        {
+          "name": "keyword.control.memory.noeon",
+          "match": "\\b(KNOW|RELATE|CAUSE|RECALL|CONSOLIDATE|ACTIVATE|EMBED|BELIEVE|REMEMBER|FORGET|ASSOCIATE|STRENGTH|DECAY)\\b"
+        }
+      ]
+    },
+    "keywords-metacognition": {
+      "patterns": [
+        {
+          "name": "keyword.control.metacognition.noeon",
+          "match": "\\b(REFLECT|MONITOR|ADAPT|CALIBRATE|CRITERIA|EMOTION|VALENCE|AROUSAL|SURPRISE)\\b"
+        }
+      ]
+    },
+    "keywords-flow": {
+      "patterns": [
+        {
+          "name": "keyword.control.flow.noeon",
+          "match": "\\b(STREAM|THINK_UNTIL|WHEN_CONFIDENT|ATTEND_PARALLEL|ON_SURPRISE|ON_CONFUSION|ON_CONFLICT|CYCLE|UNTIL|PARALLEL|SEQUENTIAL)\\b"
+        }
+      ]
+    },
+    "keywords-social": {
+      "patterns": [
+        {
+          "name": "keyword.control.social.noeon",
+          "match": "\\b(CONSULT|DEBATE_MULTI|SPAWN|DELEGATE|VOTE|CONSENSUS|AGENT|ROLE|EXPERTISE)\\b"
+        }
+      ]
+    },
+    "keywords-evolution": {
+      "patterns": [
+        {
+          "name": "keyword.control.evolution.noeon",
+          "match": "\\b(EVOLVE|DEFINE|MUTATE|SYNTHESIZE|CROSSOVER|SELECT|FITNESS|GENERATION|POPULATION)\\b"
+        }
+      ]
+    },
+    "parameters": {
+      "patterns": [
+        {
+          "name": "variable.parameter.noeon",
+          "match": "\\b[a-z_][a-z0-9_]*(?=\\s*=)"
+        },
+        {
+          "name": "variable.other.noeon",
+          "match": "\\b[a-z_][a-z0-9_]*\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.noeon",
+          "match": "(->|=>|>=|<=|!=|==|\\+|-|\\*|/|=|>|<)"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.noeon",
+          "match": "\\b(true|false|null|none|infinity|unknown)\\b"
+        },
+        {
+          "name": "constant.language.strategy.noeon",
+          "match": "\\b(deductive|inductive|abductive|analogical|bayesian|heuristic|satisfice|maximize|minimax|fast|slow|deep|shallow)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.noeon",
+          "match": "\\b(Belief|Uncertain|Temporal|Emotion|Intention|Percept|MemoryTrace)\\b"
+        }
+      ]
+    }
+  }
+}

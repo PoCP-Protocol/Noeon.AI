@@ -1,0 +1,154 @@
+{
+  "name": "Noeon Cognitive Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#0d1117",
+    "editor.foreground": "#c9d1d9",
+    "editor.lineHighlightBackground": "#161b22",
+    "editor.selectionBackground": "#264f78",
+    "editorCursor.foreground": "#58a6ff",
+    "editorLineNumber.foreground": "#484f58",
+    "editorLineNumber.activeForeground": "#c9d1d9",
+    "sideBar.background": "#010409",
+    "sideBar.foreground": "#c9d1d9",
+    "activityBar.background": "#0d1117",
+    "titleBar.activeBackground": "#0d1117",
+    "statusBar.background": "#1a0a2e",
+    "statusBar.foreground": "#d2a8ff",
+    "terminal.background": "#0d1117",
+    "terminal.foreground": "#c9d1d9"
+  },
+  "tokenColors": [
+    {
+      "name": "Comments",
+      "scope": ["comment"],
+      "settings": {
+        "foreground": "#6e7681",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Strings",
+      "scope": ["string"],
+      "settings": {
+        "foreground": "#a5d6ff"
+      }
+    },
+    {
+      "name": "Numbers",
+      "scope": ["constant.numeric"],
+      "settings": {
+        "foreground": "#79c0ff"
+      }
+    },
+    {
+      "name": "Contract Keywords (Task/Budget/Verify) — Blue: Structure",
+      "scope": ["keyword.control.contract.noeon"],
+      "settings": {
+        "foreground": "#58a6ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Perception Keywords — Green: Sensing the world",
+      "scope": ["keyword.control.perception.noeon"],
+      "settings": {
+        "foreground": "#3fb950",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Reasoning Keywords — Purple: Deep thought",
+      "scope": ["keyword.control.reasoning.noeon"],
+      "settings": {
+        "foreground": "#d2a8ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Memory Keywords — Gold: Knowledge stored",
+      "scope": ["keyword.control.memory.noeon"],
+      "settings": {
+        "foreground": "#e3b341",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Metacognition Keywords — Pink: Self-awareness",
+      "scope": ["keyword.control.metacognition.noeon"],
+      "settings": {
+        "foreground": "#f778ba",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Flow Control Keywords — Cyan: Brain-native flow",
+      "scope": ["keyword.control.flow.noeon"],
+      "settings": {
+        "foreground": "#56d4dd",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Social Keywords — Orange: Collaboration",
+      "scope": ["keyword.control.social.noeon"],
+      "settings": {
+        "foreground": "#f0883e",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Evolution Keywords — Red: Mutation & Growth",
+      "scope": ["keyword.control.evolution.noeon"],
+      "settings": {
+        "foreground": "#ff7b72",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Parameters",
+      "scope": ["variable.parameter.noeon"],
+      "settings": {
+        "foreground": "#ffa657"
+      }
+    },
+    {
+      "name": "Variables",
+      "scope": ["variable.other.noeon"],
+      "settings": {
+        "foreground": "#c9d1d9"
+      }
+    },
+    {
+      "name": "Operators",
+      "scope": ["keyword.operator.noeon"],
+      "settings": {
+        "foreground": "#ff7b72"
+      }
+    },
+    {
+      "name": "Constants",
+      "scope": ["constant.language.noeon"],
+      "settings": {
+        "foreground": "#79c0ff",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Strategy Constants",
+      "scope": ["constant.language.strategy.noeon"],
+      "settings": {
+        "foreground": "#d2a8ff",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Cognitive Types",
+      "scope": ["support.type.noeon"],
+      "settings": {
+        "foreground": "#7ee787",
+        "fontStyle": "bold italic"
+      }
+    }
+  ]
+}
