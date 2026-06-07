@@ -1,0 +1,13 @@
+{
+  "name": "@noeon/language-server",
+  "version": "0.9.0",
+  "description": "Minimal LSP server for Noeon .ael files",
+  "main": "server.js",
+  "bin": {
+    "noeon-language-server": "server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

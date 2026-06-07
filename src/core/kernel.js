@@ -147,6 +147,17 @@ class CognitiveKernel {
       errors_recovered: 0,
       avg_cycle_time_ms: 0
     };
+
+    // LLM bridge (optional — live when API key configured)
+    this.llm = null;
+    if (options.enable_llm !== false && process.env.NOEON_LLM_MODE !== 'off') {
+      try {
+        const { LLMBridge } = require('../runtime/cognitive/llm-bridge');
+        this.llm = new LLMBridge(options.llm || {});
+      } catch {
+        this.llm = null;
+      }
+    }
   }
 
   // --- Subsystem Injection ---
@@ -362,33 +373,74 @@ class CognitiveKernel {
     // PROCESS handler
     this.handlers.set(IRNodeType.PROCESS, async (node, ctx, kernel) => {
       const mode = node.params.mode || ProcessMode.ANALYTICAL;
-      
+      const query = node.params.pattern || node.params.strategy || node.params.name || 'general cognition';
+      const llmContext = {
+        strategy: node.params.strategy,
+        workspace: Object.fromEntries(ctx.workspace),
+        memories: [...ctx.beliefs.values()].slice(0, 5)
+      };
+
       if (mode === ProcessMode.INTUITIVE) {
-        // System 1: Fast pattern matching
-        const result = {
-          mode: 'intuitive',
-          pattern: node.params.pattern,
-          confidence: node.params.confidence_floor || 0.5,
-          result: `intuition:${node.params.pattern || 'general'}`
-        };
+        let result;
+        if (kernel.llm) {
+          const llmOut = await kernel.llm.intuit(query, llmContext);
+          result = {
+            mode: 'intuitive',
+            pattern: node.params.pattern,
+            confidence: llmOut.confidence || node.params.confidence_floor || 0.5,
+            result: llmOut.judgment,
+            llm: llmOut.model === 'noeon-mock' ? 'mock' : 'live'
+          };
+        } else {
+          result = {
+            mode: 'intuitive',
+            pattern: node.params.pattern,
+            confidence: node.params.confidence_floor || 0.5,
+            result: `intuition:${node.params.pattern || 'general'}`
+          };
+        }
         ctx.broadcast('intuition', result, 0.6);
         return result;
       } else if (mode === ProcessMode.ANALYTICAL) {
-        // System 2: Deep reasoning
-        const result = {
-          mode: 'analytical',
-          strategy: node.params.strategy || 'deductive',
-          model: node.params.model || null,
-          result: `reasoning:${node.params.strategy || 'general'}`
-        };
+        let result;
+        if (kernel.llm) {
+          const llmOut = await kernel.llm.reason(query, llmContext);
+          result = {
+            mode: 'analytical',
+            strategy: node.params.strategy || 'deductive',
+            model: llmOut.model,
+            confidence: llmOut.confidence,
+            result: llmOut.conclusion,
+            llm: llmOut.model === 'noeon-mock' ? 'mock' : 'live'
+          };
+          ctx.confidence = Math.max(ctx.confidence * 0.5, llmOut.confidence || ctx.confidence);
+        } else {
+          result = {
+            mode: 'analytical',
+            strategy: node.params.strategy || 'deductive',
+            model: node.params.model || null,
+            result: `reasoning:${node.params.strategy || 'general'}`
+          };
+        }
         ctx.broadcast('reasoning_result', result, 0.8);
         return result;
       } else if (mode === ProcessMode.DIALECTICAL) {
+        let synthesis;
+        if (kernel.llm && node.params.thesis) {
+          const debate = await kernel.llm.debate(
+            `${node.params.thesis} vs ${node.params.antithesis}`,
+            2,
+            1
+          );
+          synthesis = debate.synthesis;
+        } else {
+          synthesis = `synthesis of ${node.params.thesis} and ${node.params.antithesis}`;
+        }
         const result = {
           mode: 'dialectical',
           thesis: node.params.thesis,
           antithesis: node.params.antithesis,
-          synthesis: `synthesis of ${node.params.thesis} and ${node.params.antithesis}`
+          synthesis
         };
         ctx.broadcast('dialectic_result', result, 0.7);
         return result;
@@ -397,26 +449,40 @@ class CognitiveKernel {
     });
 
     // VALIDATE handler
-    this.handlers.set(IRNodeType.VALIDATE, async (node, ctx) => {
+    this.handlers.set(IRNodeType.VALIDATE, async (node, ctx, kernel) => {
       const type = node.params.type || 'assertion';
       let passed = true;
       let details = {};
 
       if (type === 'reflection') {
-        // Self-check: are beliefs coherent?
         const beliefCount = ctx.beliefs.size;
         const avgConfidence = beliefCount > 0
           ? [...ctx.beliefs.values()].reduce((s, b) => s + b.confidence, 0) / beliefCount
           : 0;
-        passed = avgConfidence >= (node.params.threshold || 0.5);
-        details = { belief_count: beliefCount, avg_confidence: avgConfidence };
+
+        if (kernel.llm && node.params.criteria) {
+          const reflection = await kernel.llm.reflect(
+            node.params.criteria,
+            [...ctx.beliefs.values()].slice(0, 5),
+            { workspace: Object.fromEntries(ctx.workspace) }
+          );
+          details = {
+            belief_count: beliefCount,
+            avg_confidence: avgConfidence,
+            insights: reflection.insights?.slice(0, 3),
+            llm: reflection.latency ? 'engaged' : 'mock'
+          };
+          passed = avgConfidence >= (node.params.threshold || 0.5);
+        } else {
+          passed = avgConfidence >= (node.params.threshold || 0.5);
+          details = { belief_count: beliefCount, avg_confidence: avgConfidence };
+        }
       } else if (type === 'verification') {
-        // External verification
         passed = ctx.confidence >= (node.params.threshold || 0.8);
         details = { confidence: ctx.confidence, threshold: node.params.threshold };
       }
 
-      if (!passed) ctx.confidence *= 0.9; // Reduce confidence on validation failure
+      if (!passed) ctx.confidence *= 0.9;
       ctx.broadcast('validation', { passed, type, details }, 0.7);
       return { type, passed, details };
     });
@@ -453,24 +519,37 @@ class CognitiveKernel {
     // DECIDE handler
     this.handlers.set(IRNodeType.DECIDE, async (node, ctx) => {
       const type = node.params.type || 'choice';
+      const threshold = node.params.threshold || 0.6;
       let decision;
 
       if (type === 'state_machine') {
         decision = {
           type: 'state_transition',
           states: node.params.states,
-          current: node.params.initial || node.params.states[0]
+          current: node.params.initial || node.params.states?.[0]
         };
       } else if (type === 'cognitive_decision') {
         const options = node.params.options || [];
+        const reasoning = ctx.getFromWorkspace('reasoning_result');
+        const chosen = ctx.confidence >= threshold
+          ? (options[0] || node.params.action || 'proceed')
+          : (node.params.fallback || options[1] || 'wait');
         decision = {
           type: 'cognitive',
-          chosen: options[0] || 'default',
-          strategy: node.params.strategy,
-          confidence: ctx.confidence
+          chosen,
+          strategy: node.params.strategy || node.params.mode,
+          confidence: ctx.confidence,
+          threshold,
+          influenced_by: reasoning ? 'reasoning_result' : null
         };
       } else {
-        decision = { type, resolved: true };
+        const action = node.params.action || node.params.chosen;
+        decision = {
+          type,
+          chosen: ctx.confidence >= threshold ? action : (node.params.fallback || 'escalate'),
+          confidence: ctx.confidence,
+          threshold
+        };
       }
 
       ctx.decisions.push(decision);
@@ -484,13 +563,21 @@ class CognitiveKernel {
     });
 
     // COLLABORATE handler
-    this.handlers.set(IRNodeType.COLLABORATE, async (node, ctx) => {
+    this.handlers.set(IRNodeType.COLLABORATE, async (node, ctx, kernel) => {
       const mode = node.params.mode || CollabMode.DEBATE;
+      const topic = node.params.topic || node.params.proposal || 'collaboration topic';
+      let outcome = `${mode}_completed`;
+
+      if (kernel.llm && (mode === CollabMode.DEBATE || mode === 'debate')) {
+        const debate = await kernel.llm.debate(topic, node.params.participants?.length || 2, 1);
+        outcome = debate.synthesis?.slice(0, 200) || outcome;
+      }
+
       const result = {
         mode,
-        topic: node.params.topic || node.params.proposal,
+        topic,
         participants: node.params.participants || node.params.agents || [],
-        outcome: `${mode}_completed`
+        outcome
       };
       ctx.broadcast('collaboration', result, 0.6);
       return result;
@@ -535,14 +622,31 @@ class CognitiveKernel {
     });
 
     // PREDICT handler
-    this.handlers.set(IRNodeType.PREDICT, async (node, ctx) => {
-      const prediction = {
-        target: node.params.target,
-        horizon: node.params.horizon || 1,
-        model: node.params.model || 'bayesian',
-        confidence: 0.5 + Math.random() * 0.3 // Simulated prediction confidence
-      };
-      ctx.predictions.set(node.params.target, prediction);
+    this.handlers.set(IRNodeType.PREDICT, async (node, ctx, kernel) => {
+      const target = node.params.target || node.params.statement || 'unknown';
+      let prediction;
+
+      if (kernel.llm && target !== 'unknown') {
+        const llmPred = await kernel.llm.predict(target, [], {
+          workspace: Object.fromEntries(ctx.workspace)
+        });
+        prediction = {
+          target,
+          horizon: node.params.horizon || 1,
+          model: llmPred.model || node.params.model || 'llm',
+          confidence: llmPred.confidence ?? node.params.confidence ?? 0.6,
+          assessment: llmPred.assessment || llmPred.reasoning
+        };
+      } else {
+        prediction = {
+          target,
+          horizon: node.params.horizon || 1,
+          model: node.params.model || 'bayesian',
+          confidence: node.params.confidence ?? (0.5 + Math.random() * 0.3)
+        };
+      }
+
+      ctx.predictions.set(target, prediction);
       ctx.broadcast('prediction', prediction, 0.6);
       return prediction;
     });

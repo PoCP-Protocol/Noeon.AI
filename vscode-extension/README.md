@@ -1,8 +1,15 @@
-# Noeon AI — VS Code Extension
+# Noeon AI — VS Code Extension v0.8
 
-Syntax highlighting, code snippets, and a cognitive-inspired color theme for the Noeon programming language.
+Syntax highlighting, **LSP diagnostics & completion**, run command, snippets, and cognitive theme.
 
 ## Features
+
+### Language Server (v0.8)
+- Real-time diagnostics from parse + validate
+- Keyword completion for 50+ primitives
+- Command: **Noeon: Run Current File**
+
+Start server manually: `noeon lsp`
 
 ### Syntax Highlighting
 - **8 semantic color categories** mapped to brain functions:

@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  conformance-and-gate:
+  test-and-gate:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -28,8 +28,8 @@ jobs:
       - name: Install Dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Run Conformance
-        run: npm run conformance
+      - name: Run Full Test Suite
+        run: npm test
 
       - name: Record Metrics
         run: npm run metrics:record
@@ -44,7 +44,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: conformance-last-node-${{ matrix.node-version }}
+          name: conformance-node-${{ matrix.node-version }}
           path: |
             artifacts/conformance.last.txt
             artifacts/conformance.baseline.txt

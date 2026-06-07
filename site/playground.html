@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon Playground</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./playground.css" />
+  </head>
+  <body class="playground-body">
+    <header class="topbar">
+      <div class="container nav-wrap">
+        <div class="brand"><a href="./index.html">Noeon</a> / Playground</div>
+        <nav>
+          <a href="./index.html">Home</a>
+          <a href="./convergence.html">Convergence</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container playground">
+      <section class="playground-header">
+        <h1>Noeon Playground</h1>
+        <p>Write, validate, compile, and run Noeon (.ael) programs in the browser.</p>
+      </section>
+
+      <div class="playground-toolbar">
+        <select id="example-select" aria-label="Load example">
+          <option value="">Load example…</option>
+        </select>
+        <button id="btn-validate" class="btn ghost">Validate</button>
+        <button id="btn-compile" class="btn ghost">Compile IR</button>
+        <button id="btn-run" class="btn primary">Run</button>
+        <button id="btn-explain" class="btn ghost">Explain</button>
+        <span class="toolbar-hint">Ctrl+Enter to run</span>
+      </div>
+
+      <div class="playground-grid">
+        <div class="panel">
+          <h2>Source (.ael)</h2>
+          <textarea id="source" spellcheck="false" aria-label="Noeon source code"></textarea>
+        </div>
+        <div class="panel">
+          <h2>Output</h2>
+          <pre id="output" class="output-pane">Ready.</pre>
+        </div>
+      </div>
+
+      <p class="playground-note">
+        v0.9: Run includes automatic protocol enrichment (compute + META) when detected.
+        Set <code>OPENAI_API_KEY</code> for live LLM reasoning.
+      </p>
+      <footer class="playground-status">
+        <span id="status-bar">Ready</span>
+        <span id="line-info">Ln 1, Col 1</span>
+      </footer>
+    </main>
+
+    <script src="./playground.js"></script>
+  </body>
+</html>

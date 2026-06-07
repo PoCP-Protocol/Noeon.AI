@@ -1,10 +1,14 @@
 {
   "name": "noeon-language",
   "displayName": "Noeon AI — Cognitive Programming Language",
-  "description": "Syntax highlighting, code snippets, and hover documentation for the Noeon cognitive programming language (.ael files)",
-  "version": "0.7.0",
+  "description": "Syntax highlighting, LSP diagnostics, completion, and run command for Noeon (.ael)",
+  "version": "0.9.0",
   "publisher": "PoCP-Protocol",
-  "icon": "icon.png",
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:noeon",
+    "onCommand:noeon.runFile"
+  ],
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -12,14 +16,6 @@
     "Programming Languages",
     "Snippets",
     "Themes"
-  ],
-  "keywords": [
-    "noeon",
-    "ael",
-    "cognitive",
-    "ai",
-    "brain",
-    "programming-language"
   ],
   "contributes": {
     "languages": [
@@ -48,6 +44,12 @@
         "label": "Noeon Cognitive Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/noeon-dark.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "noeon.runFile",
+        "title": "Noeon: Run Current File"
       }
     ]
   },

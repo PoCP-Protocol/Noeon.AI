@@ -17,8 +17,9 @@ const http = require("http");
 class LLMBridge {
   constructor(config = {}) {
     this.apiBase = config.apiBase || process.env.OPENAI_API_BASE || "https://api.openai.com/v1";
-    this.apiKey = config.apiKey || process.env.OPENAI_API_KEY || "";
-    this.defaultModel = config.model || "gpt-5-nano";
+    this.apiKey = config.apiKey || process.env.NOEON_API_KEY || process.env.OPENAI_API_KEY || "";
+    this.defaultModel = config.model || process.env.NOEON_LLM_MODEL || "gpt-4o-mini";
+    this.mode = config.mode || process.env.NOEON_LLM_MODE || "auto";
     this.temperature = config.temperature ?? 0.7;
     this.maxTokens = config.maxTokens || 2048;
     this.timeout = config.timeout || 30000;
@@ -35,6 +36,12 @@ class LLMBridge {
       totalTokens: 0,
       avgLatency: 0
     };
+  }
+
+  isConfigured() {
+    if (this.mode === "off" || this.mode === "mock") return false;
+    if (this.mode === "live") return Boolean(this.apiKey);
+    return Boolean(this.apiKey);
   }
 
   /**
@@ -206,6 +213,19 @@ class LLMBridge {
   async _call(messages, options = {}) {
     const start = Date.now();
     this.stats.totalCalls++;
+
+    if (!this.isConfigured()) {
+      const mockContent = this._mockResponse(messages, options);
+      this.stats.successCalls++;
+      return {
+        content: mockContent,
+        model: "noeon-mock",
+        usage: { total_tokens: mockContent.length / 4 },
+        latency: 1,
+        finishReason: "stop",
+        mock: true
+      };
+    }
 
     const model = options.model || this.defaultModel;
     const temperature = options.temperature ?? this.temperature;
@@ -447,6 +467,17 @@ class LLMBridge {
     // Normalize
     const magnitude = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0)) || 1;
     return vector.map(v => v / magnitude);
+  }
+
+  _mockResponse(messages, options = {}) {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    const query = lastUser ? lastUser.content : "unknown query";
+    const snippet = String(query).slice(0, 120).replace(/\s+/g, " ");
+    const temp = options.temperature ?? this.temperature;
+    if (temp >= 0.7) {
+      return `Intuition: ${snippet} — pattern suggests moderate confidence (~0.65).`;
+    }
+    return `Analysis of "${snippet}": structured reasoning with confidence ~0.72. Key factors identified; recommend proceed with verification.`;
   }
 
   _defaultSystemPrompt() {

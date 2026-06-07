@@ -1,11 +1,31 @@
 {
   "name": "noeon-ael",
-  "version": "0.7.0-unified",
-  "description": "Noeon AI - The world's first cognitive programming language with a Unified Cognitive Kernel. All programs (AEL contracts + cognitive flows) compile to a single Cognitive IR and execute through one brain-inspired kernel. Features: formal type system, standard library, module system, REPL, observability, CLI toolchain, and 550+ passing tests.",
+  "version": "0.9.0",
+  "description": "Noeon AI — cognitive programming language with unified kernel, governance protocol, LSP, web playground, and LLM integration.",
   "type": "commonjs",
   "main": "src/cli.js",
+  "exports": {
+    ".": "./src/cli.js",
+    "./runtime": "./src/runtime/unified-runtime.js",
+    "./parser": "./src/parser.js"
+  },
   "bin": {
     "noeon": "src/cli.js"
+  },
+  "files": [
+    "src/",
+    "language-server/",
+    "examples/",
+    "docs/spec/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PoCP-Protocol/Noeon.AI.git"
   },
   "scripts": {
     "start": "node src/cli.js",
@@ -16,14 +36,17 @@
     "validate": "node src/cli.js validate",
     "inspect": "node src/cli.js inspect",
     "repl": "node src/cli.js repl",
-    "simulate": "node src/index.js simulate",
-    "train": "node src/index.js train",
-    "rollback": "node src/index.js rollback",
+    "playground": "node src/cli.js playground",
+    "lsp": "node src/cli.js lsp",
+    "simulate": "node src/cli.js simulate",
+    "train": "node src/cli.js train",
+    "rollback": "node src/cli.js rollback",
     "legacy:simulate": "node src/index.js simulate",
     "legacy:train": "node src/index.js train",
     "legacy:rollback": "node src/index.js rollback",
-    "test": "node tests/kernel.test.js && node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && node tests/cognitive-v06.test.js && npm run conformance",
+    "test": "node tests/kernel.test.js && node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && node tests/cognitive-v06.test.js && node tests/unified-v08.test.js && node tests/unified-v09.test.js && npm run conformance",
     "test:kernel": "node tests/kernel.test.js",
+    "test:unified": "node tests/unified-v08.test.js && node tests/unified-v09.test.js",
     "test:cognitive": "node tests/cognitive.test.js",
     "test:v04": "node tests/cognitive-v04.test.js",
     "test:v05": "node tests/cognitive-v05.test.js",
@@ -33,21 +56,19 @@
     "conformance:summary": "node scripts/conformance-diff-summary.js",
     "gate:strict": "node scripts/strict-gate.js",
     "metrics": "node scripts/quality-metrics.js",
-    "metrics:record": "npm run metrics"
+    "metrics:record": "npm run metrics",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "cognitive-programming",
     "ai-language",
     "unified-kernel",
     "cognitive-ir",
-    "type-system",
-    "uncertainty",
-    "reasoning",
-    "metacognition",
-    "observability",
-    "repl",
-    "brain-inspired",
-    "new-species"
+    "lsp",
+    "playground",
+    "llm",
+    "governance",
+    "observability"
   ],
   "license": "MIT"
 }

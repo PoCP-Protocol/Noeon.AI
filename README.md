@@ -4,7 +4,7 @@
 
 > *"A language that doesn't just describe computation — it thinks."*
 
-[![Version](https://img.shields.io/badge/version-0.7.0--unified-blue)]()
+[![Version](https://img.shields.io/badge/version-0.9.0-blue)]()
 [![Tests](https://img.shields.io/badge/tests-551%2B%20passed-green)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
@@ -28,6 +28,44 @@ REASON strategy=abductive depth=3
 DECIDE action=alert threshold=0.8
 REFLECT "Was my reasoning sound?" depth=deep
 ```
+
+---
+
+## v0.9: Protocol Bridge + Deep LLM + Config
+
+v0.9 closes the remaining gap between cognitive run and protocol simulate:
+
+| Feature | Description |
+|---|---|
+| **Protocol bridge** | `noeon run` auto-enriches with compute + META when detected |
+| **Deep LLM** | PREDICT, REFLECT, DEBATE, dialectical PROCESS use LLM bridge |
+| **Project config** | `.noeonrc.json` controls LLM, observability, `with_protocol` |
+| **Smarter DECIDE** | Confidence-threshold decisions with fallback/escalate |
+| **LSP v0.9** | Hover docs + document outline symbols |
+| **Playground v0.9** | Ctrl+Enter run, status bar, error line jump |
+
+```bash
+noeon run examples/noeon_contract.ael --with-protocol --trace
+noeon compile examples/cognitive_minimal.ael --format both --out out.json
+```
+
+See [NOEON_SPEC_v0.9.md](docs/spec/NOEON_SPEC_v0.9.md).
+
+---
+
+## v0.8: Production Developer Experience
+
+v0.8 converges the dual execution paths and adds production-ready tooling:
+
+| Capability | Command |
+|---|---|
+| Unified CLI (cognitive + protocol) | `noeon run` / `noeon simulate` / `noeon train` |
+| Web Playground | `npm run playground` → http://localhost:5177/playground.html |
+| Language Server | `noeon lsp` (VS Code extension v0.8) |
+| LLM integration | Set `OPENAI_API_KEY` or `NOEON_API_KEY` (`NOEON_LLM_MODE=auto`) |
+| npm install | `npm install -g noeon-ael` → `noeon` command |
+
+See [NOEON_SPEC_v0.8.md](docs/spec/NOEON_SPEC_v0.8.md) for normative specification.
 
 ---
 
@@ -128,8 +166,35 @@ npm run rollback -- <state.json> [steps]
 | `noeon repl` | Interactive cognitive session |
 | `noeon init <name>` | Create new project |
 | `noeon status` | Show kernel status |
+| `noeon simulate` | Protocol simulation + audit artifacts |
+| `noeon train` | Multi-round policy training |
+| `noeon rollback` | Roll back persisted state |
+| `noeon playground` | Start web playground + API |
+| `noeon lsp` | Start language server (stdio) |
 
 ---
+
+## LLM Configuration
+
+```bash
+export OPENAI_API_KEY=sk-...
+export NOEON_LLM_MODE=auto    # auto | live | mock | off
+export NOEON_LLM_MODEL=gpt-4o-mini
+noeon run examples/cognitive_superbrain.ael --trace
+```
+
+Without an API key, the kernel uses deterministic mock reasoning (tests stay offline).
+
+---
+
+## npm Publish
+
+```bash
+npm install -g noeon-ael
+noeon --version
+noeon init my-agent
+noeon playground
+```
 
 ## Core Competitive Advantages
 
@@ -320,8 +385,8 @@ v0.7      UNIFIED COGNITIVE KERNEL ← You are here
 - [x] v0.5: Consciousness stream, knowledge graph, multimodal, meta-language
 - [x] v0.6: Type system, stdlib, modules, REPL, formal spec
 - [x] **v0.7: Unified Cognitive Kernel, Cognitive IR, Observability, CLI (551+ tests)**
-- [ ] v0.8: VS Code Extension + Web Playground
-- [ ] v0.9: Production runtime with real LLM integration
+- [x] **v0.8: Dual-path convergence, LSP, Web Playground, LLM integration, npm publish**
+- [x] **v0.9: Protocol bridge, config loader, deep LLM handlers, LSP hover/symbols**
 - [ ] v1.0: Complete AI-native programming language
 
 ---

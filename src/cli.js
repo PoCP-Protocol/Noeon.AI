@@ -2,37 +2,39 @@
 'use strict';
 
 /**
- * Noeon CLI — Unified Command-Line Interface
- * 
- * The single entry point for all Noeon operations:
- *   noeon run <file>       — Parse, compile to IR, execute through Kernel
- *   noeon parse <file>     — Parse and show AST
- *   noeon compile <file>   — Compile to Cognitive IR
- *   noeon explain <file>   — Natural language explanation
- *   noeon repl             — Interactive cognitive session
- *   noeon inspect <file>   — Show execution trace and metrics
- *   noeon validate <file>  — Validate contract
- *   noeon status           — Show kernel status
- *   noeon init <name>      — Create new .ael project
+ * Noeon CLI v0.8 — Unified entry point
+ *
+ * Cognitive path:  run | compile | inspect | repl
+ * Protocol path:   simulate | train | rollback | compile --format ael
+ * Developer tools: playground | lsp | validate | parse | explain | init | status
  */
 
 const fs = require('fs');
 const path = require('path');
-const { parseAel } = require('./parser');
-const { AELtoIRCompiler } = require('./core/cognitive-ir');
-const { CognitiveKernel } = require('./core/kernel');
-const { ObservabilitySystem } = require('./core/observability');
+const { spawn } = require('child_process');
+const {
+  parseProgram,
+  validateProgram,
+  compileProgram,
+  runProgram,
+  inspectProgram,
+  simulateContract,
+  trainContract,
+  rollbackState,
+  explainProgram,
+  readFeedbackBatch,
+  readJsonFileIfExists,
+  getRuntimeStatus
+} = require('./runtime/unified-runtime');
 
-// ============================================================
-// CLI ARGUMENT PARSING
-// ============================================================
+const VERSION = '0.9.0';
 
 const args = process.argv.slice(2);
 const command = args[0];
 const target = args[1];
+const positional = args.slice(1).filter((a) => !a.startsWith('--'));
 const flags = {};
 
-// Parse flags
 for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith('--')) {
     const key = args[i].slice(2);
@@ -42,428 +44,270 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-// ============================================================
-// BANNER
-// ============================================================
-
 function showBanner() {
   console.log(`
 \x1b[36m╔══════════════════════════════════════════════════════╗
-║                                                      ║
-║   ◈  N O E O N  ◈                                   ║
-║                                                      ║
-║   Cognitive Programming Language v0.7.0              ║
-║   "A language that thinks like a brain"              ║
-║                                                      ║
-║   Created by Humans & AI together                    ║
-║                                                      ║
-╚══════════════════════════════════════════════════════╝\x1b[0m
-`);
+║   ◈  N O E O N  ◈   v${VERSION}                          ║
+║   Cognitive Programming Language                     ║
+╚══════════════════════════════════════════════════════╝\x1b[0m`);
 }
 
-// ============================================================
-// COMMANDS
-// ============================================================
+function resolveFile(filePath) {
+  if (!filePath) return null;
+  return path.resolve(process.cwd(), filePath);
+}
 
-async function cmdRun(filePath, flags) {
-  if (!filePath) { console.error('Usage: noeon run <file.ael> [--verbose] [--trace]'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  const ast = parseAel(source);
-
-  // Create observability
-  const obs = new ObservabilitySystem({
-    log_level: flags.verbose ? 'debug' : 'info',
-    console: !flags.quiet,
-    compact: !flags.verbose
+async function cmdRun(filePath) {
+  if (!filePath) { console.error('Usage: noeon run <file.ael> [--json] [--trace] [--verbose]'); process.exit(1); }
+  const { ast } = parseProgram(filePath);
+  const result = await runProgram(ast, {
+    verbose: flags.verbose,
+    trace: flags.trace,
+    quiet: flags.quiet,
+    program_name: path.basename(filePath),
+    with_protocol: flags['with-protocol'] || flags.with_protocol || 'auto',
+    strict_protocol: Boolean(flags['strict-protocol'] || flags.strict_protocol),
+    feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
   });
 
-  // Create kernel
-  const kernel = new CognitiveKernel({
-    enable_prediction: !flags['no-predict'],
-    enable_evolution: !flags['no-evolve'],
-    enable_metacognition: !flags['no-meta']
-  });
-
-  // Execute
-  obs.logger.info('kernel.start', { file: filePath, program: ast.task?.name || 'unnamed' });
-  const traceId = obs.traceExecution(path.basename(filePath));
-
-  const result = await kernel.execute(ast);
-
-  obs.endExecution(result.success ? 'success' : 'failure');
-
-  // Output
   if (flags.json) {
     console.log(JSON.stringify(result, null, 2));
+  } else if (result.blocked) {
+    console.error('\x1b[31m✗ Blocked by governance preflight\x1b[0m');
+    (result.validation?.errors || []).forEach((e) => console.error(`  • ${e}`));
   } else {
     console.log('\n\x1b[32m═══ Execution Result ═══\x1b[0m');
     console.log(`Program: ${result.program}`);
     console.log(`Status:  ${result.success ? '\x1b[32m✓ SUCCESS\x1b[0m' : '\x1b[31m✗ FAILED\x1b[0m'}`);
-    console.log(`Cycles:  ${result.stats.cycles}`);
-    console.log(`Nodes:   ${result.stats.nodes_processed}`);
-    console.log(`Time:    ${result.stats.elapsed_ms}ms`);
-    
-    if (result.decisions.length > 0) {
-      console.log(`\n\x1b[33mDecisions:\x1b[0m`);
-      result.decisions.forEach((d, i) => console.log(`  ${i + 1}. [${d.type}] ${d.chosen || d.current || JSON.stringify(d)}`));
+    console.log(`Cycles:  ${result.stats?.cycles ?? 0}`);
+    console.log(`Nodes:   ${result.stats?.nodes_processed ?? 0}`);
+    console.log(`Time:    ${result.stats?.elapsed_ms ?? 0}ms`);
+    if (result.llm) console.log(`LLM:     ${result.llm.totalCalls} call(s), mode ${process.env.NOEON_LLM_MODE || 'auto'}`);
+    if (result.protocol?.enriched) {
+      console.log(`Protocol:  ${result.protocol.protocolSuccess ? '\x1b[32m✓ OK\x1b[0m' : '\x1b[33m⚠ issues\x1b[0m'} (compute + META)`);
     }
-
-    if (result.beliefs && Object.keys(result.beliefs).length > 0) {
-      console.log(`\n\x1b[36mBeliefs formed:\x1b[0m`);
-      Object.entries(result.beliefs).slice(0, 5).forEach(([k, v]) => {
-        console.log(`  • ${k}: ${v.value} (confidence: ${(v.confidence * 100).toFixed(0)}%)`);
-      });
-    }
-
     if (flags.trace && result.trace) {
-      console.log(`\n\x1b[35mExecution Trace:\x1b[0m`);
-      result.trace.forEach((t, i) => {
-        console.log(`  ${i + 1}. [${t.phase}] ${t.operation} → ${JSON.stringify(t.result).slice(0, 80)}`);
+      result.trace.slice(0, 20).forEach((t, i) => {
+        console.log(`  ${i + 1}. [${t.phase}] ${t.operation}`);
       });
     }
   }
-
   process.exit(result.success ? 0 : 1);
 }
 
-function cmdParse(filePath, flags) {
+function cmdParse(filePath) {
   if (!filePath) { console.error('Usage: noeon parse <file.ael>'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  const ast = parseAel(source);
+  const { ast } = parseProgram(filePath);
+  console.log(flags.json ? JSON.stringify(ast, null, 2) : JSON.stringify(ast, null, 2));
+}
 
-  if (flags.json) {
-    console.log(JSON.stringify(ast, null, 2));
+function cmdCompile(filePath) {
+  if (!filePath) { console.error('Usage: noeon compile <file.ael> [--format ir|ael|both] [--out file]'); process.exit(1); }
+  const { ast } = parseProgram(filePath);
+  const format = flags.format === 'ael' ? 'ael' : flags.format === 'both' ? 'both' : 'ir';
+  const compiled = compileProgram(ast, format);
+
+  let output;
+  if (format === 'ir') output = compiled.program.toJSON();
+  else if (format === 'both') output = { ir: compiled.program.toJSON(), artifact: compiled.artifact, warnings: compiled.warnings };
+  else output = compiled.artifact;
+
+  if (flags.out) {
+    fs.writeFileSync(resolveFile(flags.out), JSON.stringify(output, null, 2), 'utf8');
+    console.log(`Written: ${resolveFile(flags.out)}`);
   } else {
-    console.log('\x1b[32m═══ AST Structure ═══\x1b[0m');
-    console.log(`Contract: ${ast.task?.name || ast.contractName || 'unnamed'}`);
-    console.log(`\nSections:`);
-    const sections = Object.entries(ast).filter(([k, v]) => v && (Array.isArray(v) ? v.length > 0 : typeof v === 'object'));
-    sections.forEach(([key, value]) => {
-      const count = Array.isArray(value) ? value.length : Object.keys(value).length;
-      console.log(`  • ${key}: ${count} items`);
-    });
-    
-    if (flags.verbose) {
-      console.log('\n\x1b[36mFull AST:\x1b[0m');
-      console.log(JSON.stringify(ast, null, 2));
-    }
+    console.log(JSON.stringify(output, null, 2));
   }
 }
 
-function cmdCompile(filePath, flags) {
-  if (!filePath) { console.error('Usage: noeon compile <file.ael>'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  const ast = parseAel(source);
-  
-  const compiler = new AELtoIRCompiler();
-  const { program, warnings } = compiler.compile(ast);
-
-  if (flags.json) {
-    console.log(JSON.stringify(program.toJSON(), null, 2));
-  } else {
-    console.log('\x1b[32m═══ Cognitive IR ═══\x1b[0m');
-    console.log(`Program: ${program.name}`);
-    console.log(`\nIR Statistics:`);
-    const stats = program.getStats();
-    Object.entries(stats).filter(([k, v]) => v > 0 && k !== 'name').forEach(([key, value]) => {
-      console.log(`  • ${key}: ${value}`);
-    });
-
-    if (warnings.length > 0) {
-      console.log(`\n\x1b[33mWarnings:\x1b[0m`);
-      warnings.forEach(w => console.log(`  ⚠ ${w}`));
-    }
-
-    if (flags.verbose) {
-      console.log('\n\x1b[36mExecution Order:\x1b[0m');
-      const nodes = program.getAllNodes();
-      program.execution_order.forEach((id, i) => {
-        const node = nodes.find(n => n.id === id);
-        if (node) console.log(`  ${i + 1}. [${node.type}] ${node.params.name || node.params.mode || node.params.type || ''} (source: ${node.source})`);
-      });
-    }
-  }
-}
-
-function cmdExplain(filePath, flags) {
+function cmdExplain(filePath) {
   if (!filePath) { console.error('Usage: noeon explain <file.ael>'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  const ast = parseAel(source);
-  
-  // Use the existing explainer
-  try {
-    const { explainAel } = require('./explainer');
-    const explanation = explainAel(ast);
-    console.log('\x1b[32m═══ Natural Language Explanation ═══\x1b[0m\n');
-    console.log(explanation);
-  } catch (e) {
-    // Fallback: explain via IR
-    const compiler = new AELtoIRCompiler();
-    const { program } = compiler.compile(ast);
-    
-    console.log('\x1b[32m═══ Cognitive Explanation ═══\x1b[0m\n');
-    console.log(`This program "${program.name}" thinks as follows:\n`);
-    
-    if (program.intents.length > 0) {
-      console.log(`GOALS: It wants to ${program.intents.map(i => i.params.description || i.params.name).join(', ')}`);
-    }
-    if (program.constraints.length > 0) {
-      console.log(`LIMITS: It is constrained by ${program.constraints.map(c => `${c.params.type} (max: ${c.params.max_amount})`).join(', ')}`);
-    }
-    if (program.processes.length > 0) {
-      console.log(`THINKING: It uses ${program.processes.map(p => p.params.mode).join(', ')} reasoning`);
-    }
-    if (program.validators.length > 0) {
-      console.log(`CHECKING: It validates itself with ${program.validators.length} checks`);
-    }
-    if (program.collaborators.length > 0) {
-      console.log(`COLLABORATING: It works with others via ${program.collaborators.map(c => c.params.mode).join(', ')}`);
-    }
-  }
+  const { ast } = parseProgram(filePath);
+  console.log(explainProgram(ast));
 }
 
-function cmdValidate(filePath, flags) {
+function cmdValidate(filePath) {
   if (!filePath) { console.error('Usage: noeon validate <file.ael>'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  
   try {
-    const ast = parseAel(source);
-    const { validateAel } = require('./validator');
-    const result = validateAel(ast);
-    
-    if (result.valid || result.exitCode === 0) {
-      console.log('\x1b[32m✓ Valid Noeon contract\x1b[0m');
+    const { ast } = parseProgram(filePath);
+    const result = validateProgram(ast);
+    if (result.valid) {
+      console.log('\x1b[32m✓ Valid\x1b[0m');
       process.exit(0);
-    } else {
-      console.log('\x1b[31m✗ Validation failed:\x1b[0m');
-      (result.errors || []).forEach(e => console.log(`  • ${e}`));
-      process.exit(1);
     }
+    console.log('\x1b[31m✗ Invalid\x1b[0m');
+    (result.errors || []).forEach((e) => console.log(`  • ${e}`));
+    process.exit(1);
   } catch (e) {
-    console.error(`\x1b[31m✗ Parse error: ${e.message}\x1b[0m`);
+    console.error(`\x1b[31m✗ ${e.message}\x1b[0m`);
     process.exit(1);
   }
 }
 
-async function cmdRepl(flags) {
-  try {
-    const { startRepl } = require('./repl');
-    startRepl(flags);
-  } catch (e) {
-    console.error('REPL module not available:', e.message);
+async function cmdInspect(filePath) {
+  if (!filePath) { console.error('Usage: noeon inspect <file.ael>'); process.exit(1); }
+  const { ast } = parseProgram(filePath);
+  const { result, observability, trace, kernelStatus } = await inspectProgram(ast, {
+    program_name: path.basename(filePath)
+  });
+  console.log('\x1b[32m═══ Inspection ═══\x1b[0m');
+  console.log(`Status: ${result.success ? '✓' : '✗'} | ${result.stats?.elapsed_ms}ms`);
+  if (trace) console.log(observability.tracer.explain(trace.id));
+  console.log('Kernel:', JSON.stringify(kernelStatus, null, 2));
+}
+
+function cmdSimulate() {
+  const filePath = positional[0];
+  const feedbackPath = positional[1];
+  const cyclePath = positional[2];
+  const statePath = positional[3];
+  const reportPath = positional[4];
+  const auditPath = positional[5];
+
+  if (!filePath) {
+    console.error('Usage: noeon simulate <contract.ael> [feedback.json] [cycle.json] [state.json] [report.json] [audit.jsonl]');
     process.exit(1);
+  }
+
+  const { ast } = parseProgram(filePath);
+  const feedback = feedbackPath ? readJsonFileIfExists(feedbackPath) : {};
+  const result = simulateContract(ast, feedback, { cyclePath, statePath, reportPath, auditPath });
+
+  if (!result.success) {
+    console.error(result.error);
+    console.error(JSON.stringify(result.validation, null, 2));
+    process.exit(2);
+  }
+
+  if (flags.json || !cyclePath) {
+    console.log(JSON.stringify(result.cycle, null, 2));
+  } else {
+    console.log('Simulation complete.');
+    if (cyclePath) console.log(`  cycle:  ${resolveFile(cyclePath)}`);
+    if (reportPath) console.log(`  report: ${resolveFile(reportPath)}`);
+    if (auditPath) console.log(`  audit:  ${resolveFile(auditPath)}`);
   }
 }
 
-async function cmdInspect(filePath, flags) {
-  if (!filePath) { console.error('Usage: noeon inspect <file.ael> [--verbose]'); process.exit(1); }
-  
-  const source = fs.readFileSync(filePath, 'utf-8');
-  const ast = parseAel(source);
-
-  const obs = new ObservabilitySystem({ log_level: 'trace', console: false });
-  const kernel = new CognitiveKernel();
-
-  obs.traceExecution(path.basename(filePath));
-  const result = await kernel.execute(ast);
-  const trace = obs.endExecution(result.success ? 'success' : 'failure');
-
-  console.log('\x1b[32m═══ Execution Inspection ═══\x1b[0m');
-  console.log(`\nProgram: ${result.program}`);
-  console.log(`Status: ${result.success ? '✓' : '✗'} | Time: ${result.stats.elapsed_ms}ms | Nodes: ${result.stats.nodes_processed}`);
-  
-  console.log('\n\x1b[36m── Cognitive Trace ──\x1b[0m');
-  if (trace) {
-    console.log(obs.tracer.explain(trace.id));
+function cmdTrain() {
+  const filePath = positional[0];
+  const batchPath = positional[1];
+  if (!filePath || !batchPath) {
+    console.error('Usage: noeon train <contract.ael> <feedback_batch.json> [training.json] [state.json] [convergence.json] [audit.jsonl]');
+    process.exit(1);
   }
 
-  console.log('\n\x1b[33m── Metrics ──\x1b[0m');
-  const metrics = obs.metrics.getAll();
-  Object.entries(metrics).forEach(([k, v]) => {
-    console.log(`  ${k}: ${v.value || v.avg || JSON.stringify(v)}`);
+  const { ast } = parseProgram(filePath);
+  const batch = readFeedbackBatch(batchPath);
+  const result = trainContract(ast, batch, {
+    trainingPath: positional[2],
+    statePath: positional[3],
+    convergencePath: positional[4],
+    auditPath: positional[5]
   });
 
-  console.log('\n\x1b[35m── Kernel Status ──\x1b[0m');
-  const status = kernel.getStatus();
-  console.log(`  State: ${status.state}`);
-  console.log(`  Handlers: ${status.handlers}`);
-  console.log(`  Programs executed: ${status.stats.programs_executed}`);
+  if (!result.success) {
+    console.error(result.error);
+    process.exit(2);
+  }
+
+  console.log(flags.json ? JSON.stringify(result.training, null, 2) : 'Training complete.');
 }
 
-function cmdInit(name, flags) {
+function cmdRollback() {
+  const statePath = positional[0];
+  const steps = positional[1];
+  if (!statePath) {
+    console.error('Usage: noeon rollback <state.json> [steps]');
+    process.exit(1);
+  }
+  const updated = rollbackState(statePath, steps);
+  console.log(JSON.stringify(updated, null, 2));
+}
+
+async function cmdRepl() {
+  const { startRepl } = require('./repl');
+  startRepl(flags);
+}
+
+function cmdInit(name) {
   if (!name) { console.error('Usage: noeon init <project-name>'); process.exit(1); }
-  
   const dir = path.join(process.cwd(), name);
-  if (fs.existsSync(dir)) { console.error(`Directory '${name}' already exists`); process.exit(1); }
-
+  if (fs.existsSync(dir)) { console.error(`Directory exists: ${name}`); process.exit(1); }
   fs.mkdirSync(dir, { recursive: true });
-  
-  // Create main.ael
-  const template = `# ${name} — Noeon Cognitive Contract
-# Created: ${new Date().toISOString().slice(0, 10)}
-
-TASK "${name}"
-  DESCRIPTION "A cognitive program built with Noeon"
-
-BUDGET
-  MAX 1000 tokens
-
-DRIVE goal
-  GOAL "Achieve the primary objective"
-  IMPORTANCE 0.9
-
-PERCEIVE input
-  MODALITY text
-  SOURCE "user_input"
-
-REASON analysis
-  STRATEGY deductive
-  DEPTH 5
-
-DECIDE action
-  OPTIONS ["proceed", "wait", "ask"]
-  STRATEGY satisfice
-  THRESHOLD 0.7
-
-REFLECT check
-  TARGET self
-  CRITERIA coherence
-
-VERIFY quality
-  METHOD assertion
-  THRESHOLD 0.8
-
-REWARD success
-  AMOUNT 1.0
-  CONDITION task_success
-`;
-
-  fs.writeFileSync(path.join(dir, 'main.ael'), template);
-  fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({
-    environment: 'development',
-    cognition: { exploration_factor: 0.5 },
-    observability: { log_level: 'debug' }
-  }, null, 2));
-  fs.writeFileSync(path.join(dir, 'README.md'), `# ${name}\n\nA cognitive program built with Noeon.\n\n## Run\n\n\`\`\`bash\nnoeon run main.ael\n\`\`\`\n`);
-
-  console.log(`\x1b[32m✓ Created Noeon project: ${name}/\x1b[0m`);
-  console.log(`  • main.ael       — Main cognitive contract`);
-  console.log(`  • .noeonrc.json  — Configuration`);
-  console.log(`  • README.md      — Documentation`);
-  console.log(`\nGet started:`);
-  console.log(`  cd ${name}`);
-  console.log(`  noeon run main.ael`);
+  fs.writeFileSync(path.join(dir, 'main.ael'), `VERSION "0.8"\nNETWORK "local"\nTASK "${name}"\n\nGOAL "Primary objective"\nBUDGET 1000 msat\n\nPERCEIVE input modality=text\nREASON strategy=deductive\nDECIDE action=proceed threshold=0.7\n`);
+  fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({ observability: { log_level: 'debug' } }, null, 2));
+  console.log(`\x1b[32m✓ Created ${name}/\x1b[0m`);
 }
 
-function cmdStatus(flags) {
-  const kernel = new CognitiveKernel();
-  const status = kernel.getStatus();
-  
-  console.log('\x1b[32m═══ Noeon Kernel Status ═══\x1b[0m');
-  console.log(`Version:    0.7.0`);
-  console.log(`State:      ${status.state}`);
-  console.log(`Handlers:   ${status.handlers} registered`);
-  console.log(`\nSubsystems:`);
-  Object.entries(status.subsystems).forEach(([k, v]) => {
-    const icon = v === 'connected' ? '\x1b[32m●\x1b[0m' : '\x1b[90m○\x1b[0m';
-    console.log(`  ${icon} ${k}: ${v}`);
-  });
+function cmdStatus() {
+  const status = getRuntimeStatus();
+  console.log(JSON.stringify(status, null, 2));
+}
+
+async function cmdPlayground() {
+  const port = flags.port || process.env.PORT || 5177;
+  process.env.PORT = String(port);
+  const { startServer } = require('./serve-site');
+  await startServer(Number(port));
+}
+
+function cmdLsp() {
+  const serverPath = path.join(__dirname, '..', 'language-server', 'server.js');
+  if (!fs.existsSync(serverPath)) {
+    console.error('Language server not found. Run: cd language-server && npm install');
+    process.exit(1);
+  }
+  const child = spawn(process.execPath, [serverPath, '--stdio'], { stdio: 'inherit' });
+  child.on('exit', (code) => process.exit(code || 0));
 }
 
 function cmdHelp() {
   showBanner();
-  console.log(`\x1b[1mUsage:\x1b[0m noeon <command> [arguments] [flags]
+  console.log(`
+\x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
+\x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
+\x1b[1mTools:\x1b[0m      validate | parse | init | status | playground | lsp
 
-\x1b[1mCommands:\x1b[0m
-  run <file>       Execute a .ael file through the Cognitive Kernel
-  parse <file>     Parse and display AST structure
-  compile <file>   Compile to Cognitive IR (unified representation)
-  explain <file>   Generate natural language explanation
-  validate <file>  Validate contract syntax and semantics
-  inspect <file>   Execute with full tracing and metrics
-  repl             Start interactive cognitive session
-  init <name>      Create a new Noeon project
-  status           Show kernel status
+\x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --out file
+       --with-protocol auto|on|off --strict-protocol --port 5177
 
-\x1b[1mFlags:\x1b[0m
-  --verbose        Show detailed output
-  --json           Output in JSON format
-  --trace          Show execution trace
-  --quiet          Suppress log output
-  --no-predict     Disable predictive processing
-  --no-evolve      Disable evolution engine
-  --no-meta        Disable metacognition
+\x1b[1mLLM:\x1b[0m Set OPENAI_API_KEY or NOEON_API_KEY (NOEON_LLM_MODE=auto|live|mock|off)
 
 \x1b[1mExamples:\x1b[0m
-  noeon run examples/cognitive_superbrain.ael --trace
-  noeon compile examples/cognitive_minimal.ael --verbose
-  noeon inspect examples/cognitive_advanced.ael
-  noeon init my-brain
-  noeon repl
+  noeon run examples/noeon_contract.ael --with-protocol --trace
+  noeon compile examples/cognitive_minimal.ael --format both --out out.json
+  noeon playground
+  noeon lsp
 `);
 }
 
-// ============================================================
-// MAIN DISPATCH
-// ============================================================
-
 async function main() {
   switch (command) {
-    case 'run':
-      await cmdRun(target, flags);
-      break;
-    case 'parse':
-      cmdParse(target, flags);
-      break;
-    case 'compile':
-      cmdCompile(target, flags);
-      break;
-    case 'explain':
-      cmdExplain(target, flags);
-      break;
-    case 'validate':
-      cmdValidate(target, flags);
-      break;
-    case 'inspect':
-      await cmdInspect(target, flags);
-      break;
-    case 'repl':
-      await cmdRepl(flags);
-      break;
-    case 'init':
-      cmdInit(target, flags);
-      break;
-    case 'status':
-      cmdStatus(flags);
-      break;
-    case 'help':
-    case '--help':
-    case '-h':
-      cmdHelp();
-      break;
-    case 'version':
-    case '--version':
-    case '-v':
-      console.log('noeon v0.7.0');
-      break;
+    case 'run': await cmdRun(target); break;
+    case 'parse': cmdParse(target); break;
+    case 'compile': cmdCompile(target); break;
+    case 'explain': cmdExplain(target); break;
+    case 'validate': cmdValidate(target); break;
+    case 'inspect': await cmdInspect(target); break;
+    case 'repl': await cmdRepl(); break;
+    case 'init': cmdInit(target); break;
+    case 'status': cmdStatus(); break;
+    case 'simulate': cmdSimulate(); break;
+    case 'train': cmdTrain(); break;
+    case 'rollback': cmdRollback(); break;
+    case 'playground': await cmdPlayground(); break;
+    case 'lsp': cmdLsp(); break;
+    case 'help': case '--help': case '-h': cmdHelp(); break;
+    case 'version': case '--version': case '-v': console.log(`noeon v${VERSION}`); break;
     default:
-      if (!command) {
-        cmdHelp();
-      } else {
-        console.error(`Unknown command: ${command}`);
-        console.error('Run "noeon help" for usage information.');
-        process.exit(1);
-      }
+      if (!command) cmdHelp();
+      else { console.error(`Unknown command: ${command}`); cmdHelp(); process.exit(1); }
   }
 }
 
-main().catch(e => {
-  console.error(`\x1b[31mFatal error: ${e.message}\x1b[0m`);
+main().catch((e) => {
+  console.error(`Fatal: ${e.message}`);
   if (flags.verbose) console.error(e.stack);
   process.exit(1);
 });

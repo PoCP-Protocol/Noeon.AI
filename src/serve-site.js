@@ -1,6 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { handlePlaygroundApi } = require("./playground-api");
 
 const PORT = Number(process.env.PORT || 5177);
 const ROOT = path.resolve(__dirname, "..", "site");
@@ -25,9 +26,16 @@ function send(res, status, body, type = "text/plain; charset=utf-8") {
   res.end(body);
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const rawPath = req.url ? req.url.split("?")[0] : "/";
   const safePath = path.normalize(rawPath).replace(/^([.][.][/\\])+/, "");
+
+  if (safePath.startsWith("/api/")) {
+    const handled = await handlePlaygroundApi(req, res, safePath);
+    if (handled) return;
+    send(res, 404, JSON.stringify({ error: "API route not found" }), "application/json; charset=utf-8");
+    return;
+  }
 
   const requested = safePath === "/" ? "/index.html" : safePath;
   const isArtifactRequest = requested.startsWith("/artifacts/");
@@ -58,6 +66,18 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Noeon site available at http://localhost:${PORT}`);
-});
+function startServer(port = PORT) {
+  return new Promise((resolve) => {
+    server.listen(port, () => {
+      console.log(`Noeon site + playground API at http://localhost:${port}`);
+      console.log(`  Playground: http://localhost:${port}/playground.html`);
+      resolve(server);
+    });
+  });
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { startServer, PORT };
