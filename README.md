@@ -105,6 +105,14 @@ node src/cli.js repl
 node src/cli.js init my-brain
 ```
 
+Compatibility scripts are available for governance and legacy docs:
+
+```bash
+npm run simulate -- <contract.ael> <feedback.json> <cycle.json> <state.json> <report.json> <audit.jsonl>
+npm run train -- <contract.ael> <feedback_batch.json> <training.json> <state.json> <convergence.json> <audit.jsonl>
+npm run rollback -- <state.json> [steps]
+```
+
 ---
 
 ## CLI Commands

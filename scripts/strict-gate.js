@@ -1,4 +1,7 @@
 const { spawnSync } = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 
 function run(command, args, env) {
   const result = spawnSync(command, args, {
@@ -31,22 +34,30 @@ function main() {
   };
 
   run(process.execPath, [npmCli, "run", "conformance"], env);
-  run(
-    process.execPath,
-    [
-      npmCli,
-      "run",
-      "simulate",
-      "--",
-      "examples/noeon_hayek_bitcion_ai_extreme.ael",
-      "examples/feedback_highrisk.json",
-      "artifacts/noeon_hayek_extreme_cycle.json",
-      "artifacts/noeon_hayek_extreme_state.json",
-      "artifacts/noeon_hayek_extreme_report.json",
-      "artifacts/noeon_hayek_extreme_audit.jsonl"
-    ],
-    env
-  );
+
+  // Write strict-gate simulation outputs to a temp directory so local runs
+  // do not dirty tracked artifacts.
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "noeon-strict-gate-"));
+  try {
+    run(
+      process.execPath,
+      [
+        npmCli,
+        "run",
+        "simulate",
+        "--",
+        "examples/noeon_hayek_bitcion_ai_extreme.ael",
+        "examples/feedback_highrisk.json",
+        path.join(tempDir, "noeon_hayek_extreme_cycle.json"),
+        path.join(tempDir, "noeon_hayek_extreme_state.json"),
+        path.join(tempDir, "noeon_hayek_extreme_report.json"),
+        path.join(tempDir, "noeon_hayek_extreme_audit.jsonl")
+      ],
+      env
+    );
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 
   console.log("Strict governance gate passed.");
 }

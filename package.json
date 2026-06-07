@@ -16,6 +16,9 @@
     "validate": "node src/cli.js validate",
     "inspect": "node src/cli.js inspect",
     "repl": "node src/cli.js repl",
+    "simulate": "node src/index.js simulate",
+    "train": "node src/index.js train",
+    "rollback": "node src/index.js rollback",
     "legacy:simulate": "node src/index.js simulate",
     "legacy:train": "node src/index.js train",
     "legacy:rollback": "node src/index.js rollback",
@@ -29,7 +32,8 @@
     "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",
     "conformance:summary": "node scripts/conformance-diff-summary.js",
     "gate:strict": "node scripts/strict-gate.js",
-    "metrics": "node scripts/quality-metrics.js"
+    "metrics": "node scripts/quality-metrics.js",
+    "metrics:record": "npm run metrics"
   },
   "keywords": [
     "cognitive-programming",
