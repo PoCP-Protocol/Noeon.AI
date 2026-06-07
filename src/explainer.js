@@ -156,7 +156,7 @@ function explainAel(ast) {
     lines.push(`Penalty policy: ${slashRules}.`);
   }
 
-  const flow = Array.isArray(ast.flow) ? ast.flow : [];
+  const flow = Array.isArray(ast.stateFlow) ? ast.stateFlow : [];
   if (flow.length > 0) {
     const sequence = flow.map((edge) => `${edge.from} --${edge.event}--> ${edge.to}`).join(" | ");
     lines.push(`Neural flow: ${sequence}.`);

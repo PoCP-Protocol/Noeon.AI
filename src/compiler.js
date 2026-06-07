@@ -46,7 +46,7 @@ function buildAdaptiveHints(ast) {
 }
 
 function compileAel(ast) {
-  const flow = Array.isArray(ast.flow) && ast.flow.length > 0 ? ast.flow : buildDefaultFlow();
+  const flow = Array.isArray(ast.stateFlow) && ast.stateFlow.length > 0 ? ast.stateFlow : buildDefaultFlow();
 
   return {
     spec: {

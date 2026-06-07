@@ -15,6 +15,31 @@ const {
   parseAdapt
 } = require("./cognitive-parser");
 
+const {
+  parseWhenSalient,
+  parseRuminate,
+  parsePerceiveAll,
+  parseCompete,
+  parseHabituate,
+  parseOnSurprise,
+  parseDream,
+  parsePrime,
+  parseInhibit,
+  parseSpawn,
+  parseDelegate,
+  parseDebate: parseDebateExt,
+  parseVote,
+  parseShare,
+  parseDismiss,
+  parseEvolve,
+  parseMutate,
+  parseSynthesize,
+  parseFreeze,
+  parseAsk,
+  parseThinkWith,
+  parseEmbed
+} = require("./cognitive-parser-ext");
+
 
 function parseQuoted(value, lineNo) {
   const m = value.match(/^"([\s\S]*)"$/);
@@ -817,7 +842,7 @@ function parseAel(source) {
     },
     onSuccess: null,
     onSlash: null,
-    flow: [],
+    stateFlow: [],
     metaRules: [],
     metaProfile: null,
     compute: {
@@ -843,6 +868,36 @@ function parseAel(source) {
       monitors: [],
       focuses: [],
       adaptations: []
+    },
+    cognitiveFlow: {
+      whenSalient: [],
+      ruminations: [],
+      perceiveAll: [],
+      competitions: [],
+      habits: [],
+      surpriseHandlers: [],
+      dreams: [],
+      primes: [],
+      inhibitions: []
+    },
+    social: {
+      spawns: [],
+      delegations: [],
+      debates: [],
+      votes: [],
+      shares: [],
+      dismissals: []
+    },
+    evolution: {
+      evolves: [],
+      mutations: [],
+      syntheses: [],
+      freezes: []
+    },
+    llm: {
+      asks: [],
+      thinkWiths: [],
+      embeds: []
     }
   };
 
@@ -887,7 +942,29 @@ function parseAel(source) {
     FORESEE: "PREDICT",
     GUT: "INTUIT",
     THINK_DEEP: "REASON",
-    INTROSPECT: "REFLECT"
+    INTROSPECT: "REFLECT",
+    PONDER: "RUMINATE",
+    MULL_OVER: "RUMINATE",
+    SENSE_ALL: "PERCEIVE_ALL",
+    RACE: "COMPETE",
+    AUTOMATE: "HABITUATE",
+    STARTLE: "ON_SURPRISE",
+    SLEEP: "DREAM",
+    ACTIVATE: "PRIME",
+    SUPPRESS: "INHIBIT",
+    CREATE_AGENT: "SPAWN",
+    ASSIGN: "DELEGATE",
+    DISCUSS: "DEBATE_MULTI",
+    BALLOT: "VOTE",
+    TEACH: "SHARE",
+    REMOVE_AGENT: "DISMISS",
+    NATURAL_SELECT: "EVOLVE",
+    VARY: "MUTATE",
+    INVENT: "SYNTHESIZE",
+    LOCK: "FREEZE",
+    QUERY: "ASK",
+    CONSULT: "THINK_WITH",
+    VECTORIZE: "EMBED"
   };
 
   for (let i = 0; i < lines.length; i += 1) {
@@ -1022,7 +1099,7 @@ function parseAel(source) {
         ast.onSlash = parseDistribution(value, lineNo);
         break;
       case "FLOW":
-        ast.flow.push(parseFlow(value, lineNo));
+        ast.stateFlow.push(parseFlow(value, lineNo));
         break;
       case "META_REQUIRE":
         ast.metaRules.push(parseMetaRequire(value, lineNo));
@@ -1101,6 +1178,76 @@ function parseAel(source) {
         break;
       case "ADAPT":
         ast.cognitive.adaptations.push(parseAdapt(value, lineNo));
+        break;
+      // === Flow Control ===
+      case "WHEN_SALIENT":
+        ast.cognitiveFlow.whenSalient.push(parseWhenSalient(value, lineNo));
+        break;
+      case "RUMINATE":
+        ast.cognitiveFlow.ruminations.push(parseRuminate(value, lineNo));
+        break;
+      case "PERCEIVE_ALL":
+        ast.cognitiveFlow.perceiveAll.push(parsePerceiveAll(value, lineNo));
+        break;
+      case "COMPETE":
+        ast.cognitiveFlow.competitions.push(parseCompete(value, lineNo));
+        break;
+      case "HABITUATE":
+        ast.cognitiveFlow.habits.push(parseHabituate(value, lineNo));
+        break;
+      case "ON_SURPRISE":
+        ast.cognitiveFlow.surpriseHandlers.push(parseOnSurprise(value, lineNo));
+        break;
+      case "DREAM":
+        ast.cognitiveFlow.dreams.push(parseDream(value, lineNo));
+        break;
+      case "PRIME":
+        ast.cognitiveFlow.primes.push(parsePrime(value, lineNo));
+        break;
+      case "INHIBIT":
+        ast.cognitiveFlow.inhibitions.push(parseInhibit(value, lineNo));
+        break;
+      // === Multi-Agent ===
+      case "SPAWN":
+        ast.social.spawns.push(parseSpawn(value, lineNo));
+        break;
+      case "DELEGATE":
+        ast.social.delegations.push(parseDelegate(value, lineNo));
+        break;
+      case "DEBATE_MULTI":
+        ast.social.debates.push(parseDebateExt(value, lineNo));
+        break;
+      case "VOTE":
+        ast.social.votes.push(parseVote(value, lineNo));
+        break;
+      case "SHARE":
+        ast.social.shares.push(parseShare(value, lineNo));
+        break;
+      case "DISMISS":
+        ast.social.dismissals.push(parseDismiss(value, lineNo));
+        break;
+      // === Evolution ===
+      case "EVOLVE":
+        ast.evolution.evolves.push(parseEvolve(value, lineNo));
+        break;
+      case "MUTATE":
+        ast.evolution.mutations.push(parseMutate(value, lineNo));
+        break;
+      case "SYNTHESIZE":
+        ast.evolution.syntheses.push(parseSynthesize(value, lineNo));
+        break;
+      case "FREEZE":
+        ast.evolution.freezes.push(parseFreeze(value, lineNo));
+        break;
+      // === LLM Integration ===
+      case "ASK":
+        ast.llm.asks.push(parseAsk(value, lineNo));
+        break;
+      case "THINK_WITH":
+        ast.llm.thinkWiths.push(parseThinkWith(value, lineNo));
+        break;
+      case "EMBED":
+        ast.llm.embeds.push(parseEmbed(value, lineNo));
         break;
       default:
         throw new Error(`Line ${lineNo}: unknown keyword '${keyword}'`);

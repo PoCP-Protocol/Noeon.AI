@@ -1,7 +1,7 @@
 {
   "name": "noeon-ael",
-  "version": "0.3.0-cognitive",
-  "description": "Noeon AI - Brain-inspired cognitive programming language for building SuperBrains",
+  "version": "0.4.0-cognitive",
+  "description": "Noeon AI - Brain-inspired cognitive programming language with LLM integration, multi-agent collaboration, self-evolution, and cognitive flow control",
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
@@ -13,6 +13,8 @@
     "rollback": "node src/index.js rollback",
     "cognitive": "node src/index.js cognitive",
     "cognitive:test": "node tests/cognitive.test.js",
+    "cognitive:v04": "node tests/cognitive-v04.test.js",
+    "test:all": "node tests/cognitive.test.js && node tests/cognitive-v04.test.js && npm run conformance",
     "site": "node src/serve-site.js",
     "conformance": "node tests/conformance/run.js",
     "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",

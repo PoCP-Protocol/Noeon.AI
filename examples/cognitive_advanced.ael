@@ -1,0 +1,87 @@
+# Noeon AI v0.4 - Advanced Cognitive Contract
+# Demonstrates: Multi-Agent, Evolution, Flow Control, LLM Integration
+#
+# This contract creates a self-evolving research team that:
+# 1. Spawns specialized cognitive agents
+# 2. Collaboratively analyzes a problem through debate
+# 3. Uses LLM for deep reasoning
+# 4. Evolves its strategies based on outcomes
+# 5. Consolidates knowledge into semantic memory
+
+VERSION "0.4-cognitive"
+NETWORK "noeon-mainnet"
+TASK "autonomous_research_team"
+
+# === Motivation Layer (What drives this system?) ===
+DRIVE_CMD "discover novel insights through collaborative reasoning" priority=high
+DRIVE_CMD "continuously improve reasoning strategies" priority=medium
+
+# === Workspace (Conscious attention) ===
+WORKSPACE "research_lab" capacity=9 decay=time_based ttl=120
+
+# === Emotional Context (Biases decisions) ===
+EMOTION valence=0.5 arousal=0.4 tag=curious influence=exploration
+
+# === Semantic Priming (Pre-activate relevant concepts) ===
+PRIME "scientific_method" associations=hypothesis,experiment,evidence,conclusion strength=0.8 ttl=60000
+PRIME "critical_thinking" associations=logic,bias,evidence,counterargument strength=0.7 ttl=60000
+
+# === Multi-Agent: Spawn Research Team ===
+SPAWN "analyst" specialty=data_analysis personality=methodical weight=1.2
+SPAWN "theorist" specialty=hypothesis_generation personality=creative weight=1.0
+SPAWN "critic" specialty=logical_validation personality=skeptical weight=1.1
+SPAWN "synthesizer" specialty=knowledge_integration personality=balanced weight=1.0
+
+# === LLM Integration: Deep Reasoning ===
+ASK "What are the key factors in this research domain?" model=default temperature=0.5 context=workspace
+THINK_WITH "Analyze the relationship between variables" model=gpt-5-nano strategy=abductive depth=4
+
+# === Predictive Processing ===
+PREDICT "collaborative analysis will yield novel insights" confidence=0.7 model=research_model
+PERCEIVE source=research_data modality=text filter=relevant timeout_ms=10000
+
+# === Multi-Agent: Structured Debate ===
+DEBATE_MULTI "What is the most promising research direction?" rounds=3 protocol=socratic consensus_threshold=0.6
+
+# === Flow Control: Iterative Thinking ===
+RUMINATE "synthesize findings into coherent theory" max_iterations=8 confidence_target=0.8 decay=0.03
+
+# === Flow Control: Parallel Perception ===
+PERCEIVE_ALL channels=literature,data,expert_opinion timeout=8000 merge=weighted modalities=text,structured
+
+# === Flow Control: Competitive Hypotheses ===
+COMPETE "best explanation" candidates=hypothesis_a,hypothesis_b,hypothesis_c strategy=strongest timeout=5000
+
+# === Dual-System Reasoning ===
+INTUIT "Which direction feels most promising?" using=pattern_match threshold=0.6
+REASON strategy=abductive depth=5 breadth=4 context=workspace timeout_ms=15000
+
+# === Decision with Emotional Bias ===
+DECIDE action=publish_findings threshold=0.7 mode=maximise fallback=iterate valence_weight=0.2
+
+# === Metacognitive Monitoring ===
+MONITOR metric=reasoning_quality threshold=0.6 action=adapt window=5 continuous=true
+REFLECT "research methodology effectiveness" depth=deep trigger=periodic
+
+# === Evolution: Self-Improvement ===
+EVOLVE target=reasoning_strategies generations=3 mutation_rate=0.15 selection_pressure=0.8
+MUTATE rule=hypothesis_generation type=parameter_shift intensity=0.3
+SYNTHESIZE "improved_analysis_method" type=strategy from=patterns,elites
+FREEZE rule=validated_methodology reason=proven_effective
+
+# === Knowledge Sharing & Consolidation ===
+SHARE "research findings" from=synthesizer tags=insight,validated
+CONSOLIDATE from=workspace to=semantic strength=0.85 decay_rate=0.005
+ADAPT rule=research_approach delta=0.1 signal=reward
+
+# === Surprise Handling ===
+ON_SURPRISE threshold=0.8 action=investigate priority=high once=false
+
+# === Background Processing ===
+DREAM "reorganize knowledge graph" priority=medium delay=5000
+
+# === Cleanup ===
+DISMISS "critic" reason=task_complete
+
+# === Democratic Final Decision ===
+VOTE "Accept research conclusions?" quorum=0.6 protocol=meritocratic

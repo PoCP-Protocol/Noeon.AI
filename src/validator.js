@@ -1142,11 +1142,11 @@ function validateAel(ast) {
     }
   }
 
-  if (!Array.isArray(ast.flow) || ast.flow.length === 0) {
+  if (!Array.isArray(ast.stateFlow) || ast.stateFlow.length === 0) {
     warnings.push("FLOW is not defined; default state transitions will be used");
   } else {
     const seen = new Set();
-    for (const edge of ast.flow) {
+    for (const edge of ast.stateFlow) {
       const key = `${edge.from}->${edge.to}:${edge.event}`;
       if (seen.has(key)) {
         errors.push(`duplicate FLOW transition '${key}'`);
@@ -1154,7 +1154,7 @@ function validateAel(ast) {
       seen.add(key);
     }
 
-    const startsAtCreated = ast.flow.some((edge) => edge.from === "CREATED");
+    const startsAtCreated = ast.stateFlow.some((edge) => edge.from === "CREATED");
     if (!startsAtCreated) {
       warnings.push("FLOW does not start from CREATED");
     }
