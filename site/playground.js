@@ -4,23 +4,26 @@ const statusEl = document.getElementById("status-bar");
 const exampleSelect = document.getElementById("example-select");
 const lineInfoEl = document.getElementById("line-info");
 
-const DEFAULT_SOURCE = `# Noeon Playground — v0.9
-VERSION "0.9"
-NETWORK "playground"
-TASK "demo_thinker"
+let activeExampleName = null;
 
-GOAL "Demonstrate perceive-reason-decide cycle"
-BUDGET 1000 msat
-DEADLINE 2026-12-31T23:59:59Z
+const FALLBACK_SOURCE = `profile "general"
+version "1.0.0-alpha"
 
-PERCEIVE source=user_input modality=text filter=general timeout_ms=1000
-INTUIT "Is the input coherent?" using=heuristic threshold=0.6
-REASON strategy=deductive depth=3
-DECIDE action=respond threshold=0.7 mode=satisfice
-REFLECT "Was reasoning sound?" depth=standard
+module hello
+
+program hello_world {
+  objective "Demonstrate general profile execution through unified VM"
+  context domain=general audience=developer mode=cognitive
+
+  observe input modality=text source="user"
+  understand context=developer_intent method=semantic_summary confidence=0.72
+  reason strategy=deductive depth=2
+  decide action=greet threshold=0.6
+  act action=greet channel=console safety=low
+  feedback source=user signal=acceptance window=1
+  reflect "execution quality" depth=standard
+}
 `;
-
-sourceEl.value = DEFAULT_SOURCE;
 
 function setStatus(text) {
   if (statusEl) statusEl.textContent = text;
@@ -72,26 +75,49 @@ async function api(path, body) {
   return data;
 }
 
+function formatExampleLabel(ex) {
+  const title = ex.title || ex.name;
+  if (ex.category) return `[${ex.category}] ${title}`;
+  return title;
+}
+
 async function loadExamples() {
   try {
     const res = await fetch("/api/examples");
     const data = await res.json();
-    for (const ex of data.examples || []) {
+    const examples = data.examples || [];
+
+    for (const ex of examples) {
       const opt = document.createElement("option");
       opt.value = ex.name;
-      opt.textContent = ex.name;
+      opt.textContent = formatExampleLabel(ex);
       exampleSelect.appendChild(opt);
     }
+
+    const hello = examples.find((e) => e.name === "hello.noeon");
+    if (hello) {
+      sourceEl.value = hello.source;
+      activeExampleName = hello.name;
+      exampleSelect.value = hello.name;
+    } else {
+      sourceEl.value = FALLBACK_SOURCE;
+    }
+
     exampleSelect.addEventListener("change", () => {
       const name = exampleSelect.value;
-      if (!name) return;
-      const ex = data.examples.find((e) => e.name === name);
+      if (!name) {
+        activeExampleName = null;
+        return;
+      }
+      const ex = examples.find((e) => e.name === name);
       if (ex) {
         sourceEl.value = ex.source;
-        setStatus(`Loaded ${name}`);
+        activeExampleName = name;
+        setStatus(`Loaded ${ex.title || name}`);
       }
     });
   } catch {
+    sourceEl.value = FALLBACK_SOURCE;
     setStatus("Examples unavailable (start server with npm run playground)");
   }
 }
@@ -117,9 +143,11 @@ document.getElementById("btn-compile").addEventListener("click", async () => {
 });
 
 document.getElementById("btn-run").addEventListener("click", async () => {
-  setOutput("Running (kernel + protocol auto)…");
+  const isNoeon = activeExampleName?.endsWith(".noeon");
+  setOutput(isNoeon ? "Running (cognitive workflow)…" : "Running (kernel + protocol auto)…");
   try {
-    const data = await api("/api/run", { trace: true });
+    const withProtocol = isNoeon ? "off" : "auto";
+    const data = await api("/api/run", { trace: true, with_protocol: withProtocol });
     setOutput(JSON.stringify(data, null, 2), !data.success);
   } catch (e) {
     setOutput(e.message, true, e.line);

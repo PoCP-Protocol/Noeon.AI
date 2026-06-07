@@ -26,8 +26,9 @@ const {
   readJsonFileIfExists,
   getRuntimeStatus
 } = require('./runtime/unified-runtime');
+const { runDoctor, formatDoctorReport } = require('./doctor');
 
-const VERSION = '0.9.0';
+const VERSION = '1.0.0-alpha';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -156,7 +157,7 @@ async function cmdInspect(filePath) {
   console.log('Kernel:', JSON.stringify(kernelStatus, null, 2));
 }
 
-function cmdSimulate() {
+async function cmdSimulate() {
   const filePath = positional[0];
   const feedbackPath = positional[1];
   const cyclePath = positional[2];
@@ -171,7 +172,7 @@ function cmdSimulate() {
 
   const { ast } = parseProgram(filePath);
   const feedback = feedbackPath ? readJsonFileIfExists(feedbackPath) : {};
-  const result = simulateContract(ast, feedback, { cyclePath, statePath, reportPath, auditPath });
+  const result = await simulateContract(ast, feedback, { cyclePath, statePath, reportPath, auditPath });
 
   if (!result.success) {
     console.error(result.error);
@@ -234,15 +235,92 @@ function cmdInit(name) {
   if (!name) { console.error('Usage: noeon init <project-name>'); process.exit(1); }
   const dir = path.join(process.cwd(), name);
   if (fs.existsSync(dir)) { console.error(`Directory exists: ${name}`); process.exit(1); }
+  const profile = String(flags.profile || 'general').toLowerCase();
+  if (!['general', 'ael'].includes(profile)) {
+    console.error('Usage: noeon init <project-name> [--profile general|ael]');
+    process.exit(1);
+  }
+
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'main.ael'), `VERSION "0.8"\nNETWORK "local"\nTASK "${name}"\n\nGOAL "Primary objective"\nBUDGET 1000 msat\n\nPERCEIVE input modality=text\nREASON strategy=deductive\nDECIDE action=proceed threshold=0.7\n`);
-  fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({ observability: { log_level: 'debug' } }, null, 2));
-  console.log(`\x1b[32m✓ Created ${name}/\x1b[0m`);
+  const entry = profile === 'general' ? 'main.noeon' : 'main.ael';
+  const source = profile === 'general'
+    ? `PROFILE "general"\nVERSION "${VERSION}"\n\nAGENT "${name}"\n  GOAL "Solve the primary user goal"\n  POLICY audit=true\n  FLOW\n    PERCEIVE source=user_input modality=text\n    REASON strategy=deductive depth=2\n    DECIDE action=proceed threshold=0.7 fallback=escalate\n    ACT action=respond channel=runtime safety=standard\n    REFLECT "execution quality" depth=standard\n`
+    : `VERSION "0.8"\nNETWORK "local"\nTASK "${name}"\n\nGOAL "Primary objective"\nBUDGET 1000 msat\n\nPERCEIVE input modality=text\nREASON strategy=deductive\nDECIDE action=proceed threshold=0.7\n`;
+  fs.writeFileSync(path.join(dir, entry), source);
+  fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({
+    environment: 'development',
+    profile,
+    entry,
+    cognition: { enable_llm: true, with_protocol: profile === 'general' ? 'off' : 'auto' },
+    observability: { log_level: 'debug' },
+    llm: { mode: 'auto' }
+  }, null, 2));
+  console.log(`\x1b[32m✓ Created ${name}/ (${profile}, ${entry})\x1b[0m`);
 }
 
 function cmdStatus() {
   const status = getRuntimeStatus();
   console.log(JSON.stringify(status, null, 2));
+}
+
+function cmdDoctor() {
+  const report = runDoctor({ file: flags.file });
+  console.log(flags.json ? JSON.stringify(report, null, 2) : formatDoctorReport(report));
+  process.exit(report.ok ? 0 : 1);
+}
+
+async function cmdTest() {
+  const { testFile, testDirectory, runDefaultSuite } = require('./test-runner');
+  const testTarget = positional[0];
+  let summary;
+
+  if (!testTarget) {
+    summary = await runDefaultSuite({ trace: flags.trace });
+  } else {
+    const resolved = resolveFile(testTarget);
+    if (!fs.existsSync(resolved)) {
+      console.error(`\x1b[31m✗ Not found: ${resolved}\x1b[0m`);
+      process.exit(1);
+    }
+    if (fs.statSync(resolved).isDirectory()) {
+      summary = await testDirectory(resolved, { trace: flags.trace });
+    } else {
+      const result = await testFile(resolved, { trace: flags.trace });
+      summary = {
+        total: 1,
+        passed: result.ok ? 1 : 0,
+        failed: result.ok ? 0 : 1,
+        skipped: 0,
+        ok: result.ok,
+        results: [result]
+      };
+    }
+  }
+
+  if (flags.json) {
+    console.log(JSON.stringify(summary, null, 2));
+  } else {
+    console.log('\n\x1b[32m═══ Test Results ═══\x1b[0m');
+    for (const r of summary.results) {
+      const name = path.basename(r.file);
+      if (r.skipped) {
+        console.log(`  \x1b[33m⊘ SKIP\x1b[0m ${name} (${r.error})`);
+      } else if (r.ok) {
+        const ms = r.run?.stats?.elapsed_ms ?? 0;
+        console.log(`  \x1b[32m✓ PASS\x1b[0m ${name} (${ms}ms)`);
+        if (flags.trace && r.run?.trace) {
+          r.run.trace.slice(0, 10).forEach((t, i) => {
+            console.log(`      ${i + 1}. [${t.phase}] ${t.operation}`);
+          });
+        }
+      } else {
+        console.log(`  \x1b[31m✗ FAIL\x1b[0m ${name} [${r.stage || 'error'}] ${r.error || ''}`);
+      }
+    }
+    console.log(`\n${summary.passed} passed, ${summary.failed} failed${summary.skipped ? `, ${summary.skipped} skipped` : ''}`);
+  }
+
+  process.exit(summary.failed > 0 ? 1 : 0);
 }
 
 async function cmdPlayground() {
@@ -267,16 +345,21 @@ function cmdHelp() {
   console.log(`
 \x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
 \x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
-\x1b[1mTools:\x1b[0m      validate | parse | init | status | playground | lsp
+\x1b[1mTools:\x1b[0m      validate | parse | test | init | status | doctor | playground | lsp
 
 \x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --out file
-       --with-protocol auto|on|off --strict-protocol --port 5177
+       --with-protocol auto|on|off --strict-protocol --port 5177 --file program.ael
+       --profile general|ael
 
 \x1b[1mLLM:\x1b[0m Set OPENAI_API_KEY or NOEON_API_KEY (NOEON_LLM_MODE=auto|live|mock|off)
 
 \x1b[1mExamples:\x1b[0m
-  noeon run examples/noeon_contract.ael --with-protocol --trace
+  noeon init my-agent --profile general
+  noeon run main.noeon --trace
   noeon compile examples/cognitive_minimal.ael --format both --out out.json
+  noeon doctor --file examples/cognitive_minimal.ael
+  noeon test examples/agent_research.noeon
+  noeon test
   noeon playground
   noeon lsp
 `);
@@ -293,7 +376,9 @@ async function main() {
     case 'repl': await cmdRepl(); break;
     case 'init': cmdInit(target); break;
     case 'status': cmdStatus(); break;
-    case 'simulate': cmdSimulate(); break;
+    case 'doctor': cmdDoctor(); break;
+    case 'test': await cmdTest(); break;
+    case 'simulate': await cmdSimulate(); break;
     case 'train': cmdTrain(); break;
     case 'rollback': cmdRollback(); break;
     case 'playground': await cmdPlayground(); break;

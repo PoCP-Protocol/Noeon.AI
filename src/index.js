@@ -28,7 +28,7 @@ function printUsage() {
   console.log('  npm run rollback -- <state> [steps]');
 }
 
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   const commands = ['parse', 'compile', 'explain', 'simulate', 'train', 'rollback', 'cognitive'];
   const explicit = commands.includes(argv[0]);
@@ -90,7 +90,7 @@ function main() {
         return;
       }
       const { readJsonFileIfExists } = require('./runtime/unified-runtime');
-      const result = simulateContract(ast, readJsonFileIfExists(a2), {
+      const result = await simulateContract(ast, readJsonFileIfExists(a2), {
         cyclePath: a3,
         statePath: a4,
         reportPath: a5,

@@ -15,14 +15,15 @@ const { CognitiveKernel } = require('../core/kernel');
 const { ObservabilitySystem } = require('../core/observability');
 const { runGovernancePreflight } = require('../core/governance');
 const { loadProjectConfig, resolveRunOptions } = require('../core/config');
-const { enrichWithProtocol, hasProtocolFeatures } = require('../core/protocol-bridge');
-const { runSuperBrainCycle } = require('./simulator');
+const { executeProgram, VM_VERSION } = require('../vm/unified-executor');
+const { runProtocolCycle } = require('../vm/protocol-phase');
+const { hasProtocolFeatures, enrichWithProtocol } = require('../core/protocol-bridge');
 const { runTraining } = require('./trainer');
 const { loadState, saveState, rollbackState } = require('./state-store');
 const { generateReport } = require('./report');
 const { appendAuditEntries } = require('./audit-logger');
 
-const RUNTIME_VERSION = '0.9.0';
+const RUNTIME_VERSION = VM_VERSION;
 
 function readSource(filePath) {
   const resolved = path.resolve(process.cwd(), filePath);
@@ -34,7 +35,7 @@ function readSource(filePath) {
 
 function parseFromSource(source, filename = '<input>') {
   try {
-    const ast = parseAel(source);
+    const ast = parseAel(source, { filename });
     return { ast, source, filename };
   } catch (e) {
     e.filename = filename;
@@ -61,7 +62,7 @@ function readFeedbackBatch(filePath) {
 function parseProgram(filePath, options = {}) {
   const { resolved, source } = readSource(filePath);
   const { config } = loadProjectConfig({ cwd: path.dirname(resolved), ...options });
-  const ast = parseAel(source);
+  const ast = parseAel(source, { filename: resolved, ...options });
   return { ast, resolved, source, config };
 }
 
@@ -110,49 +111,27 @@ async function runProgram(ast, options = {}) {
 
   if (runOpts.llm?.mode) process.env.NOEON_LLM_MODE = runOpts.llm.mode;
 
-  const validation = validateAel(ast);
-  const governance = runGovernancePreflight(ast, validation, options);
-
-  if (options.require_valid !== false && !governance.valid) {
-    return {
-      success: false,
-      blocked: true,
-      validation: governance,
-      error: 'Governance preflight failed'
-    };
-  }
-
   const obs = options.observability || new ObservabilitySystem({
     log_level: runOpts.verbose ? 'debug' : 'info',
     console: options.console !== false && !runOpts.quiet,
     compact: !runOpts.verbose
   });
 
-  const kernel = createKernel(runOpts);
   if (runOpts.trace) {
     obs.traceExecution(options.program_name || ast.task?.name || 'program');
   }
 
-  const result = await kernel.execute(ast, { verbose: runOpts.verbose });
-  result.governance = governance;
-  result.llm = kernel.llm ? kernel.llm.getStats() : null;
-  result.config = { path: configPath, environment: config.environment };
-
-  const feedback = options.feedback || {};
-  const protocol = enrichWithProtocol(ast, result, feedback, {
+  const result = await executeProgram(ast, {
+    ...runOpts,
+    ...options,
     with_protocol: runOpts.with_protocol,
-    pluginPolicy: options.pluginPolicy
+    feedback: options.feedback || {},
+    verbose: runOpts.verbose
   });
 
-  if (protocol.enriched) {
-    result.protocol = protocol;
-    if (!protocol.protocolSuccess && options.strict_protocol) {
-      result.success = false;
-      result.error = 'Protocol enrichment failed (compute or META violations)';
-    }
-  }
+  result.config = { path: configPath, environment: config.environment };
 
-  if (runOpts.trace) {
+  if (runOpts.trace && !result.blocked) {
     result.observability = obs.endExecution(result.success ? 'success' : 'failure');
   }
 
@@ -161,28 +140,38 @@ async function runProgram(ast, options = {}) {
 
 async function inspectProgram(ast, options = {}) {
   const obs = new ObservabilitySystem({ log_level: 'trace', console: false });
-  const kernel = createKernel(options);
   obs.traceExecution(options.program_name || ast.task?.name || 'program');
-  const result = await kernel.execute(ast);
+  const result = await executeProgram(ast, { ...options, with_protocol: 'on' });
   const trace = obs.endExecution(result.success ? 'success' : 'failure');
-  const protocol = enrichWithProtocol(ast, result, options.feedback || {}, options);
   return {
-    result: { ...result, protocol: protocol.enriched ? protocol : undefined },
+    result,
     observability: obs,
     trace,
-    kernelStatus: kernel.getStatus(),
-    hasProtocolFeatures: hasProtocolFeatures(ast)
+    kernelStatus: result.cognitive ? buildKernelStatus(result) : null,
+    hasProtocolFeatures: hasProtocolFeatures(ast),
+    vm: result.vm,
+    profile: result.profile,
+    phases: result.phases
   };
 }
 
-function simulateContract(ast, feedback = {}, outputOptions = {}) {
+function buildKernelStatus(result) {
+  return {
+    state: 'idle',
+    phases: result.phases,
+    vm: result.vm,
+    profile: result.profile
+  };
+}
+
+async function simulateContract(ast, feedback = {}, outputOptions = {}) {
   const validation = validateAel(ast);
   if (!validation.valid) {
     return { success: false, validation, error: 'Simulation blocked: contract is invalid.' };
   }
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, feedback);
+  const cycle = await runProtocolCycle(compiled, feedback, {});
 
   const statePath = outputOptions.statePath;
   if (statePath) {
@@ -282,6 +271,7 @@ function getRuntimeStatus() {
   const { configPath, config } = loadProjectConfig();
   return {
     version: RUNTIME_VERSION,
+    vm: VM_VERSION,
     kernel: kernel.getStatus(),
     config: { path: configPath, environment: config.environment },
     llm: {
@@ -310,5 +300,7 @@ module.exports = {
   getRuntimeStatus,
   loadProjectConfig,
   hasProtocolFeatures,
-  enrichWithProtocol
+  enrichWithProtocol,
+  executeProgram,
+  VM_VERSION
 };

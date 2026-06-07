@@ -1,0 +1,15 @@
+{
+  "version": "v0",
+  "updatedAt": "2026-06-07T21:47:50.950Z",
+  "productivity": {
+    "baselineMeanStatements": null,
+    "noeonMeanStatements": null
+  },
+  "reliability": {
+    "baselineSuccessRate": null,
+    "noeonSuccessRate": null
+  },
+  "governance": {
+    "auditReplaySuccessRate": null
+  }
+}

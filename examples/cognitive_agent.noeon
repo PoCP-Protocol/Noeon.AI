@@ -1,0 +1,19 @@
+profile "general"
+version "1.0.0-alpha"
+
+module agent_demo
+
+import std.cognition
+
+@effect(ai)
+fn think(input: string) {
+  observe input modality=text source="user"
+  understand context=intent method=semantic confidence=0.72
+  reason strategy=abductive depth=3
+  decide action=respond threshold=0.65
+  reflect "reasoning quality" depth=standard
+}
+
+export fn main() {
+  think("Hello, Noeon")
+}

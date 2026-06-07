@@ -1,3 +1,5 @@
+const httpCall = require("./http-call");
+
 function normalizeBoolean(value, fallback = false) {
   if (value === undefined || value === null) {
     return fallback;
@@ -63,38 +65,7 @@ const plugins = {
   http_call: {
     name: "http_call",
     version: "0.9.0",
-    execute({ stepName, binding, feedback }) {
-      const latencyMs = Number(binding.latencyMs || 1000);
-      const endpoint = binding.endpoint || "https://api.example.com/execute";
-
-      const injected = feedback?.actionResults?.[stepName];
-      if (injected?.status === "failed") {
-        return {
-          status: "failed",
-          reason: injected.reason || "http call failed",
-          latencyMs: Number(injected.latencyMs || latencyMs),
-          failureCategory: "execution_error",
-          pluginMeta: {
-            template: "http_call",
-            endpoint,
-            mocked: true
-          },
-          errorCode: injected.errorCode || "HTTP_CALL_FAILED"
-        };
-      }
-
-      return {
-        status: "done",
-        reason: "http call succeeded",
-        latencyMs,
-        failureCategory: null,
-        pluginMeta: {
-          template: "http_call",
-          endpoint,
-          mocked: true
-        }
-      };
-    }
+    execute: httpCall.execute
   }
 };
 

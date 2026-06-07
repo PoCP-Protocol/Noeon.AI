@@ -2,6 +2,8 @@
 
 const { parseFromSource, validateProgram, compileProgram, runProgram, explainProgram, getRuntimeStatus } = require('./runtime/unified-runtime');
 
+const MAX_BODY_BYTES = 1024 * 1024;
+
 function sendJson(res, status, payload) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -15,7 +17,16 @@ function sendJson(res, status, payload) {
 async function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', (chunk) => { data += chunk; });
+    let size = 0;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new Error('Request body too large'));
+        req.destroy();
+        return;
+      }
+      data += chunk;
+    });
     req.on('end', () => {
       try {
         resolve(data ? JSON.parse(data) : {});
@@ -115,13 +126,48 @@ async function handlePlaygroundApi(req, res, pathname) {
     const fs = require('fs');
     const path = require('path');
     const examplesDir = path.resolve(__dirname, '..', 'examples');
-    const files = fs.readdirSync(examplesDir).filter((f) => f.endsWith('.ael'));
-    sendJson(res, 200, {
-      examples: files.map((name) => ({
-        name,
-        source: fs.readFileSync(path.join(examplesDir, name), 'utf8')
-      }))
-    });
+    const url = new URL(req.url || '/api/examples', 'http://localhost');
+    const listAll = url.searchParams.get('all') === '1';
+
+    if (listAll) {
+      const files = fs.readdirSync(examplesDir)
+        .filter((f) => f.endsWith('.noeon') || f.endsWith('.ael'))
+        .sort();
+      sendJson(res, 200, {
+        examples: files.map((name) => ({
+          name,
+          title: name,
+          description: '',
+          category: name.endsWith('.noeon') ? 'noeon' : 'ael',
+          profile: name.endsWith('.noeon') ? 'general' : 'ael',
+          source: fs.readFileSync(path.join(examplesDir, name), 'utf8')
+        }))
+      });
+      return true;
+    }
+
+    const curated = [
+      { name: 'hello.noeon', title: 'Hello World', description: 'Minimal cognitive cycle', category: 'getting-started' },
+      { name: 'agent_research.noeon', title: 'Research Analyst', description: 'Industry research with citations', category: 'agents' },
+      { name: 'agent_risk_review.noeon', title: 'Risk Reviewer', description: 'Payment approval with escalation', category: 'agents' },
+      { name: 'agent_customer_service.noeon', title: 'Support Agent', description: 'Customer issue resolution', category: 'agents' }
+    ];
+
+    const examples = [];
+    for (const entry of curated) {
+      const filePath = path.join(examplesDir, entry.name);
+      if (!fs.existsSync(filePath)) continue;
+      examples.push({
+        name: entry.name,
+        title: entry.title,
+        description: entry.description,
+        category: entry.category,
+        profile: 'general',
+        source: fs.readFileSync(filePath, 'utf8')
+      });
+    }
+
+    sendJson(res, 200, { examples });
     return true;
   }
 

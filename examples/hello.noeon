@@ -1,0 +1,17 @@
+profile "general"
+version "1.0.0-alpha"
+
+module hello
+
+program hello_world {
+  objective "Demonstrate general profile execution through unified VM"
+  context domain=general audience=developer mode=cognitive
+
+  observe input modality=text source="user"
+  understand context=developer_intent method=semantic_summary confidence=0.72
+  reason strategy=deductive depth=2
+  decide action=greet threshold=0.6
+  act action=greet channel=console safety=low
+  feedback source=user signal=acceptance window=1
+  reflect "execution quality" depth=standard
+}

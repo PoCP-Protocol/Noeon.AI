@@ -52,12 +52,12 @@ CIRCUIT "implementation" => "test_validation"
 CIRCUIT "test_validation" => "release_gating"
 CIRCUIT "release_gating" => "runtime_observability"
 
-ROUTE "spec_define" plugin=echo version=1.0.0 signature=he742dbe2 message=spec_locked latencyMs=700
-ROUTE "architecture_design" plugin=echo version=1.0.0 signature=he742dbe2 message=design_reviewed latencyMs=900
-ROUTE "implementation" plugin=echo version=1.0.0 signature=he742dbe2 message=code_integrated latencyMs=1200
-ROUTE "test_validation" plugin=policy_guard version=1.1.0 signature=h6c80f2a8 strict=true latencyMs=1000
-ROUTE "release_gating" plugin=http_call version=0.9.0 signature=h161bf2f4 endpoint=https://api.example.com/release-gate latencyMs=1100
-ROUTE "runtime_observability" plugin=echo version=1.0.0 signature=he742dbe2 message=runtime_metrics_published latencyMs=800
+ROUTE "spec_define" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=spec_locked latencyMs=700
+ROUTE "architecture_design" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=design_reviewed latencyMs=900
+ROUTE "implementation" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=code_integrated latencyMs=1200
+ROUTE "test_validation" plugin=policy_guard version=1.1.0 signature=hmac-sha256:8a6108d05c3683ba517d5f466e5dd2318343650e373444d2808be51d51da9760 strict=true latencyMs=1000
+ROUTE "release_gating" plugin=http_call version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910 endpoint=https://api.example.com/release-gate latencyMs=1100
+ROUTE "runtime_observability" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=runtime_metrics_published latencyMs=800
 
 CHAIN step=spec_define hypothesis=requirements_traceability_maintained evidence=spec_artifacts note=req_to_design_trace
 CHAIN step=architecture_design hypothesis=requirements_traceability_maintained evidence=spec_artifacts note=design_constraints_locked

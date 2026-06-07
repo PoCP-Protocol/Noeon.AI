@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-06-07T21:53:46.376Z",
+  "gateStatus": "HEALTHY",
+  "gates": {
+    "conformance": {
+      "totalPass": 32,
+      "totalFail": 0,
+      "baselineStatus": "existing",
+      "newFail": []
+    },
+    "metrics": {
+      "status": "PENDING",
+      "passRate": 100,
+      "total": 32,
+      "passed": 32,
+      "failed": 0
+    },
+    "strict": {
+      "clean": true
+    },
+    "collector": {
+      "conformanceFailed": false,
+      "conformanceExitCode": 0
+    }
+  }
+}

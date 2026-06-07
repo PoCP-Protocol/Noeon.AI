@@ -783,9 +783,63 @@ function validateComputeBlock(ast, errors, warnings) {
   }
 }
 
+function validateAgents(ast, errors, warnings) {
+  if (!Array.isArray(ast.agents) || ast.agents.length === 0) {
+    return;
+  }
+
+  const allowedFlowKinds = new Set([
+    "perceive",
+    "reason",
+    "act",
+    "reflect",
+    "understand",
+    "decide",
+    "feedback"
+  ]);
+
+  for (const agent of ast.agents) {
+    if (!agent.name) {
+      errors.push("agent.name is required");
+    }
+    if (!agent.goal) {
+      errors.push(`AGENT '${agent.name || "unknown"}' requires GOAL`);
+    }
+
+    if (Array.isArray(agent.tools)) {
+      for (const tool of agent.tools) {
+        if (!tool || !String(tool).trim()) {
+          errors.push(`AGENT '${agent.name}' TOOLS entries must be non-empty strings`);
+        }
+      }
+    }
+
+    if (!Array.isArray(agent.flow) || agent.flow.length === 0) {
+      warnings.push(`AGENT '${agent.name}' has no FLOW steps defined`);
+    } else {
+      for (let i = 0; i < agent.flow.length; i += 1) {
+        const step = agent.flow[i];
+        if (!step || !step.kind) {
+          errors.push(`AGENT '${agent.name}' FLOW step ${i + 1} is missing kind`);
+          continue;
+        }
+        if (!allowedFlowKinds.has(step.kind)) {
+          errors.push(`AGENT '${agent.name}' FLOW step ${i + 1} has unsupported kind '${step.kind}'`);
+        }
+      }
+    }
+  }
+}
+
 function validateAel(ast) {
   const errors = [];
   const warnings = [];
+  const isGeneralProfile = ast.profile === "general" || ast.languageProfile === "general";
+  const primaryAgent = Array.isArray(ast.agents) && ast.agents.length > 0 ? ast.agents[0] : null;
+  const generalTask =
+    ast.task ||
+    ast.cognition?.goal ||
+    (primaryAgent ? primaryAgent.name : null);
 
   // Cognitive-mode contracts have relaxed protocol requirements
   const isCognitiveMode = ast.cognitive && (
@@ -795,7 +849,13 @@ function validateAel(ast) {
     ast.cognitive.reasonings.length > 0
   );
 
-  const required = isCognitiveMode
+  const required = isGeneralProfile
+    ? [
+        ["profile", ast.profile || ast.languageProfile],
+        ["task", generalTask],
+        ["version", ast.version]
+      ]
+    : isCognitiveMode
     ? [
         ["network", ast.network],
         ["task", ast.task],
@@ -858,7 +918,7 @@ function validateAel(ast) {
     errors.push("budget must be > 0");
   }
 
-  if (ast.collateral && !isCognitiveMode) {
+  if (ast.collateral && !isCognitiveMode && !isGeneralProfile) {
     if (ast.collateral.solver <= 0) {
       errors.push("solver collateral must be > 0");
     }
@@ -1143,7 +1203,10 @@ function validateAel(ast) {
   }
 
   if (!Array.isArray(ast.stateFlow) || ast.stateFlow.length === 0) {
-    warnings.push("FLOW is not defined; default state transitions will be used");
+    const hasAgentFlow = Array.isArray(ast.agents) && ast.agents.some((agent) => agent.flow?.length > 0);
+    if (!hasAgentFlow) {
+      warnings.push("FLOW is not defined; default state transitions will be used");
+    }
   } else {
     const seen = new Set();
     for (const edge of ast.stateFlow) {
@@ -1161,6 +1224,7 @@ function validateAel(ast) {
   }
 
   validateComputeBlock(ast, errors, warnings);
+  validateAgents(ast, errors, warnings);
 
   applyMetaRules(ast, errors, warnings);
 

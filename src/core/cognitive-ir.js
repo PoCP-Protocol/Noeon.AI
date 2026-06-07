@@ -379,6 +379,11 @@ class AELtoIRCompiler {
       this._compileCognitiveBlock(ast.cognitive, program);
     }
 
+    // --- GENERAL PROFILE AGENT BLOCKS ---
+    if (Array.isArray(ast.agents) && ast.agents.length > 0) {
+      this._compileAgents(ast.agents, program);
+    }
+
     // --- EXTENDED COGNITIVE (v0.4+) ---
     if (ast.cognitiveFlow) {
       this._compileCognitiveFlow(ast.cognitiveFlow, program);
@@ -484,6 +489,20 @@ class AELtoIRCompiler {
       }
     }
 
+    // UNDERSTAND → PROCESS (semantic/contextual understanding)
+    if (cog.understandings) {
+      for (const u of cog.understandings) {
+        program.add(new IRNode(IRNodeType.PROCESS, {
+          mode: ProcessMode.ANALYTICAL,
+          operation: 'understand',
+          context: u.context || u.domain || 'current_context',
+          method: u.method || 'semantic',
+          confidence: u.confidence !== undefined ? Number(u.confidence) : null,
+          source: 'general'
+        }));
+      }
+    }
+
     // REFLECT → VALIDATE (self-check)
     if (cog.reflections) {
       for (const r of cog.reflections) {
@@ -517,6 +536,32 @@ class AELtoIRCompiler {
           strategy: d.strategy || 'satisfice',
           threshold: d.threshold || 0.6,
           source: 'cognitive'
+        }));
+      }
+    }
+
+    // ACT → COLLABORATE (tool/action boundary until Action IR is promoted)
+    if (cog.acts) {
+      for (const a of cog.acts) {
+        program.add(new IRNode(IRNodeType.COLLABORATE, {
+          mode: CollabMode.DELEGATE,
+          action: a.action || a.name || 'act',
+          channel: a.channel || 'runtime',
+          safety: a.safety || 'standard',
+          source: 'general'
+        }));
+      }
+    }
+
+    // FEEDBACK → LEARN
+    if (cog.feedback) {
+      for (const f of cog.feedback) {
+        program.add(new IRNode(IRNodeType.LEARN, {
+          type: 'feedback',
+          signal_type: f.signal || 'feedback',
+          source_name: f.source || 'runtime',
+          window: f.window || null,
+          source: 'general'
         }));
       }
     }
@@ -556,6 +601,100 @@ class AELtoIRCompiler {
           rounds: d.rounds || 3,
           source: 'cognitive'
         }));
+      }
+    }
+  }
+
+  // --- Agent Block Compilation (General Profile) ---
+
+  _compileAgents(agents, program) {
+    for (const agent of agents) {
+      const intent = new IRNode(IRNodeType.INTENT, {
+        type: 'agent',
+        name: agent.name,
+        description: agent.goal,
+        tools: agent.tools || [],
+        policy: agent.policy || {},
+        memory: agent.memory || null,
+        source: 'general'
+      });
+      program.add(intent);
+
+      for (const step of agent.flow || []) {
+        switch (step.kind) {
+          case 'perceive':
+            program.add(new IRNode(IRNodeType.PERCEIVE, {
+              modality: step.modality || 'text',
+              source_input: step.source || step.input,
+              preprocessing: step.preprocessing || null,
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'reason':
+            program.add(new IRNode(IRNodeType.PROCESS, {
+              mode: ProcessMode.ANALYTICAL,
+              strategy: step.strategy || 'deductive',
+              max_depth: step.depth ? Number(step.depth) : 5,
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'act':
+            program.add(new IRNode(IRNodeType.COLLABORATE, {
+              mode: CollabMode.DELEGATE,
+              action: step.action || step.name || 'act',
+              channel: step.channel || 'runtime',
+              safety: step.safety || 'standard',
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'reflect':
+            program.add(new IRNode(IRNodeType.VALIDATE, {
+              type: 'reflection',
+              target: step.subject || 'self',
+              criteria: step.criteria || 'coherence',
+              depth: step.depth || 'standard',
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'understand':
+            program.add(new IRNode(IRNodeType.PROCESS, {
+              mode: ProcessMode.ANALYTICAL,
+              operation: 'understand',
+              context: step.context || step.domain || 'current_context',
+              method: step.method || 'semantic',
+              confidence: step.confidence !== undefined ? Number(step.confidence) : null,
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'decide':
+            program.add(new IRNode(IRNodeType.DECIDE, {
+              type: 'cognitive_decision',
+              options: step.options || [],
+              strategy: step.strategy || 'satisfice',
+              threshold: step.threshold ? Number(step.threshold) : 0.6,
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          case 'feedback':
+            program.add(new IRNode(IRNodeType.LEARN, {
+              type: 'feedback',
+              signal_type: step.signal || 'feedback',
+              source_name: step.source || 'runtime',
+              window: step.window || null,
+              agent: agent.name,
+              source: 'general'
+            }));
+            break;
+          default:
+            this.warnings.push(`unsupported agent flow step kind '${step.kind}'`);
+            break;
+        }
       }
     }
   }

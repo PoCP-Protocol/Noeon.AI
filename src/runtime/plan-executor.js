@@ -27,7 +27,7 @@ function findEntryNodes(incomingCount) {
   return nodes;
 }
 
-function executePlan(planEdges, options = {}) {
+async function executePlan(planEdges, options = {}) {
   const failedSteps = Array.isArray(options.failedSteps) ? new Set(options.failedSteps) : new Set();
   const stepLatencyMs = options.stepLatencyMs || {};
   const maxSteps = Number.isInteger(options.maxSteps) && options.maxSteps > 0 ? options.maxSteps : null;
@@ -87,7 +87,7 @@ function executePlan(planEdges, options = {}) {
 
     let evalResult = null;
     if (stepEvaluator) {
-      evalResult = stepEvaluator(node);
+      evalResult = await stepEvaluator(node);
     }
 
     const latencyMs = Number(evalResult?.latencyMs || stepLatencyMs[node] || 350);

@@ -1,0 +1,15 @@
+
+> noeon-ael@1.0.0-alpha metrics
+> node scripts/quality-metrics.js
+
+{
+  "timestamp": "2026-06-07T21:53:45.934Z",
+  "status": "HEALTHY",
+  "metrics": {
+    "conformanceTests": 32,
+    "passRate": "100.00%",
+    "passed": 32,
+    "failed": 0,
+    "total": 32
+  }
+}

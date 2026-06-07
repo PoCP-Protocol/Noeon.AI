@@ -48,13 +48,13 @@ CIRCUIT "adversarial_probe" => "risk_check"
 CIRCUIT "risk_check" => "value_settlement"
 CIRCUIT "value_settlement" => "policy_reflection"
 
-ROUTE "observe_market" plugin=echo version=1.0.0 signature=he742dbe2 message=market_snapshot latencyMs=850
-ROUTE "price_discovery" plugin=echo version=1.0.0 signature=he742dbe2 message=signal_aggregation latencyMs=1050
-ROUTE "cross_verify" plugin=echo version=1.0.0 signature=he742dbe2 message=peer_verification latencyMs=980
-ROUTE "adversarial_probe" plugin=echo version=1.0.0 signature=he742dbe2 message=counterparty_stress_probe latencyMs=1100
-ROUTE "risk_check" plugin=policy_guard version=1.1.0 signature=h6c80f2a8 strict=true latencyMs=950
-ROUTE "value_settlement" plugin=http_call version=0.9.0 signature=h161bf2f4 endpoint=https://api.example.com/settle latencyMs=1200
-ROUTE "policy_reflection" plugin=echo version=1.0.0 signature=he742dbe2 message=policy_updated latencyMs=700
+ROUTE "observe_market" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=market_snapshot latencyMs=850
+ROUTE "price_discovery" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=signal_aggregation latencyMs=1050
+ROUTE "cross_verify" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=peer_verification latencyMs=980
+ROUTE "adversarial_probe" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=counterparty_stress_probe latencyMs=1100
+ROUTE "risk_check" plugin=policy_guard version=1.1.0 signature=hmac-sha256:8a6108d05c3683ba517d5f466e5dd2318343650e373444d2808be51d51da9760 strict=true latencyMs=950
+ROUTE "value_settlement" plugin=http_call version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910 endpoint=https://api.example.com/settle latencyMs=1200
+ROUTE "policy_reflection" plugin=echo version=1.0.0 signature=hmac-sha256:ad8c4a281a1d3138e8b27693b83ced824d3e9fedce8a9bfca1a3456ca6d6911c message=policy_updated latencyMs=700
 
 CHAIN step=observe_market hypothesis=adversarial_price_discovery_remains_stable evidence=market_data note=critical_signal_snapshot
 CHAIN step=price_discovery hypothesis=adversarial_price_discovery_remains_stable evidence=verifier_reports note=consensus_window_evaluated

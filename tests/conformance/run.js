@@ -31,18 +31,13 @@ function baseContext(actionBindings, pluginPolicy = {}) {
   };
 }
 
+const queuedTests = [];
+
 function run(name, fn) {
-  try {
-    fn();
-    console.log(`PASS ${name}`);
-  } catch (err) {
-    console.error(`FAIL ${name}`);
-    console.error(err.stack || err.message);
-    process.exitCode = 1;
-  }
+  queuedTests.push({ name, fn });
 }
 
-run("parser and validator accept reference contract", () => {
+run("parser and validator accept reference contract", async () => {
   const source = loadExample("examples/noeon_superbrain.ael");
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -52,7 +47,7 @@ run("parser and validator accept reference contract", () => {
   assert.equal(result.valid, true);
 });
 
-run("parser accepts native cognition directives", () => {
+run("parser accepts native cognition directives", async () => {
   const source = loadExample("examples/noeon_native_mind.ael");
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -77,7 +72,7 @@ run("parser accepts native cognition directives", () => {
   assert.equal(result.valid, true);
 });
 
-run("compute directives parse and validate", () => {
+run("compute directives parse and validate", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base_score = 10\nCOMPUTE adjusted = base_score * 2 + 5\nASSERT adjusted > 0 message=compute_assertion_ok\nRETURN adjusted`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -92,7 +87,7 @@ run("compute directives parse and validate", () => {
   assert.equal(compiled.contract.compute.bindings.length, 2);
 });
 
-run("compute DEF signatures parse and compile", () => {
+run("compute DEF signatures parse and compile", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nDEF score_boost(base, weight) = base * weight + 1\nLET base = 10\nLET weight = 2\nCOMPUTE boosted = base * weight + 1\nRETURN boosted`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -107,7 +102,7 @@ run("compute DEF signatures parse and compile", () => {
   assert.equal(compiled.contract.compute.functions.length, 1);
 });
 
-run("compute DEF validation rejects duplicate parameters", () => {
+run("compute DEF validation rejects duplicate parameters", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nDEF broken(x, x) = x + 1\nLET x = 1\nRETURN x`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -119,14 +114,14 @@ run("compute DEF validation rejects duplicate parameters", () => {
   );
 });
 
-run("compute DEF can be executed in runtime expressions", () => {
+run("compute DEF can be executed in runtime expressions", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nDEF double(x) = x * 2\nDEF boost(x) = double(x) + 1\nLET base = 10\nCOMPUTE out = boost(base)\nRETURN out`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.81,
     disputeRate: 0.09,
     maliciousRate: 0.02,
@@ -137,7 +132,7 @@ run("compute DEF can be executed in runtime expressions", () => {
   assert.equal(cycle.execution.compute.result, 21);
 });
 
-run("compute DEF reports undefined function usage", () => {
+run("compute DEF reports undefined function usage", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base = 10\nCOMPUTE out = missingFn(base)\nRETURN out`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -149,12 +144,12 @@ run("compute DEF reports undefined function usage", () => {
   );
 });
 
-run("compute IF parses and executes selected branch", () => {
+run("compute IF parses and executes selected branch", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base = 8\nIF gate = base > 5 ? 100 : 1\nRETURN gate`;
   const ast = parseAel(source);
   const result = validateAel(ast);
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.8,
     disputeRate: 0.1,
     maliciousRate: 0.02,
@@ -171,7 +166,7 @@ run("compute IF parses and executes selected branch", () => {
   );
 });
 
-run("compute IF validation rejects non-boolean condition", () => {
+run("compute IF validation rejects non-boolean condition", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base = 2\nIF gate = base + 1 ? 100 : 1\nRETURN gate`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -183,7 +178,7 @@ run("compute IF validation rejects non-boolean condition", () => {
   );
 });
 
-run("compute validation fails on undefined symbol", () => {
+run("compute validation fails on undefined symbol", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nCOMPUTE adjusted = missing_symbol + 1\nRETURN adjusted`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -195,7 +190,7 @@ run("compute validation fails on undefined symbol", () => {
   );
 });
 
-run("compute validation enforces CALL policy fields", () => {
+run("compute validation enforces CALL policy fields", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base = 1\nCALL "compute_step" plugin=echo input=base\nRETURN base`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -211,14 +206,14 @@ run("compute validation enforces CALL policy fields", () => {
   );
 });
 
-run("simulate emits compute receipts for CALL", () => {
+run("simulate emits compute receipts for CALL", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nLET base = 4\nCOMPUTE score = base * 3\nCALL "compute_step" plugin=echo input=score budget_ms=200 timeout_ms=300\nRETURN score`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.8,
     disputeRate: 0.1,
     maliciousRate: 0.02,
@@ -233,14 +228,14 @@ run("simulate emits compute receipts for CALL", () => {
   );
 });
 
-run("meta rules can validate runtime.compute.env", () => {
+run("meta rules can validate runtime.compute.env", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_RANGE path=runtime.compute.env.score min=10 max=100 level=error message=meta_compute_score_out_of_range\nLET base = 5\nCOMPUTE score = base * 15\nCALL "compute_step" plugin=echo input=score budget_ms=200 timeout_ms=300\nRETURN score`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.8,
     disputeRate: 0.1,
     maliciousRate: 0.02,
@@ -256,14 +251,14 @@ run("meta rules can validate runtime.compute.env", () => {
   );
 });
 
-run("meta rules can validate runtime.compute.receipts", () => {
+run("meta rules can validate runtime.compute.receipts", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_REQUIRE path=runtime.compute.receipts level=error message=meta_compute_must_have_receipts\nLET base = 4\nCOMPUTE value = base * 2\nCALL "compute_verify" plugin=echo input=value budget_ms=150 timeout_ms=250\nRETURN value`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.85,
     disputeRate: 0.05,
     maliciousRate: 0.01,
@@ -281,14 +276,14 @@ run("meta rules can validate runtime.compute.receipts", () => {
   assert.equal(cycle.execution.compute.receipts.length >= 2, true);
 });
 
-run("meta rules can gate runtime.compute.summary.callFailureRate", () => {
+run("meta rules can gate runtime.compute.summary.callFailureRate", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_RANGE path=runtime.compute.summary.callFailureRate min=0 max=0 level=error message=meta_compute_call_failure_rate_must_be_zero\nLET base = 4\nCALL "broken_call" plugin=missing_plugin input=base budget_ms=120 timeout_ms=120\nRETURN base`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.85,
     disputeRate: 0.05,
     maliciousRate: 0.01,
@@ -306,14 +301,14 @@ run("meta rules can gate runtime.compute.summary.callFailureRate", () => {
   );
 });
 
-run("meta rules can gate runtime.compute.summary.callFailed", () => {
+run("meta rules can gate runtime.compute.summary.callFailed", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_RANGE path=runtime.compute.summary.callFailed min=0 max=0 level=error message=meta_compute_call_failed_count_must_be_zero\nLET base = 4\nCALL "broken_call" plugin=missing_plugin input=base budget_ms=120 timeout_ms=120\nRETURN base`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.85,
     disputeRate: 0.05,
     maliciousRate: 0.01,
@@ -331,14 +326,14 @@ run("meta rules can gate runtime.compute.summary.callFailed", () => {
   );
 });
 
-run("meta rules can gate runtime.compute.summary.diagnosticCount", () => {
+run("meta rules can gate runtime.compute.summary.diagnosticCount", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_RANGE path=runtime.compute.summary.diagnosticCount min=0 max=0 level=error message=meta_compute_diagnostic_count_must_be_zero\nLET base = 4\nCALL "broken_call" plugin=missing_plugin input=base budget_ms=120 timeout_ms=120\nRETURN base`;
   const ast = parseAel(source);
   const validation = validateAel(ast);
   assert.equal(validation.valid, true);
 
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.85,
     disputeRate: 0.05,
     maliciousRate: 0.01,
@@ -355,7 +350,7 @@ run("meta rules can gate runtime.compute.summary.diagnosticCount", () => {
   );
 });
 
-run("meta rules drive dynamic validation", () => {
+run("meta rules drive dynamic validation", async () => {
   const source = loadExample("examples/noeon_meta_selfhost.ael");
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -385,7 +380,7 @@ run("meta rules drive dynamic validation", () => {
   );
 });
 
-run("meta profile advisory downgrades rule severity in validator", () => {
+run("meta profile advisory downgrades rule severity in validator", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_PROFILE name=advisory_guard namespace=noeon.policy version=1.0 mode=advisory\nMETA_RANGE path=verify.challengeSeconds min=5000 max=6000 level=error message=meta_advisory_should_warn`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -397,7 +392,7 @@ run("meta profile advisory downgrades rule severity in validator", () => {
   assert.equal(result.warnings.some((msg) => msg.includes("[noeon.policy/advisory_guard@1.0]")), true);
 });
 
-run("meta conflict uses last-win in validator", () => {
+run("meta conflict uses last-win in validator", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_RANGE path=verify.challengeSeconds min=700 max=900 level=error message=meta_old_block\nMETA_RANGE path=contract.verify.challengeSeconds min=1000 max=1300 level=error message=meta_new_allow`;
   const ast = parseAel(source);
   const result = validateAel(ast);
@@ -407,7 +402,7 @@ run("meta conflict uses last-win in validator", () => {
   assert.equal(result.warnings.some((msg) => msg.includes("meta conflict resolved by last-win")), true);
 });
 
-run("compiler emits required artifact contract fields", () => {
+run("compiler emits required artifact contract fields", async () => {
   const source = loadExample("examples/noeon_superbrain.ael");
   const ast = parseAel(source);
   const compiled = compileAel(ast);
@@ -424,7 +419,7 @@ run("compiler emits required artifact contract fields", () => {
   assert.equal(typeof compiled.runtime.neuralLoops, "object");
 });
 
-run("parser and compiler preserve meta rules", () => {
+run("parser and compiler preserve meta rules", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_PROFILE name=strict_core namespace=noeon.policy version=1.0 mode=enforce extends=baseline_guard,org_default\nMETA_REQUIRE path=contract.cognition.goal level=error`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
@@ -438,11 +433,11 @@ run("parser and compiler preserve meta rules", () => {
   assert.equal(compiled.spec.metaProfile.extends.includes("baseline_guard"), true);
 });
 
-run("meta policy hardens runtime when blocking rules fail", () => {
+run("meta policy hardens runtime when blocking rules fail", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_REQUIRE path=feedback.proofHash level=error`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.7,
     disputeRate: 0.2,
     maliciousRate: 0.1,
@@ -456,7 +451,7 @@ run("meta policy hardens runtime when blocking rules fail", () => {
   assert.equal(cycle.adaptation.updates.slash.malicious >= 95, true);
 });
 
-run("external meta policy file can harden runtime", () => {
+run("external meta policy file can harden runtime", async () => {
   const source = loadExample("examples/noeon_superbrain.ael");
   const ast = parseAel(source);
   const compiled = compileAel(ast);
@@ -490,7 +485,7 @@ run("external meta policy file can harden runtime", () => {
 
   try {
     process.env.NOEON_META_POLICY_FILE = externalPolicyPath;
-    const cycle = runSuperBrainCycle(compiled, {
+    const cycle = await runSuperBrainCycle(compiled, {
       successRate: 0.82,
       disputeRate: 0.09,
       maliciousRate: 0.03,
@@ -518,7 +513,7 @@ run("external meta policy file can harden runtime", () => {
   }
 });
 
-run("external profile inheritance loads parent rules", () => {
+run("external profile inheritance loads parent rules", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_PROFILE name=strict_child namespace=noeon.meta version=1.0 mode=enforce extends=baseline_parent`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
@@ -562,7 +557,7 @@ run("external profile inheritance loads parent rules", () => {
 
   try {
     process.env.NOEON_META_POLICY_FILE = externalPolicyPath;
-    const cycle = runSuperBrainCycle(compiled, {
+    const cycle = await runSuperBrainCycle(compiled, {
       successRate: 0.8,
       disputeRate: 0.1,
       maliciousRate: 0.05,
@@ -590,7 +585,7 @@ run("external profile inheritance loads parent rules", () => {
   }
 });
 
-run("external profile inheritance cycle emits warning", () => {
+run("external profile inheritance cycle emits warning", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_PROFILE name=cycle_a namespace=noeon.meta version=1.0 mode=enforce extends=cycle_b`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
@@ -622,7 +617,7 @@ run("external profile inheritance cycle emits warning", () => {
 
   try {
     process.env.NOEON_META_POLICY_FILE = externalPolicyPath;
-    const cycle = runSuperBrainCycle(compiled, {
+    const cycle = await runSuperBrainCycle(compiled, {
       successRate: 0.8,
       disputeRate: 0.1,
       maliciousRate: 0.05,
@@ -648,11 +643,11 @@ run("external profile inheritance cycle emits warning", () => {
   }
 });
 
-run("meta profile advisory prevents runtime hardening for advisory violations", () => {
+run("meta profile advisory prevents runtime hardening for advisory violations", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_PROFILE name=advisory_guard namespace=noeon.policy version=1.0 mode=advisory\nMETA_REQUIRE path=feedback.proofHash level=error message=meta_runtime_advisory`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.7,
     disputeRate: 0.2,
     maliciousRate: 0.1,
@@ -668,11 +663,11 @@ run("meta profile advisory prevents runtime hardening for advisory violations", 
   );
 });
 
-run("meta conflict uses last-win in runtime engine", () => {
+run("meta conflict uses last-win in runtime engine", async () => {
   const source = `${loadExample("examples/noeon_superbrain.ael")}\nMETA_REQUIRE path=feedback.proofHash level=error message=runtime_old_block\nMETA_REQUIRE path=feedback.proofHash level=warning message=runtime_new_warn`;
   const ast = parseAel(source);
   const compiled = compileAel(ast);
-  const cycle = runSuperBrainCycle(compiled, {
+  const cycle = await runSuperBrainCycle(compiled, {
     successRate: 0.8,
     disputeRate: 0.1,
     maliciousRate: 0.05,
@@ -690,8 +685,8 @@ run("meta conflict uses last-win in runtime engine", () => {
   );
 });
 
-run("runtime denies when version is required but missing", () => {
-  const result = runActionStep(
+run("runtime denies when version is required but missing", async () => {
+  const result = await runActionStep(
     "collect_signals",
     baseContext(
       {
@@ -708,8 +703,8 @@ run("runtime denies when version is required but missing", () => {
   assert.equal(result.receipt.errorCode, "PLUGIN_VERSION_REQUIRED");
 });
 
-run("runtime denies plugin version mismatch", () => {
-  const result = runActionStep(
+run("runtime denies plugin version mismatch", async () => {
+  const result = await runActionStep(
     "collect_signals",
     baseContext({
       collect_signals: { plugin: "echo", version: "9.9.9", latencyMs: 100 }
@@ -721,8 +716,8 @@ run("runtime denies plugin version mismatch", () => {
   assert.equal(result.receipt.errorCode, "PLUGIN_VERSION_MISMATCH");
 });
 
-run("runtime denies when signature is required but missing", () => {
-  const result = runActionStep(
+run("runtime denies when signature is required but missing", async () => {
+  const result = await runActionStep(
     "collect_signals",
     baseContext(
       {
@@ -740,11 +735,11 @@ run("runtime denies when signature is required but missing", () => {
   assert.equal(result.receipt.errorCode, "PLUGIN_SIGNATURE_REQUIRED");
 });
 
-run("runtime accepts valid signature and reports verification", () => {
+run("runtime accepts valid signature and reports verification", async () => {
   const signingKey = "conformance-key";
   const signature = expectedSignature("echo", "1.0.0", signingKey);
 
-  const result = runActionStep(
+  const result = await runActionStep(
     "collect_signals",
     baseContext(
       {
@@ -768,14 +763,28 @@ run("runtime accepts valid signature and reports verification", () => {
   assert.equal(result.receipt.pluginVersion, "1.0.0");
   assert.equal(result.receipt.signatureVerified, true);
   assert.equal(typeof result.receipt.expectedSignature, "string");
+  assert.equal(result.receipt.expectedSignature.startsWith("hmac-sha256:"), true);
 });
 
-if (!process.exitCode) {
-  console.log("All conformance checks passed.");
-}
+(async () => {
+  for (const { name, fn } of queuedTests) {
+    try {
+      await fn();
+      console.log(`PASS ${name}`);
+    } catch (err) {
+      console.error(`FAIL ${name}`);
+      console.error(err.stack || err.message);
+      process.exitCode = 1;
+    }
+  }
 
-if (originalMetaPolicyFile === undefined) {
-  delete process.env.NOEON_META_POLICY_FILE;
-} else {
-  process.env.NOEON_META_POLICY_FILE = originalMetaPolicyFile;
-}
+  if (!process.exitCode) {
+    console.log("All conformance checks passed.");
+  }
+
+  if (originalMetaPolicyFile === undefined) {
+    delete process.env.NOEON_META_POLICY_FILE;
+  } else {
+    process.env.NOEON_META_POLICY_FILE = originalMetaPolicyFile;
+  }
+})();

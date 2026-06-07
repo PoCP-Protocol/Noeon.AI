@@ -1,230 +1,387 @@
 # Noeon Language System v1.0 (Draft)
 
-Status: Draft
-Audience: language designers, runtime engineers, governance maintainers
-Scope: normative skeleton aligned to current implementation
+**Status:** Draft  
+**Audience:** language designers, runtime engineers, product architects, governance maintainers  
+**Scope:** system architecture and cognitive programming paradigm — not normative grammar  
+**Normative spec:** see `docs/spec/NOEON_SPEC_v1.0.md` (when published); interim reference: `docs/spec/NOEON_SPEC_v0.9.md`
 
-## 1. Vision and Scope
+---
 
-Noeon is a protocol-first language system for distributed intelligence execution.
+## 1. Executive Summary
 
-This draft defines Noeon as a five-layer system:
+Noeon is an **AI-native general programming language** built around the **Cognitive Programming** paradigm. Humans express programs through goals, context, cognition, evidence, decisions, actions, feedback, and learning; the Noeon compiler and unified runtime convert those cognitive programs into executable, observable systems. Every surface — `.noeon` general programs, AEL task contracts (`.ael`), and cognitive-only flows — compiles to the same **Cognitive Intermediate Representation (IR)** and executes through a single kernel.
 
-1. L1 Contract Layer: task, budget, verification, settlement
-2. L2 Cognition Layer: reasoning policy, uncertainty control, debate and arbitration
-3. L3 Governance Layer: meta rules, policy profiles, inheritance and conflict resolution
-4. L4 Execution Layer: plan execution, plugin policy, audit, learning, reporting
-5. L5 Compute Layer: deterministic expressions, governed effects, auditable compute receipts
+The core formula is:
 
-Out of scope for this draft:
+```text
+Program = Goal + Context + Cognition + Action + Feedback + Evolution
+```
 
-1. Full decentralized consensus protocol
-2. Cryptographic settlement finality
-3. LLM/model runtime specification
+This document describes *how* that formula is realized in layers, pipelines, and tooling. It does **not** claim that software is conscious or sentient. Noeon **models cognitive workflows** — the repeatable patterns humans use to perceive, reason, decide, act, measure outcomes, and adapt — and makes them **executable, testable, auditable, and governable**. The language borrows cognitive vocabulary as a design metaphor, not as a claim about machine phenomenology.
 
-## 2. Core Terms
+---
 
-1. Contract: a machine-checkable Noeon program that declares task and policy constraints.
-2. Cycle: one runtime execution round produced by simulate.
-3. Learning update: policy delta inferred from feedback.
-4. Meta rule: governance constraint evaluated on contract, feedback, or runtime context.
-5. Meta profile: namespaced rule package with execution mode and optional inheritance.
-6. Hardened mode: runtime safety posture activated by blocking governance violations.
+## 2. Paradigm: Cognitive Programming
 
-## 3. Layered Architecture
+### 2.1 Intent-driven vs command-driven
 
-### 3.1 L1 Contract Layer
+| Paradigm | Unit of thought | Primary question | Typical artifact |
+|---|---|---|---|
+| **Imperative** | Statement | What step runs next? | `if`, `for`, assignment |
+| **Object-oriented** | Object + method | Who owns this behavior? | classes, interfaces |
+| **Functional** | Expression + function | What value is produced? | pure functions, pipelines |
+| **Cognitive (Noeon)** | Goal + evidence + decision | What should the system understand and achieve? | `PERCEIVE`, `REASON`, `DECIDE`, `LEARN` |
 
-Required concern set:
+Traditional languages center machine execution primitives: variables, functions, branches, loops, classes, threads. Noeon retains computation but elevates AI-era concepts to first-class language objects: **Goal, Context, Perception, Understanding, Hypothesis, Evidence, Confidence, Decision, Action, Memory, Policy, Trace, Reflection, and Evolution**.
 
-1. Identity: NETWORK, TASK
-2. Economics: BUDGET, collateral, ON_SUCCESS, ON_SLASH
-3. Verification: VERIFY quorum/challenge/mode
-4. Lifecycle: FLOW transitions
+### 2.2 Design principles
 
-### 3.2 L2 Cognition Layer
+1. **Intent as program** — describe *what* to achieve; the runtime resolves *how* within constraints.
+2. **Uncertainty-native** — confidence and evidence are structural, not afterthoughts.
+3. **Observable cognition** — reasoning traces, decisions, and policy checks are first-class outputs.
+4. **Governed execution** — META rules, POLICY profiles, and human-in-the-loop gates bound autonomous behavior.
+5. **Unified compilation** — one IR, one kernel; protocol contracts and cognitive flows are views of the same model.
 
-Cognition primitives:
+Example contrast:
 
-1. GOAL, CONSTRAINT, RISK, MEMORY, LEARN
-2. COGNITION, SELF_CHECK, INFER, CRITIC
-3. HYPOTHESIS, EVIDENCE, COUNTEREXAMPLE, TRACE
-4. DEBATE, ARBITRATE, JUROR
+```text
+# Imperative: execute instructions
+if (data > threshold) { alert(); }
 
-Runtime expectation:
+# Noeon: model a cognitive workflow
+PERCEIVE source=sensor modality=numerical
+PREDICT "threshold breach" confidence=0.7
+REASON strategy=abductive depth=3
+DECIDE action=alert threshold=0.8
+REFLECT "Was my reasoning sound?" depth=deep
+```
 
-1. Produce nativeMind diagnostics
-2. Produce recommendation and controlDecision
-3. Keep explainable linkage between plan and evidence objects
+Reference implementation of the cognitive cycle: `src/core/kernel.js` (Perceive → Attend → Predict → Process → Decide → Validate → Learn → Remember → Evolve).
 
-### 3.3 L3 Governance Layer
+---
 
-Meta directives:
+## 3. System Architecture
 
-1. META_REQUIRE
-2. META_RANGE
-3. META_ENUM
-4. META_RELATION
-5. META_PROFILE
+Noeon is organized as a six-layer stack (L0–L5). Layers are conceptual boundaries; many modules span adjacent layers.
 
-Meta profile fields:
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  L5  Developer Experience                                                │
+│      CLI, LSP, Playground, Studio (roadmap)                              │
+├──────────────────────────────────────────────────────────────────────────┤
+│  L4  Execution & Tools                                                   │
+│      Plugins, HTTP, MCP, compute kernel, protocol simulate/train         │
+├──────────────────────────────────────────────────────────────────────────┤
+│  L3  Governance & Security                                               │
+│      META rules, POLICY profiles, human-in-the-loop, plugin integrity    │
+├──────────────────────────────────────────────────────────────────────────┤
+│  L2  Unified Cognitive Kernel                                            │
+│      perceive → decide → act → learn cycle                               │
+├──────────────────────────────────────────────────────────────────────────┤
+│  L1  Cognitive IR & Type System                                          │
+│      14 IR node types, belief/uncertainty/temporal types                 │
+├──────────────────────────────────────────────────────────────────────────┤
+│  L0  Language Surface                                                    │
+│      general (.noeon) · cognitive · protocol/AEL (.ael) profiles         │
+└──────────────────────────────────────────────────────────────────────────┘
+```
 
-1. name
-2. namespace
-3. version
-4. mode: enforce or advisory
-5. extends: parent profile names
+### 3.1 L0 — Language Surface
 
-Normative behavior:
+Three **language profiles** share parsers and compile to the same IR (see Section 4):
 
-1. advisory mode downgrades all meta violations to warning severity.
-2. conflict resolution uses deterministic last-win for same rule identity.
-3. overridden rules emit audit warnings.
-4. inheritance cycles must emit warnings.
+| Profile | Typical extension | Role |
+|---|---|---|
+| **General** | `.noeon` | AI-era general programs: goals, observe/understand/reason/decide/act/feedback |
+| **Cognitive** | `.ael` (cognitive-only) | Reasoning flows without full contract headers |
+| **Protocol / AEL** | `.ael` | Task contracts: budget, verify, settlement, FLOW, governance hooks |
 
-### 3.4 L4 Execution Layer
+**Key modules:** `src/parser.js`, `src/cognitive-parser.js`, `src/core/profile.js`, `examples/hello.noeon`
 
-Execution flow:
+The surface accepts 50+ cognitive keywords plus AEL contract directives. Cognitive aliases map deterministically to canonical forms for validation and compilation.
 
-1. parse -> validate -> compile
-2. evaluate meta policy (pre-plan)
-3. execute plan/actions
-4. apply learning update
-5. evaluate meta policy (post-learning)
-6. emit cycle + report + optional audit log
+### 3.2 L1 — Cognitive IR & Type System
 
-Safety behavior:
+All programs lower to **Cognitive IR** — the unification layer where “a contract is a thought.” AEL primitives map to cognitive operations (e.g., `TASK` → `INTENT`, `BUDGET` → `CONSTRAINT`, `VERIFY` → `VALIDATE`, `PLUGIN` → `PERCEIVE`).
 
-1. if blocking meta violations exist, runtime enters hardened mode.
-2. hardened mode enforces safer verification posture and stricter learning bounds.
+**IR node types (14):** `INTENT`, `CONSTRAINT`, `PROCESS`, `VALIDATE`, `LEARN`, `PERCEIVE`, `DECIDE`, `COMMIT`, `COLLABORATE`, `EVOLVE`, `REMEMBER`, `ATTEND`, `PREDICT`, `META`
 
-### 3.5 L5 Compute Layer
+**Cognitive types (7):** `Belief`, `Uncertain`, `Temporal`, `Emotion`, `Intention`, `Percept`, `MemoryTrace`
 
-Compute kernel responsibility:
+**Key modules:** `src/core/cognitive-ir.js`, `src/compiler.js`, `src/validator.js`
 
-1. provide deterministic expression evaluation as language-native compute capability.
-2. isolate side effects behind explicit capability-scoped calls.
-3. emit machine-verifiable receipts for every effectful compute step.
-4. expose compute outputs/receipts to governance checks.
+### 3.3 L2 — Unified Cognitive Kernel
 
-Reference draft:
+The kernel is the single execution engine for all profiles. It orchestrates subsystems (workspace, dual-process reasoning, memory, prediction, metacognition, fault tolerance, lifecycle, observability) and implements the full cycle:
 
-1. docs/NOEON_COMPUTE_KERNEL_v0.1_DRAFT.md
+```text
+Perceive → Attend → Predict → Process → Decide → Act → Validate → Learn → Remember → Evolve
+```
 
-## 4. Grammar Surface (Normative Skeleton)
+Kernel states (`KernelState` in `src/core/kernel.js`) track phase transitions for tracing and debugging.
 
-The exact grammar is implementation-defined, but the following directives are normative for v1.0 profile:
+**Key modules:** `src/core/kernel.js`, `src/vm/unified-executor.js`, `src/core/observability.js`
 
-1. VERSION, NETWORK, TASK, TAGS
-2. BUDGET, DEADLINE, VERIFY
-3. SOLVER_COLLATERAL, VERIFIER_COLLATERAL
-4. ON_SUCCESS, ON_SLASH, FLOW
-5. Cognition directives from Section 3.2
-6. Governance directives from Section 3.3
+### 3.4 L3 — Governance & Security
 
-Alias policy:
+Governance constrains *what* the kernel may do regardless of cognitive output:
 
-1. Cognitive aliases are allowed if they map deterministically to canonical directives.
-2. Canonical form is the source of truth for validation and compilation.
+- **META directives** — `META_REQUIRE`, `META_RANGE`, `META_ENUM`, `META_RELATION`, `META_PROFILE`
+- **Policy profiles** — namespaced rule packages with `enforce` or `advisory` mode and optional inheritance
+- **Human-in-the-loop** — escalation paths when confidence, policy, or risk thresholds are breached
+- **Hardened mode** — activated on blocking governance violations; stricter verification and learning bounds
 
-## 5. Semantic Invariants (Normative)
+Preflight governance runs before plan execution; post-learning checks run after policy updates. Audit entries capture violation traces.
 
-### 5.1 Contract Invariants
+**Key modules:** `src/core/governance.js`, `src/runtime/meta-rule-engine.js`, `src/runtime/audit-logger.js`, `src/runtime/plugins/integrity.js`, `docs/rfc/RFC-0002-plugin-signature-enforcement.md`
 
-1. required fields must exist: network, task, version, budget, deadline, verify, collateral, settlement.
-2. verify.quorum must satisfy 0 < numerator <= denominator.
-3. ON_SUCCESS distribution must sum to 100.
-4. percentage fields in slashing/settlement must be in [0, 100].
+### 3.5 L4 — Execution & Tools
 
-### 5.2 Cognition Invariants
+The execution layer bridges cognitive plans to the outside world:
 
-1. self_check.threshold in [0, 1].
-2. infer.depth and infer.diversity must be bounded by implementation limits.
-3. hypothesis/evidence/counterexample fields must preserve type constraints.
-4. arbitration thresholds must be in [0, 1].
+| Capability | Purpose | Reference |
+|---|---|---|
+| **Plugins** | External modalities and effectful capabilities | `src/runtime/plugins/` |
+| **HTTP / API** | Playground and service endpoints | `src/playground-api.js`, `src/serve-site.js` |
+| **MCP** | Model Context Protocol tool integration (roadmap / bridge) | protocol-bridge enrichment |
+| **Compute kernel** | Deterministic expressions, governed effects, receipts | `docs/NOEON_COMPUTE_KERNEL_v0.1_DRAFT.md` |
+| **Protocol phase** | Simulate/train cycles, settlement artifacts | `src/vm/protocol-phase.js`, `src/runtime/simulator.js`, `src/core/protocol-bridge.js` |
 
-### 5.3 Governance Invariants
+Project configuration (`.noeonrc.json`) controls LLM mode, observability, and `with_protocol` behavior via `src/core/config.js`.
 
-1. rule kinds must be supported by the active runtime.
-2. profile mode must be enforce or advisory.
-3. same-identity rules must resolve via last-win.
-4. inheritance resolution must be deterministic and cycle-safe.
+### 3.6 L5 — Developer Experience
+
+| Tool | Command / entry | Status |
+|---|---|---|
+| **Unified CLI** | `src/cli.js` — `run`, `compile`, `validate`, `inspect`, `repl`, `simulate`, `train` | ✅ v0.9 |
+| **Language Server** | `language-server/noeon-service.js` — hover, symbols, diagnostics | ✅ v0.9 |
+| **Web Playground** | `npm run playground` → `src/playground-api.js` | ✅ v0.9 |
+| **VS Code extension** | `vscode-extension/` — `.ael`, `.noeon` syntax | ✅ v0.9 |
+| **Noeon Studio** | Visual cognitive IDE | 🔲 roadmap (Phase 4) |
+| **Doctor / diagnostics** | `src/doctor.js` | ✅ partial |
+
+Conformance harness: `tests/conformance/run.js`, `tests/unified-v08.test.js`, `tests/unified-v09.test.js`, `tests/unified-vm.test.js`
+
+---
 
-## 6. Conformance Levels
+## 4. Language Profiles
 
-### 6.1 CL-1 Syntax Conformance
+Profile detection and execution mode resolution live in `src/core/profile.js`.
 
-A runtime is CL-1 conformant if it:
+| Profile | When to use | Required surface | Default execution |
+|---|---|---|---|
+| **General (`.noeon`)** | New AI-native apps, tutorials, general cognitive programs | `PROFILE "general"`, `PROGRAM`, `OBJECTIVE`, observe/understand/reason/decide/act | `full` (cognitive + optional protocol enrichment) |
+| **Protocol / AEL (`.ael`)** | Task contracts, budgets, verification, settlement, distributed-intelligence protocols | `TASK`, `BUDGET`, `VERIFY`, collateral, `FLOW`, settlement hooks | `full` or `protocol` (simulate/train) |
+| **Cognitive-only (`.ael`)** | Experiments, REPL sessions, pure reasoning pipelines without contract economics | Cognitive directives only (no contract core) | `cognitive` unless `--with-protocol` |
 
-1. parses canonical directives
-2. validates required contract invariants
-3. emits machine-readable parse/validation artifacts
+**Choosing a profile:**
 
-### 6.2 CL-2 Cognitive Conformance
+- Use **`.noeon`** when the program is primarily about goals, understanding, and actions in a general software context.
+- Use **`.ael` (protocol)** when machine-checkable task economics, verification quorum, or settlement semantics matter.
+- Use **cognitive-only** when iterating on reasoning structure before adding governance or protocol headers.
+
+Example general profile: `examples/hello.noeon`. Protocol bridge auto-enriches cognitive runs when protocol features are detected: `src/core/protocol-bridge.js`.
+
+---
 
-A runtime is CL-2 conformant if it additionally:
+## 5. Primitive Categories
 
-1. accepts cognition directives
-2. emits nativeMind diagnostics
-3. supports training/simulation loop semantics
+Noeon organizes language primitives into **ten categories**. Canonical keyword lists and grammar live in `docs/spec/NOEON_SPEC_v1.0.md` (draft in progress); this table is the architectural taxonomy.
 
-### 6.3 CL-3 Governance Conformance
+| # | Category | Purpose | Representative keywords / IR | Maps to IR |
+|---|---|---|---|---|
+| 1 | **Goal & Intent** | Declare objectives and drives | `OBJECTIVE`, `PROGRAM`, `TASK`, `DRIVE`, `GOAL` | `INTENT` |
+| 2 | **Context & Constraints** | Scope, resources, limits | `CONTEXT`, `BUDGET`, `CONSTRAINT`, `ATTEND` | `CONSTRAINT`, `ATTEND` |
+| 3 | **Perception & Input** | Sense external state | `PERCEIVE`, `OBSERVE`, `SENSE`, `READ`, `PLUGIN` | `PERCEIVE` |
+| 4 | **Understanding & Reasoning** | Infer, predict, process | `UNDERSTAND`, `REASON`, `INTUIT`, `PREDICT`, `COMPUTE` | `PROCESS`, `PREDICT` |
+| 5 | **Evidence & Hypothesis** | Structured beliefs under uncertainty | `HYPOTHESIS`, `EVIDENCE`, `COUNTEREXAMPLE`, `TRACE` | `PROCESS`, `VALIDATE` |
+| 6 | **Decision & Action** | Choose and execute | `DECIDE`, `ACT`, `FLOW`, `WHEN_CONFIDENT` | `DECIDE` |
+| 7 | **Memory & Knowledge** | Store, recall, relate | `KNOW`, `RECALL`, `RELATE`, `CAUSE`, `REMEMBER` | `REMEMBER` |
+| 8 | **Collaboration & Social** | Multi-agent coordination | `DEBATE`, `CONSULT`, `DELEGATE`, `VOTE`, `SPAWN` | `COLLABORATE` |
+| 9 | **Feedback & Learning** | Measure outcomes and adapt | `FEEDBACK`, `LEARN`, `REFLECT`, `REWARD`, `CONSOLIDATE` | `LEARN`, `VALIDATE` |
+| 10 | **Governance & Evolution** | Policy, meta-rules, self-modification | `META_*`, `META_PROFILE`, `EVOLVE`, `MUTATE`, `POLICY` | `META`, `EVOLVE` |
 
-A runtime is CL-3 conformant if it additionally:
+Categories 1–6 correspond to the core formula (Goal → Context → Cognition → Action); categories 7–10 cover persistence, coordination, adaptation, and bounds.
 
-1. supports all meta directives
-2. supports profile mode semantics
-3. supports conflict last-win semantics
-4. supports profile inheritance with cycle warnings
+---
 
-### 6.4 CL-4 Compute Conformance
+## 6. Compilation & Runtime Pipeline
 
-A runtime is CL-4 conformant if it additionally:
+End-to-end flow (implemented in `src/runtime/unified-runtime.js`):
 
-1. supports compute directives and deterministic pure evaluation.
-2. supports auditable effectful calls with receipts.
-3. supports governance checks on compute outputs and receipts.
+```
+ Source (.noeon | .ael)
+        │
+        ▼
+   ┌─────────┐     load .noeonrc.json (optional)
+   │  Parse  │──── src/parser.js / src/cognitive-parser.js
+   └────┬────┘
+        ▼
+   ┌───────────┐
+   │ Validate  │──── src/validator.js (profile + invariants)
+   └────┬──────┘
+        ▼
+   ┌───────────┐
+   │  Compile  │──── src/compiler.js → AELtoIRCompiler (src/core/cognitive-ir.js)
+   └────┬──────┘     emits Cognitive IR program + warnings
+        ▼
+   ┌──────────────────┐
+   │ Profile detect   │──── src/core/profile.js
+   └────┬─────────────┘
+        ▼
+   ┌──────────────────┐
+   │ Governance       │──── src/core/governance.js (preflight META/POLICY)
+   │ preflight        │
+   └────┬─────────────┘
+        ▼
+   ┌──────────────────┐
+   │ Unified executor │──── src/vm/unified-executor.js
+   │ + Kernel         │     src/core/kernel.js
+   └────┬─────────────┘
+        │
+        ├── cognitive phase ──► observability trace, nativeMind diagnostics
+        │
+        └── protocol phase (optional) ──► src/vm/protocol-phase.js
+                    simulate / train / audit artifacts
+        ▼
+   ┌──────────────────┐
+   │ Feedback & learn │──── learning updates, post-governance checks
+   └────┬─────────────┘
+        ▼
+   Report + optional audit log (src/runtime/report.js, src/runtime/audit-logger.js)
+```
 
-## 7. Compatibility and Versioning
+**CLI entry points:**
 
-1. VERSION in contract identifies language profile intent.
-2. unknown directives must fail fast unless explicitly declared experimental.
-3. additive directives are backward-compatible if default semantics are defined.
-4. breaking semantic changes require major profile increment.
+```bash
+noeon run examples/hello.noeon --trace
+noeon compile examples/cognitive_minimal.ael --format both --out out.json
+noeon simulate <contract.ael> <feedback.json> ...
+noeon validate examples/noeon_contract.ael
+```
 
-## 8. Security Baseline
+**Execution modes** (`resolveExecutionMode` in `src/core/profile.js`): `cognitive`, `full`, `protocol`.
 
-1. plugin version and signature checks should be enforceable via runtime policy.
-2. governance file loading must fail safely and surface warnings.
-3. audit entries should include governance violation traces.
-4. production profile should avoid permissive defaults for high-risk tasks.
+---
 
-## 9. Current Implementation Mapping
+## 7. Comparison Matrix
 
-Current codebase mapping to layers:
+High-level positioning — not a benchmark claim.
 
-1. L1/L2 parsing: src/parser.js
-2. invariant validation: src/validator.js
-3. compilation: src/compiler.js
-4. runtime cycle and native mind: src/runtime/simulator.js
-5. learning updates: src/runtime/learn-updater.js
-6. governance engine: src/runtime/meta-rule-engine.js
-7. conformance checks: tests/conformance/run.js
+| Dimension | Noeon | Python | LangChain | Prompt-only |
+|---|---|---|---|---|
+| **Primary abstraction** | Cognitive workflow (goal → learn) | General computation | LLM orchestration chains | Natural language instructions |
+| **Uncertainty** | Native (confidence, evidence types) | Library-dependent | Ad hoc in prompts | Implicit in model output |
+| **Governance** | First-class META/POLICY, hardened mode | Application-level | Limited framework hooks | None in language |
+| **Observability** | Thought traces, kernel phases, audit | Logging as you build it | Callback/tracing plugins | Opaque unless instrumented |
+| **Execution model** | Unified kernel + IR | Interpreter/VM | Python runtime + APIs | Remote model call |
+| **Protocol / contracts** | AEL profile built-in | Custom schemas | Rare | Not applicable |
+| **Learning loop** | `LEARN`, `REFLECT`, train/simulate | ML libraries external | Memory modules optional | Fine-tuning external |
+| **Deterministic testing** | Mock LLM mode, conformance suite | Full | Partial | Difficult |
+| **Best fit** | AI-native agents, governed cognitive systems | General software | Quick LLM pipelines | Prototypes, one-offs |
 
-## 10. Known Gaps to Reach Strong v1.0
+Noeon complements Python (implementation host) and can orchestrate LLMs without reducing the program to a single prompt string.
 
-1. formal small-step semantics document is not finalized.
-2. error code registry is not standardized.
-3. policy registry trust model/signature chain is not yet specified.
-4. distributed settlement and consensus semantics remain external.
-5. benchmark-driven evaluation suite for cognitive quality is incomplete.
-6. compute kernel directives and runtime are draft-level and not fully implemented.
+---
 
-## 11. Recommended Next Artifacts
+## 8. Maturity Roadmap
 
-1. NOEON_SEMANTICS_v1.0.md
-2. NOEON_ERROR_CODES_v1.0.md
-3. NOEON_PROFILE_REGISTRY_v1.0.md
-4. NOEON_CONFORMANCE_SUITE_v1.0.md
-5. NOEON_SECURITY_BASELINE_v1.0.md
-6. NOEON_COMPUTE_KERNEL_v0.1_DRAFT.md
+| Phase | Focus | Deliverables | Status |
+|---|---|---|---|
+| **Phase 1 — Unified foundation** | Single IR + kernel, dual-profile VM, CLI | `cognitive-ir.js`, `kernel.js`, `unified-runtime.js`, profile detection | ✅ **Current (v0.7–v0.9)** |
+| **Phase 2 — General language surface** | Full `.noeon` syntax, expanded stdlib, type checker | General grammar beyond AEL-compatible surface, `hello.noeon` pattern | 🔄 **In progress** |
+| **Phase 3 — Production hardening** | v1.0 spec, error registry, plugin signatures, compute kernel | `NOEON_SPEC_v1.0.md`, RFC-0002 enforcement, conformance CL-1–CL-4 | 🔄 **Partial** |
+| **Phase 4 — Ecosystem & Studio** | Package registry, MCP-first tools, Noeon Studio IDE | Visual debugger, marketplace, distributed settlement (external) | 🔲 **Planned** |
+
+**Version markers (repository):**
+
+- v0.9 — protocol bridge, deep LLM handlers, `.noeonrc.json`, LSP hover/symbols, playground run API
+- v1.0 target — complete AI-native programming language with normative spec and hardened governance defaults
+
+**Known gaps toward strong v1.0:**
+
+1. Formal small-step semantics document not finalized
+2. Standardized error code registry incomplete
+3. Policy registry trust model / signature chain in draft (`RFC-0002`)
+4. Compute kernel directives draft-level (`docs/NOEON_COMPUTE_KERNEL_v0.1_DRAFT.md`)
+5. Benchmark-driven cognitive quality evaluation suite incomplete
+6. Full `.noeon` grammar distinct from AEL-compatible subset
+
+---
+
+## 9. Key Challenges
+
+### 9.1 Uncertainty and non-determinism
+
+LLM-backed `PREDICT`, `REFLECT`, and `DEBATE` steps introduce variance. Mitigations: confidence thresholds, `DECIDE` fallback/escalate paths, mock/offline LLM mode for tests, and explicit `VALIDATE` / `VERIFY` gates.
+
+### 9.2 Security and governance
+
+Autonomous cognitive programs can invoke plugins and external tools. Risks: prompt injection via `PERCEIVE`, over-privileged plugins, policy bypass. Mitigations: META preflight/postflight, plugin integrity checks (`src/runtime/plugins/integrity.js`), hardened mode, human-in-the-loop escalation, advisory vs enforce profiles.
+
+### 9.3 Ecosystem and interoperability
+
+Developers expect packages, debugging, and IDE integration. Current stack covers CLI, LSP, and playground; Phase 4 targets Studio, MCP-native tooling, and a module registry. Interop with existing Python/JS stacks remains via plugins and HTTP, not syntax compatibility.
+
+### 9.4 Over-anthropomorphization
+
+Cognitive vocabulary aids intent expression but can mislead stakeholders into attributing human-like awareness to deterministic or LLM-stochastic pipelines. Documentation and APIs should emphasize **workflow modeling**, traceability, and governance — not consciousness claims. Prefer “cognitive cycle phase” over “the system believes” in operational docs.
+
+### 9.5 Dual-path complexity
+
+Cognitive and protocol execution paths must stay converged on one IR (`src/core/protocol-bridge.js`). Divergence creates duplicate semantics and conformance drift; the architecture treats protocol features as enrichments, not a separate language.
+
+---
+
+## 10. Glossary
+
+| Term | Definition |
+|---|---|
+| **AEL** | Agent Execution Language — protocol-oriented profile for task contracts (`.ael`) |
+| **Cognitive IR** | Intermediate representation; 14 node types unified from all surface profiles |
+| **Cognitive Programming** | Paradigm where programs express goals, reasoning, and learning loops rather than instruction sequences |
+| **Cognitive cycle** | Kernel execution loop: perceive through evolve (`src/core/kernel.js`) |
+| **Confidence** | Numeric belief strength attached to predictions, decisions, and evidence |
+| **Contract** | Machine-checkable AEL program declaring task, budget, verification, and settlement |
+| **Cycle** | One protocol simulation round (`simulate`) or one kernel execution with optional protocol phase |
+| **General profile** | `.noeon` programs using AI-native surface syntax |
+| **Governance profile** | Namespaced META rule package with mode and inheritance |
+| **Hardened mode** | Safety posture after blocking governance violations |
+| **Human-in-the-loop** | Required human approval on escalation paths |
+| **Kernel** | `CognitiveKernel` — sole execution engine for Cognitive IR |
+| **Learning update** | Policy or weight delta inferred from feedback |
+| **META rule** | Declarative governance constraint on contract or runtime context |
+| **nativeMind** | Runtime diagnostic bundle linking plan, evidence, and recommendations |
+| **Plugin** | Externally supplied capability exposed as a perception or effect channel |
+| **Profile** | Language surface selection: `general`, `cognitive`, or `ael` |
+| **Protocol bridge** | Auto-enrichment of cognitive runs with compute + META when protocol features detected |
+| **Unified runtime** | `src/runtime/unified-runtime.js` — parse/validate/compile/execute orchestration |
+
+---
+
+## Appendix A — Implementation Map
+
+| Layer | Primary modules |
+|---|---|
+| L0 Surface | `src/parser.js`, `src/cognitive-parser.js`, `src/core/profile.js` |
+| L1 IR & types | `src/core/cognitive-ir.js`, `src/compiler.js`, `src/validator.js` |
+| L2 Kernel | `src/core/kernel.js`, `src/vm/unified-executor.js`, `src/core/observability.js` |
+| L3 Governance | `src/core/governance.js`, `src/runtime/meta-rule-engine.js`, `src/runtime/plugins/integrity.js` |
+| L4 Execution | `src/runtime/unified-runtime.js`, `src/vm/protocol-phase.js`, `src/core/protocol-bridge.js`, `src/playground-api.js` |
+| L5 DX | `src/cli.js`, `language-server/noeon-service.js`, `src/doctor.js`, `vscode-extension/` |
+
+---
+
+## Appendix B — Related Documents
+
+| Document | Role |
+|---|---|
+| `docs/spec/NOEON_SPEC_v1.0.md` | Normative grammar and semantics (in progress) |
+| `docs/spec/NOEON_SPEC_v0.9.md` | Current interim normative reference |
+| `docs/NOEON_COMPUTE_KERNEL_v0.1_DRAFT.md` | Compute layer draft |
+| `docs/rfc/RFC-0002-plugin-signature-enforcement.md` | Plugin integrity RFC |
+| `README.md` | Project positioning and quick start |
+
+---
+
+*Draft v1.0 — aligned to Noeon v0.9 codebase. Subject to revision as `NOEON_SPEC_v1.0.md` lands.*

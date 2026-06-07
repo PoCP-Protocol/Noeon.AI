@@ -24,8 +24,8 @@ Noeon runtime supports plugin integrity checks, but ecosystem operators need a c
 
 ## 4. Non-Goals
 
-1. This RFC does not standardize cryptographic algorithms yet.
-2. This RFC does not define a remote key distribution protocol.
+1. This RFC does not define a remote key distribution protocol.
+2. This RFC does not define timestamped signatures or key rotation metadata.
 
 ## 5. Detailed Design
 
@@ -62,6 +62,22 @@ Step receipt SHOULD include:
 2. pluginVersion
 3. signatureVerified
 4. expectedSignature
+
+### 5.4 Signature Algorithm
+
+Strict signature verification MUST use HMAC-SHA256 over:
+
+```text
+<plugin_name>:<plugin_version>
+```
+
+The emitted signature format is:
+
+```text
+hmac-sha256:<hex_digest>
+```
+
+The signing key is provided by runtime policy (`pluginPolicy.signingKey`) or `NOEON_PLUGIN_SIGNING_KEY`. Implementations MAY use a development default for local examples, but production deployments SHOULD provide an explicit key.
 
 ## 6. Backward Compatibility
 

@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * General Profile — Customer service vertical demo
+ * SupportAgent: resolve, refund, or escalate customer issues
+ */
+
+PROFILE "general"
+VERSION "1.0.0-alpha"
+
+AGENT "SupportAgent"
+  GOAL "Resolve customer issues via resolve, refund, or escalate"
+  MEMORY type=episodic+semantic
+  TOOLS ["order_lookup", "refund_processor", "ticket_system"]
+  POLICY escalation_threshold=0.70 max_refund_usd=500
+  FLOW
+    PERCEIVE source=customer_inquiry modality=text
+    REASON strategy=empathetic_resolution depth=2
+    DECIDE action=resolve threshold=0.75 fallback=escalate
+    ACT action=respond_customer channel=chat
+    FEEDBACK source=customer signal=satisfaction window=1
+    REFLECT

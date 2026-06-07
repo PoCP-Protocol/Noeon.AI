@@ -35,19 +35,20 @@
 
     <main>
       <section class="hero container" id="hero">
-        <p class="eyebrow">Bitcoin for the AI era</p>
-        <h1>AI时代的新物种：<br />分布式智能经济网络</h1>
+        <p class="eyebrow">v1.0.0-alpha · Cognitive Workflow Language</p>
+        <h1>AI 原生编程语言<br />认知工作流语言</h1>
         <p class="lead">
-          Noeon 不是另一个中心化 AI 平台。Noeon 是协议基础设施：智能体可自由接入、可验证协作、可自动结算。
+          Noeon 用声明式 AGENT 块描述智能体目标、策略与认知流程——PERCEIVE、REASON、DECIDE、ACT、REFLECT——
+          让 AI 行为可编写、可验证、可运行。
         </p>
         <div class="hero-cta">
-          <a class="btn primary" href="#developers">开始构建</a>
-          <a class="btn ghost" href="#thesis">阅读宣言</a>
+          <a class="btn primary" href="./playground.html">打开 Playground</a>
+          <a class="btn ghost" href="#developers">快速开始</a>
         </div>
         <div class="hero-strip">
-          <span>Let intelligence compete freely.</span>
-          <span>Let value settle automatically.</span>
-          <span>Let order emerge spontaneously.</span>
+          <span>PERCEIVE → REASON → DECIDE → ACT → REFLECT</span>
+          <span>AGENT blocks with GOAL, POLICY, and FLOW</span>
+          <span>Run locally with <code>noeon run</code></span>
         </div>
       </section>
 
@@ -84,21 +85,28 @@
 
       <section class="container" id="developers">
         <h2>开发者入口</h2>
+        <p class="section-lead">三步启动你的第一个 Noeon 智能体项目。</p>
         <div class="cards two">
           <article class="card">
-            <h3>Noeon AEL</h3>
-            <p>用协议 DSL 定义任务合约，不先造通用语言，先统一协作契约。</p>
+            <h3>快速开始</h3>
+            <p>安装依赖后，初始化 General Profile 项目并运行带追踪的执行。</p>
             <pre><code>npm install
-npm run parse -- examples/sample.ael</code></pre>
+noeon init my-agent --profile general
+noeon run main.noeon --trace</code></pre>
           </article>
           <article class="card">
-            <h3>可扩展协议栈</h3>
-            <p>先落地任务、验证、结算最小闭环，再扩展模板市场、策略模块和多节点执行。</p>
-            <ul>
-              <li>任务协议标准化</li>
-              <li>证据链与审计接口</li>
-              <li>信誉和激励参数治理</li>
-            </ul>
+            <h3>AGENT 模板</h3>
+            <p><code>noeon init</code> 生成带 GOAL、POLICY 与 FLOW 的 AGENT 块，开箱即用。</p>
+            <pre><code>AGENT "my-agent"
+  GOAL "Solve the primary user goal"
+  POLICY audit=true
+  FLOW
+    PERCEIVE source=user_input modality=text
+    REASON strategy=deductive depth=2
+    DECIDE action=proceed threshold=0.7
+    ACT action=respond channel=runtime
+    REFLECT "execution quality"</code></pre>
+            <p><a class="btn ghost" href="./playground.html">在 Playground 中试用 →</a></p>
           </article>
         </div>
       </section>

@@ -280,7 +280,7 @@ function evalComputeExpr(expr, env, functions = {}, callDepth = 0) {
   return parseComputeExpr(tokens, env, functions, callDepth);
 }
 
-function executeComputeKernel(compiled, feedback, context) {
+async function executeComputeKernel(compiled, feedback, context) {
   const compute = compiled?.contract?.compute || {};
   const functions = Array.isArray(compute.functions) ? compute.functions : [];
   const bindings = Array.isArray(compute.bindings) ? compute.bindings : [];
@@ -513,7 +513,7 @@ function executeComputeKernel(compiled, feedback, context) {
       inputValue
     };
 
-    const actionResult = context.runActionStep(call.step, {
+    const actionResult = await context.runActionStep(call.step, {
       network: context.network,
       task: context.task,
       feedback: feedback || {},

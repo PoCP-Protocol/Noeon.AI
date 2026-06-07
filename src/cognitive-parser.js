@@ -129,7 +129,13 @@ function parsePredict(value, lineNo) {
 }
 
 function parsePerceive(value, lineNo) {
-  const kv = parseKV(value, lineNo);
+  let normalized = value;
+  const first = String(value).trim().split(/\s+/, 1)[0];
+  if (first && !first.includes("=")) {
+    normalized = `source=${first} ${String(value).trim().slice(first.length).trim()}`.trim();
+  }
+
+  const kv = parseKV(normalized, lineNo);
   if (!kv.source) {
     throw new Error(`Line ${lineNo}: PERCEIVE requires source=<source_name>`);
   }
@@ -180,15 +186,15 @@ function parseReason(value, lineNo) {
 function parseReflect(value, lineNo) {
   const m = value.match(/^"([^"]+)"(.*)$/);
   if (!m) {
-    throw new Error(`Line ${lineNo}: REFLECT format is '"subject" [depth=shallow|deep] [trigger=error|uncertainty|periodic]'`);
+    throw new Error(`Line ${lineNo}: REFLECT format is '"subject" [depth=shallow|standard|deep] [trigger=error|uncertainty|periodic]'`);
   }
   const subject = m[1];
   const rest = m[2].trim();
   const kv = rest ? parseKV(rest, lineNo) : {};
 
   const depth = kv.depth || "deep";
-  if (!["shallow", "deep", "recursive"].includes(depth)) {
-    throw new Error(`Line ${lineNo}: REFLECT depth must be shallow|deep|recursive`);
+  if (!["shallow", "standard", "deep", "recursive"].includes(depth)) {
+    throw new Error(`Line ${lineNo}: REFLECT depth must be shallow|standard|deep|recursive`);
   }
 
   return {

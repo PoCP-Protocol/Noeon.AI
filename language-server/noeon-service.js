@@ -5,8 +5,10 @@ const { parseAel } = require('../src/parser');
 const { validateAel } = require('../src/validator');
 
 const KEYWORDS = [
-  'VERSION', 'NETWORK', 'TASK', 'GOAL', 'BUDGET', 'DEADLINE', 'VERIFY',
+  'PROFILE', 'MODULE', 'VERSION', 'NETWORK', 'PROGRAM', 'TASK', 'OBJECTIVE', 'GOAL',
+  'CONTEXT', 'BUDGET', 'DEADLINE', 'VERIFY',
   'PERCEIVE', 'ATTEND', 'PREDICT', 'INTUIT', 'REASON', 'DECIDE', 'REFLECT',
+  'OBSERVE', 'UNDERSTAND', 'ACT', 'FEEDBACK',
   'CONSOLIDATE', 'KNOW', 'MONITOR', 'ADAPT', 'DRIVE_CMD', 'WORKSPACE', 'EMOTION',
   'FOCUS', 'META_RULE', 'META_PROFILE', 'COMPUTE', 'FLOW', 'PLUGIN', 'ON_SUCCESS', 'ON_SLASH',
   'SOLVER_COLLATERAL', 'VERIFIER_COLLATERAL', 'PLAN', 'ACTION', 'LEARN', 'MEMORY', 'RISK',
@@ -23,7 +25,13 @@ const HOVER_DOCS = {
   VERIFY: 'Contract verification criteria (protocol layer).',
   META_RULE: 'Governance rule enforced at runtime.',
   COMPUTE: 'Deterministic compute block with CALL receipts.',
-  TASK: 'Primary intent / goal identifier for the program.'
+  TASK: 'Primary intent / goal identifier for the program.',
+  PROGRAM: 'General-profile program identity.',
+  OBJECTIVE: 'Human-level goal the program is trying to satisfy.',
+  CONTEXT: 'Structured situation or domain context.',
+  UNDERSTAND: 'Semantic/contextual understanding step before reasoning.',
+  ACT: 'Action boundary for tool, runtime, or human-visible effects.',
+  FEEDBACK: 'Measured result signal used for learning.'
 };
 
 function validateSource(source) {
@@ -78,11 +86,11 @@ function getDocumentSymbols(source) {
   const symbols = [];
   const lines = source.split('\n');
   lines.forEach((line, idx) => {
-    const task = line.match(/^TASK\s+"([^"]+)"/);
+    const task = line.match(/^(?:TASK|PROGRAM)\s+"([^"]+)"/);
     if (task) symbols.push({ name: task[1], kind: 'intent', line: idx + 1 });
-    const goal = line.match(/^GOAL\s+"([^"]+)"/);
+    const goal = line.match(/^(?:GOAL|OBJECTIVE)\s+"([^"]+)"/);
     if (goal) symbols.push({ name: goal[1], kind: 'goal', line: idx + 1 });
-    for (const kw of ['PERCEIVE', 'REASON', 'INTUIT', 'DECIDE', 'PREDICT', 'REFLECT', 'VERIFY']) {
+    for (const kw of ['PERCEIVE', 'OBSERVE', 'UNDERSTAND', 'REASON', 'INTUIT', 'DECIDE', 'ACT', 'FEEDBACK', 'PREDICT', 'REFLECT', 'VERIFY']) {
       if (line.trimStart().startsWith(kw)) {
         symbols.push({ name: kw, kind: 'cognitive', line: idx + 1 });
       }

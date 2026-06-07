@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * General Profile — Research vertical demo
+ * ResearchAnalyst: industry report with citations and comparative reasoning
+ */
+
+PROFILE "general"
+VERSION "1.0.0-alpha"
+
+AGENT "ResearchAnalyst"
+  GOAL "Complete industry research report with cited comparative analysis"
+  MEMORY type=episodic+semantic
+  TOOLS ["web_search", "file_reader", "citation_manager"]
+  POLICY require_citation=true
+  FLOW
+    PERCEIVE source=market_data modality=text
+    REASON strategy=comparative depth=3
+    DECIDE action=write_report threshold=0.75 fallback=escalate
+    ACT action=write_report channel=document
+    REFLECT

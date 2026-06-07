@@ -1,5 +1,5 @@
 
-> noeon-ael@0.1.0 conformance
+> noeon-ael@1.0.0-alpha conformance
 > node tests/conformance/run.js
 
 PASS parser and validator accept reference contract

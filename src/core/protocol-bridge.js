@@ -1,13 +1,7 @@
 'use strict';
 
-/**
- * Protocol bridge — attach compute + META governance to kernel results.
- * Closes the gap between cognitive run and protocol simulate paths.
- */
-
 const { compileAel } = require('../compiler');
-const { executeComputeKernel } = require('../runtime/compute-kernel');
-const { evaluateMetaPolicy } = require('../runtime/meta-rule-engine');
+const { runProtocolCycle } = require('../vm/protocol-phase');
 
 function hasProtocolFeatures(ast) {
   const compute = ast.compute;
@@ -29,44 +23,24 @@ function shouldEnrichProtocol(ast, options = {}) {
   return hasProtocolFeatures(ast);
 }
 
-function enrichWithProtocol(ast, kernelResult, feedback = {}, options = {}) {
+async function enrichWithProtocol(ast, kernelResult, feedback = {}, options = {}) {
   if (!shouldEnrichProtocol(ast, options)) {
     return { enriched: false, reason: 'no_protocol_features' };
   }
 
   const compiled = compileAel(ast);
-  const compute = executeComputeKernel(compiled, feedback, {
-    pluginPolicy: options.pluginPolicy || {}
+  const result = await runProtocolCycle(compiled, feedback, {
+    lite: true,
+    skipPlan: true,
+    pluginPolicy: options.pluginPolicy
   });
-
-  const metaPolicy = evaluateMetaPolicy({
-    compiled,
-    feedback,
-    adaptiveProfile: kernelResult?.results?.adaptiveProfile || {},
-    learning: { updates: kernelResult?.results?.learning || {} },
-    compute
-  });
-
-  const blocking = (metaPolicy.violations || []).filter((v) => v.level === 'error');
-  const computeErrors = (compute.diagnostics || []).filter((d) => d.level === 'error');
 
   return {
     enriched: true,
-    compute: {
-      result: compute.result,
-      env: compute.env,
-      diagnostics: compute.diagnostics,
-      receipts: compute.receipts,
-      summary: compute.summary
-    },
-    metaPolicy: {
-      enabled: metaPolicy.enabled,
-      profile: metaPolicy.profile,
-      totalRules: metaPolicy.totalRules,
-      hardened: metaPolicy.hardened,
-      violations: metaPolicy.violations
-    },
-    protocolSuccess: blocking.length === 0 && computeErrors.length === 0
+    compute: result.compute,
+    metaPolicy: result.metaPolicy,
+    protocolSuccess: result.protocolSuccess,
+    cycle: result.cycle
   };
 }
 

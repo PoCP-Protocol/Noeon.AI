@@ -52,6 +52,8 @@ function compileAel(ast) {
     spec: {
       name: ast.language || "Noeon Contract Language",
       version: ast.version || "0.2",
+      profile: ast.profile || ast.languageProfile || "ael",
+      module: ast.module || null,
       metaRules: Array.isArray(ast.metaRules) ? ast.metaRules : [],
       metaProfile: ast.metaProfile || null
     },
@@ -61,6 +63,8 @@ function compileAel(ast) {
       tags: ast.tags || {},
       cognition: {
         goal: ast.cognition?.goal || ast.task,
+        context: ast.cognition?.context || {},
+        understandings: ast.cognition?.understandings || [],
         constraints: ast.cognition?.constraints || {},
         risk: ast.cognition?.risk || { level: "medium", profile: "balanced", impact: "standard" },
         memory: ast.cognition?.memory || { shortSeconds: 300, longDays: 30, mode: "balanced" },
@@ -104,7 +108,9 @@ function compileAel(ast) {
         },
         jurors: ast.cognition?.jurors || [],
         plan: ast.cognition?.plan || [],
-        actions: ast.cognition?.actions || {}
+        actions: ast.cognition?.actions || {},
+        acts: ast.cognition?.acts || [],
+        feedback: ast.cognition?.feedback || []
       },
       budget: {
         amount: ast.budget,

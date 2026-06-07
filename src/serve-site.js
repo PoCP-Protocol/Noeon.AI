@@ -26,9 +26,49 @@ function send(res, status, body, type = "text/plain; charset=utf-8") {
   res.end(body);
 }
 
+function normalizeUrlPath(rawPath) {
+  const decodedPath = decodeURIComponent(rawPath || "/").replace(/\\/g, "/");
+  if (decodedPath.split("/").includes("..")) {
+    return null;
+  }
+  return path.posix.normalize(decodedPath).replace(/^([.][.][/])+/, "");
+}
+
+function resolveStaticRequest(rawPath) {
+  const safePath = normalizeUrlPath(rawPath);
+  if (!safePath) {
+    return { forbidden: true, filePath: null, baseRoot: null };
+  }
+  const requested = safePath === "/" ? "/index.html" : safePath;
+  const isArtifactRequest = requested.startsWith("/artifacts/");
+  const relativePath = isArtifactRequest
+    ? requested.slice("/artifacts/".length)
+    : requested.replace(/^\//, "");
+
+  const baseRoot = isArtifactRequest ? ARTIFACTS_ROOT : ROOT;
+  const filePath = path.resolve(baseRoot, relativePath);
+  const relativeToRoot = path.relative(baseRoot, filePath);
+
+  if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) {
+    return { forbidden: true, filePath, baseRoot };
+  }
+
+  return { forbidden: false, filePath, baseRoot };
+}
+
 const server = http.createServer(async (req, res) => {
   const rawPath = req.url ? req.url.split("?")[0] : "/";
-  const safePath = path.normalize(rawPath).replace(/^([.][.][/\\])+/, "");
+  let safePath;
+  try {
+    safePath = normalizeUrlPath(rawPath);
+  } catch {
+    send(res, 400, "Bad request");
+    return;
+  }
+  if (!safePath) {
+    send(res, 403, "Forbidden");
+    return;
+  }
 
   if (safePath.startsWith("/api/")) {
     const handled = await handlePlaygroundApi(req, res, safePath);
@@ -37,21 +77,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  const requested = safePath === "/" ? "/index.html" : safePath;
-  const isArtifactRequest = requested.startsWith("/artifacts/");
-  const relativePath = isArtifactRequest
-    ? requested.slice("/artifacts/".length)
-    : requested.replace(/^\//, "");
+  const resolved = resolveStaticRequest(rawPath);
 
-  const baseRoot = isArtifactRequest ? ARTIFACTS_ROOT : ROOT;
-  const filePath = path.join(baseRoot, relativePath);
-
-  if (!filePath.startsWith(baseRoot)) {
+  if (resolved.forbidden) {
     send(res, 403, "Forbidden");
     return;
   }
 
-  fs.readFile(filePath, (err, data) => {
+  fs.readFile(resolved.filePath, (err, data) => {
     if (err) {
       if (err.code === "ENOENT") {
         send(res, 404, "Not found");
@@ -61,7 +94,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const ext = path.extname(filePath).toLowerCase();
+    const ext = path.extname(resolved.filePath).toLowerCase();
     send(res, 200, data, MIME[ext] || "application/octet-stream");
   });
 });
@@ -80,4 +113,4 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = { startServer, PORT };
+module.exports = { startServer, resolveStaticRequest, PORT };

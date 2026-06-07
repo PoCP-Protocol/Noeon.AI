@@ -60,6 +60,53 @@ function normalizeFailureCategory(errorCode) {
   return "execution_error";
 }
 
+function isPromiseLike(value) {
+  return Boolean(value) && typeof value.then === "function";
+}
+
+function buildStepResult(stepName, context, actionType, userResult, pluginResult, failedSet) {
+  const feedback = context.feedback || {};
+
+  const latencyMs = Number(
+    userResult?.latencyMs ||
+      pluginResult?.latencyMs ||
+      feedback.stepLatencyMs?.[stepName] ||
+      defaultLatencyByAction(actionType) * (context.adaptiveProfile?.latencyScale || 1)
+  );
+
+  const failed =
+    userResult?.status === "failed" ||
+    pluginResult?.status === "failed" ||
+    failedSet.has(stepName);
+  const status = failed ? "failed" : "done";
+  const failureCategory = failed
+    ? pluginResult?.failureCategory || normalizeFailureCategory(userResult?.errorCode)
+    : null;
+  const reason = failed
+    ? userResult?.reason || pluginResult?.reason || `action-${failureCategory}`
+    : userResult?.reason || pluginResult?.reason || "action-completed";
+
+  return {
+    status,
+    latencyMs: Math.max(1, Math.round(latencyMs)),
+    reason,
+    failureCategory,
+    receipt: {
+      actionType,
+      stepName,
+      task: context.task,
+      network: context.network,
+      evidenceHash: simpleHash(`${context.task}:${stepName}:${status}:${reason}`),
+      errorCode: userResult?.errorCode || pluginResult?.errorCode || null,
+      plugin: context.actionBindings?.[stepName]?.plugin || null,
+      pluginVersion: pluginResult?.pluginVersion || null,
+      signatureVerified: pluginResult?.signatureVerified || false,
+      expectedSignature: pluginResult?.expectedSignature || null,
+      pluginMeta: pluginResult?.pluginMeta || null
+    }
+  };
+}
+
 function runActionStep(stepName, context) {
   const feedback = context.feedback || {};
   const actionType = classifyAction(stepName);
@@ -108,13 +155,74 @@ function runActionStep(stepName, context) {
             }
           };
         } else {
-          pluginResult = plugin.execute({
-            stepName,
-            actionType,
-            feedback,
-            binding,
-            context
-          });
+          let executeResult;
+          try {
+            executeResult = plugin.execute({
+              stepName,
+              actionType,
+              feedback,
+              binding,
+              context
+            });
+          } catch (error) {
+            executeResult = {
+              status: "failed",
+              reason: error?.message || "plugin execution failed",
+              latencyMs: Number(binding.latencyMs || 120),
+              failureCategory: "execution_error",
+              errorCode: "PLUGIN_EXECUTION_ERROR",
+              pluginMeta: {
+                template: "runtime",
+                decision: "deny"
+              }
+            };
+          }
+
+          if (isPromiseLike(executeResult)) {
+            return executeResult
+              .then((resolved) => {
+                const next = {
+                  ...(resolved || {}),
+                  pluginVersion: integrity.version,
+                  signatureVerified: !!binding.signature,
+                  expectedSignature: integrity.expectedSignature
+                };
+                return buildStepResult(
+                  stepName,
+                  context,
+                  actionType,
+                  userResult,
+                  next,
+                  failedSet
+                );
+              })
+              .catch((error) => {
+                const next = {
+                  status: "failed",
+                  reason: error?.message || "plugin execution failed",
+                  latencyMs: Number(binding.latencyMs || 120),
+                  failureCategory: "execution_error",
+                  errorCode: "PLUGIN_EXECUTION_ERROR",
+                  pluginMeta: {
+                    template: "runtime",
+                    decision: "deny"
+                  },
+                  pluginVersion: integrity.version,
+                  signatureVerified: !!binding.signature,
+                  expectedSignature: integrity.expectedSignature
+                };
+                return buildStepResult(
+                  stepName,
+                  context,
+                  actionType,
+                  userResult,
+                  next,
+                  failedSet
+                );
+              });
+          }
+
+          pluginResult = executeResult;
 
           pluginResult.pluginVersion = integrity.version;
           pluginResult.signatureVerified = !!binding.signature;
@@ -136,44 +244,14 @@ function runActionStep(stepName, context) {
     }
   }
 
-  const latencyMs = Number(
-    userResult?.latencyMs ||
-      pluginResult?.latencyMs ||
-      feedback.stepLatencyMs?.[stepName] ||
-      defaultLatencyByAction(actionType) * (context.adaptiveProfile?.latencyScale || 1)
+  return buildStepResult(
+    stepName,
+    context,
+    actionType,
+    userResult,
+    pluginResult,
+    failedSet
   );
-
-  const failed =
-    userResult?.status === "failed" ||
-    pluginResult?.status === "failed" ||
-    failedSet.has(stepName);
-  const status = failed ? "failed" : "done";
-  const failureCategory = failed
-    ? pluginResult?.failureCategory || normalizeFailureCategory(userResult?.errorCode)
-    : null;
-  const reason = failed
-    ? userResult?.reason || pluginResult?.reason || `action-${failureCategory}`
-    : userResult?.reason || pluginResult?.reason || "action-completed";
-
-  return {
-    status,
-    latencyMs: Math.max(1, Math.round(latencyMs)),
-    reason,
-    failureCategory,
-    receipt: {
-      actionType,
-      stepName,
-      task: context.task,
-      network: context.network,
-      evidenceHash: simpleHash(`${context.task}:${stepName}:${status}:${reason}`),
-      errorCode: userResult?.errorCode || pluginResult?.errorCode || null,
-      plugin: binding?.plugin || null,
-      pluginVersion: pluginResult?.pluginVersion || null,
-      signatureVerified: pluginResult?.signatureVerified || false,
-      expectedSignature: pluginResult?.expectedSignature || null,
-      pluginMeta: pluginResult?.pluginMeta || null
-    }
-  };
 }
 
 module.exports = {

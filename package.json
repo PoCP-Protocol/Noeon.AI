@@ -1,13 +1,18 @@
 {
   "name": "noeon-ael",
-  "version": "0.9.0",
-  "description": "Noeon AI — cognitive programming language with unified kernel, governance protocol, LSP, web playground, and LLM integration.",
+  "version": "1.0.0-alpha",
+  "description": "Noeon AI — AI-native general programming language with cognitive IR, unified runtime, governance, LSP, playground, and LLM integration.",
   "type": "commonjs",
   "main": "src/cli.js",
   "exports": {
     ".": "./src/cli.js",
     "./runtime": "./src/runtime/unified-runtime.js",
-    "./parser": "./src/parser.js"
+    "./parser": "./src/parser.js",
+    "./config": "./src/core/config.js",
+    "./doctor": "./src/doctor.js",
+    "./vm": "./src/vm/unified-executor.js",
+    "./profile": "./src/core/profile.js",
+    "./protocol": "./src/core/protocol-bridge.js"
   },
   "bin": {
     "noeon": "src/cli.js"
@@ -44,7 +49,12 @@
     "legacy:simulate": "node src/index.js simulate",
     "legacy:train": "node src/index.js train",
     "legacy:rollback": "node src/index.js rollback",
-    "test": "node tests/kernel.test.js && node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && node tests/cognitive-v06.test.js && node tests/unified-v08.test.js && node tests/unified-v09.test.js && npm run conformance",
+    "test": "node tests/kernel.test.js && node tests/cognitive.test.js && node tests/cognitive-v04.test.js && node tests/cognitive-v05.test.js && node tests/cognitive-v06.test.js && node tests/unified-v08.test.js && node tests/unified-v09.test.js && node tests/unified-vm.test.js && node tests/general-profile-v1.test.js && node tests/grammar-general.test.js && node tests/examples-p0.test.js && node tests/http-call-plugin.test.js && node tests/cli-init.test.js && node tests/noeon-test.test.js && npm run conformance",
+    "test:noeon": "node tests/noeon-test.test.js",
+    "test:p0": "node tests/examples-p0.test.js && node tests/cli-init.test.js && node tests/general-profile-v1.test.js",
+    "test:vm": "node tests/unified-vm.test.js",
+    "test:general": "node tests/general-profile-v1.test.js && node tests/grammar-general.test.js && node tests/cli-init.test.js",
+    "test:http": "node tests/http-call-plugin.test.js",
     "test:kernel": "node tests/kernel.test.js",
     "test:unified": "node tests/unified-v08.test.js && node tests/unified-v09.test.js",
     "test:cognitive": "node tests/cognitive.test.js",
@@ -57,6 +67,13 @@
     "gate:strict": "node scripts/strict-gate.js",
     "metrics": "node scripts/quality-metrics.js",
     "metrics:record": "npm run metrics",
+    "quality:collect": "node scripts/quality-collect.js",
+    "quality:summary": "node scripts/quality-unified-summary.js",
+    "quality:summary:strict": "node scripts/quality-unified-summary.js --strict",
+    "quality:scorecard": "node scripts/quality-scorecard-90d.js",
+    "quality:snapshot": "node scripts/quality-scorecard-snapshot.js",
+    "quality:evidence:set": "node scripts/quality-evidence-set.js",
+    "quality:90d": "npm run quality:collect && npm run quality:summary && npm run quality:scorecard",
     "prepublishOnly": "npm test"
   },
   "keywords": [

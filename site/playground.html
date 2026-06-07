@@ -21,7 +21,7 @@
     <main class="container playground">
       <section class="playground-header">
         <h1>Noeon Playground</h1>
-        <p>Write, validate, compile, and run Noeon (.ael) programs in the browser.</p>
+        <p>Write, validate, compile, and run Noeon (.noeon and .ael) programs in the browser.</p>
       </section>
 
       <div class="playground-toolbar">
@@ -32,12 +32,12 @@
         <button id="btn-compile" class="btn ghost">Compile IR</button>
         <button id="btn-run" class="btn primary">Run</button>
         <button id="btn-explain" class="btn ghost">Explain</button>
-        <span class="toolbar-hint">Ctrl+Enter to run</span>
+        <span class="toolbar-hint">Load a .noeon demo or write .ael · Ctrl+Enter to run</span>
       </div>
 
       <div class="playground-grid">
         <div class="panel">
-          <h2>Source (.ael)</h2>
+          <h2>Source (.noeon / .ael)</h2>
           <textarea id="source" spellcheck="false" aria-label="Noeon source code"></textarea>
         </div>
         <div class="panel">
@@ -47,7 +47,8 @@
       </div>
 
       <p class="playground-note">
-        v0.9: Run includes automatic protocol enrichment (compute + META) when detected.
+        v1.0.0-alpha: .noeon examples use the general-profile cognitive workflow.
+        .ael programs may include automatic protocol enrichment when detected.
         Set <code>OPENAI_API_KEY</code> for live LLM reasoning.
       </p>
       <footer class="playground-status">

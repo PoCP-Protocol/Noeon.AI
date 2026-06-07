@@ -1,14 +1,18 @@
-function simpleHash(input) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i += 1) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return `h${(h >>> 0).toString(16)}`;
-}
+const crypto = require("crypto");
 
 function expectedSignature(name, version, signingKey) {
-  return simpleHash(`${name}:${version}:${signingKey}`);
+  const payload = `${name}:${version}`;
+  const digest = crypto
+    .createHmac("sha256", String(signingKey || ""))
+    .update(payload)
+    .digest("hex");
+  return `hmac-sha256:${digest}`;
+}
+
+function signaturesEqual(left, right) {
+  const a = Buffer.from(String(left || ""), "utf8");
+  const b = Buffer.from(String(right || ""), "utf8");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 function toBool(value, fallback = false) {
@@ -56,7 +60,7 @@ function verifyPluginBinding({ binding, plugin, context }) {
   const expected = expectedSignature(plugin.name, manifestVersion, signingKey);
 
   if (binding.signature) {
-    if (String(binding.signature) !== expected) {
+    if (!signaturesEqual(binding.signature, expected)) {
       return {
         ok: false,
         code: "PLUGIN_SIGNATURE_INVALID",

@@ -29,7 +29,7 @@ function assert(cond, msg) {
 
 console.log('\n\x1b[36m═══ Unified Runtime v0.9 Tests ═══\x1b[0m\n');
 
-assert(RUNTIME_VERSION === '0.9.0', 'RUNTIME_VERSION is 0.9.0');
+assert(RUNTIME_VERSION === '1.0.0-alpha', 'RUNTIME_VERSION is 1.0.0-alpha');
 
 const { ast } = parseFromSource('VERSION "0.9"\nNETWORK "t"\nTASK "x"\nBUDGET 1 msat\nDEADLINE 2026-01-01T00:00:00Z\n');
 assert(ast.task, 'parseFromSource parses minimal contract');
@@ -53,6 +53,9 @@ assert(hover && hover.keyword === 'PERCEIVE', 'LSP hover for PERCEIVE');
 const symbols = getDocumentSymbols('TASK "my_task"\nPERCEIVE x\nREASON y\n');
 assert(symbols.some((s) => s.name === 'my_task'), 'document symbols include TASK');
 assert(symbols.some((s) => s.name === 'PERCEIVE'), 'document symbols include cognitive ops');
+const generalSymbols = getDocumentSymbols('PROGRAM "hello"\nOBJECTIVE "greet"\nUNDERSTAND context=x\nACT action=y\n');
+assert(generalSymbols.some((s) => s.name === 'hello'), 'document symbols include PROGRAM');
+assert(generalSymbols.some((s) => s.name === 'UNDERSTAND'), 'document symbols include general ops');
 
 const bad = validateSource('TASK broken\n');
 assert(Array.isArray(bad), 'validateSource returns diagnostics array');
@@ -62,7 +65,11 @@ assert(Array.isArray(bad), 'validateSource returns diagnostics array');
   const runResult = await runProgram(minimal, { quiet: true, console: false, with_protocol: 'off' });
   assert(runResult.success === true, 'run with protocol off succeeds');
 
-  const enriched = enrichWithProtocol(contractAst, runResult, {}, { with_protocol: 'on' });
+  const general = parseAel(fs.readFileSync(path.join(__dirname, '../examples/hello.noeon'), 'utf8'));
+  const generalRun = await runProgram(general, { quiet: true, console: false, with_protocol: 'off', filename: 'hello.noeon' });
+  assert(generalRun.success === true && generalRun.profile === 'general', 'runProgram executes general profile');
+
+  const enriched = await enrichWithProtocol(contractAst, runResult, {}, { with_protocol: 'on' });
   assert(enriched.enriched === true, 'protocol enrichment on contract');
   assert(enriched.compute || enriched.metaPolicy, 'enrichment includes compute or meta');
 
@@ -71,7 +78,8 @@ assert(Array.isArray(bad), 'validateSource returns diagnostics array');
     console: false,
     with_protocol: 'on'
   });
-  assert(runWithProtocol.protocol?.enriched === true, 'runProgram attaches protocol block');
+  assert(runWithProtocol.phases.includes('protocol'), 'runProgram runs protocol phase');
+  assert(runWithProtocol.protocol?.execution?.compute != null, 'runProgram attaches protocol block');
 
   console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
   process.exit(failed > 0 ? 1 : 0);
