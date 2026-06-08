@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Noeon Playground</title>
     <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <link rel="stylesheet" href="./playground.css" />
   </head>
   <body class="playground-body">
@@ -14,6 +15,7 @@
         <nav>
           <a href="./index.html">Home</a>
           <a href="./convergence.html">Convergence</a>
+          <a href="./fusion.html">Fusion</a>
         </nav>
       </div>
     </header>
@@ -31,14 +33,22 @@
         <button id="btn-validate" class="btn ghost">Validate</button>
         <button id="btn-compile" class="btn ghost">Compile IR</button>
         <button id="btn-run" class="btn primary">Run</button>
+        <button id="btn-plan" class="btn ghost">Plan</button>
+        <button id="btn-brain" class="btn ghost">Brain</button>
+        <button id="btn-fusion" class="btn ghost">Fusion</button>
         <button id="btn-explain" class="btn ghost">Explain</button>
+        <span id="fusion-badge" class="fusion-badge hidden" aria-live="polite"></span>
         <span class="toolbar-hint">Load a .noeon demo or write .ael · Ctrl+Enter to run</span>
       </div>
 
       <div class="playground-grid">
-        <div class="panel">
+        <div class="panel source-panel">
           <h2>Source (.noeon / .ael)</h2>
-          <textarea id="source" spellcheck="false" aria-label="Noeon source code"></textarea>
+          <div id="source-route-bar" class="source-route-bar hidden" aria-live="polite"></div>
+          <div class="source-editor">
+            <div id="source-gutter" class="source-gutter" aria-hidden="true"></div>
+            <textarea id="source" spellcheck="false" aria-label="Noeon source code"></textarea>
+          </div>
         </div>
         <div class="panel">
           <h2>Output</h2>
@@ -46,8 +56,28 @@
         </div>
       </div>
 
+      <div id="fusion-panel" class="fusion-panel hidden" aria-label="Fusion preview">
+        <div class="fusion-panel-head">
+          <strong>Fusion layers</strong>
+          <span id="fusion-summary"></span>
+        </div>
+        <pre id="fusion-detail" class="fusion-detail"></pre>
+        <div id="fusion-mermaid" class="fusion-mermaid"></div>
+      </div>
+
+      <div id="brain-panel" class="brain-panel hidden" aria-label="Cognitive architecture trace">
+        <div class="brain-panel-head">
+          <strong>Cognitive Architecture</strong>
+          <span id="brain-summary"></span>
+        </div>
+        <div id="brain-regions" class="brain-regions"></div>
+        <pre id="brain-flow" class="brain-flow"></pre>
+        <div id="brain-mermaid" class="brain-mermaid"></div>
+      </div>
+
       <p class="playground-note">
-        v1.0.0-alpha: .noeon examples use the general-profile cognitive workflow.
+        v1.0.0: General agents support <code>FUSE next</code> + <code>FUSE liminal</code>.
+        Use <strong>Fusion</strong> to preview cross-profile layers without full cognitive run.
         .ael programs may include automatic protocol enrichment when detected.
         Set <code>OPENAI_API_KEY</code> for live LLM reasoning.
       </p>

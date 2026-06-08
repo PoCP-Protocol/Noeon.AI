@@ -22,7 +22,7 @@ console.log('\n\x1b[36m═══ Next Profile v0.3 — Bond + Mycelium + Flux Ma
 const myceliumDir = path.join(__dirname, '../artifacts/mycelium-test');
 if (fs.existsSync(myceliumDir)) {
   for (const f of fs.readdirSync(myceliumDir)) {
-    fs.unlinkSync(path.join(myceliumDir, f));
+    fs.rmSync(path.join(myceliumDir, f), { recursive: true, force: true });
   }
 }
 

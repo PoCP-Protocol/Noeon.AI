@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon Fusion Graph</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./playground.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      .fusion-page { max-width: 1280px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+      .fusion-controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0; align-items: center; }
+      .fusion-controls select, .fusion-controls input {
+        min-width: 200px; padding: 0.5rem 0.75rem; border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.35); color: inherit;
+      }
+      #fusion-graph { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1rem; min-height: 420px; overflow: auto; }
+      .fusion-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+      .fusion-meta .card { padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.25); font-size: 0.9rem; }
+      .fusion-meta strong { display: block; margin-bottom: 0.35rem; color: #9fd4ff; }
+      #fusion-json { margin-top: 1rem; font-family: "IBM Plex Mono", monospace; font-size: 11px; max-height: 240px; overflow: auto; background: rgba(0,0,0,0.35); padding: 1rem; border-radius: 10px; }
+      #fusion-history { margin-top: 1.5rem; }
+      #fusion-history table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+      #fusion-history th, #fusion-history td { padding: 0.45rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+      .tag { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 999px; background: rgba(80,180,255,0.15); font-size: 0.75rem; margin-right: 0.25rem; }
+    </style>
+  </head>
+  <body class="playground-body">
+    <header class="topbar">
+      <div class="container nav-wrap">
+        <div class="brand"><a href="./index.html">Noeon</a> / Fusion</div>
+        <nav>
+          <a href="./playground.html">Playground</a>
+          <a href="./mycelium.html">Mycelium</a>
+          <a href="./memory.html">Memory</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="fusion-page container">
+      <h1>Profile Fusion Graph</h1>
+      <p>三向融合拓扑 — General ↔ Next ↔ Liminal 的 FUSE 层、sidecar 与共振边。</p>
+
+      <div class="fusion-controls">
+        <select id="example-select" aria-label="Example program">
+          <option value="examples/fusion_triad.noeon">fusion_triad.noeon (FUSE triad — full loop)</option>
+          <option value="examples/agent_field.noeon">agent_field.noeon (General ← Next + Liminal)</option>
+          <option value="examples/genesis.next">genesis.next (Next → Liminal + General)</option>
+        </select>
+        <button id="btn-refresh" class="btn primary">Refresh Graph</button>
+        <label><input id="auto" type="checkbox" /> Auto (10s)</label>
+      </div>
+
+      <div class="fusion-meta">
+        <div class="card"><strong>Profile</strong><span id="meta-profile">—</span></div>
+        <div class="card"><strong>Layers</strong><span id="meta-layers">—</span></div>
+        <div class="card"><strong>Phases</strong><span id="meta-phases">—</span></div>
+        <div class="card"><strong>Mode</strong><span id="meta-mode">—</span></div>
+      </div>
+
+      <div id="fusion-graph"></div>
+      <pre id="fusion-json"></pre>
+
+      <section id="semantic-convergence" style="margin-top: 2rem;">
+        <h2>Semantic Convergence</h2>
+        <p>Cross-surface coherence — same intent across general / next / ael / liminal parity fixtures.</p>
+        <div class="fusion-meta">
+          <div class="card"><strong>Coherence</strong><span id="conv-score">—</span></div>
+          <div class="card"><strong>Pulse</strong><span id="conv-pulse">—</span></div>
+          <div class="card"><strong>Aligned</strong><span id="conv-aligned">—</span></div>
+          <div class="card"><strong>Drift</strong><span id="conv-drift">—</span></div>
+        </div>
+        <div id="conv-graph" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:1rem;min-height:280px;margin:1rem 0;overflow:auto;"></div>
+      </section>
+
+      <section id="fusion-history">
+        <h2>Fusion History</h2>
+        <p class="stats" id="history-stats">Loading…</p>
+        <table>
+          <thead><tr><th>Time</th><th>File</th><th>Layers</th><th>Summary</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+
+      const exampleEl = document.getElementById('example-select');
+      const graphEl = document.getElementById('fusion-graph');
+      const jsonEl = document.getElementById('fusion-json');
+      const autoEl = document.getElementById('auto');
+      let timer = null;
+
+      async function loadHistory() {
+        try {
+          const res = await fetch('/api/fusion/history?limit=20');
+          const data = await res.json();
+          const stats = data.stats || {};
+          document.getElementById('history-stats').textContent =
+            `Runs: ${stats.total || 0} · Success: ${stats.success || 0} · Profiles: ${JSON.stringify(stats.byProfile || {})}`;
+          const body = document.getElementById('history-body');
+          body.innerHTML = '';
+          for (const row of data.history || []) {
+            const tr = document.createElement('tr');
+            const layers = (row.layers || []).map((l) => `<span class="tag">${l}</span>`).join('');
+            tr.innerHTML = `<td>${row.ts?.slice(11, 19) || '—'}</td><td>${row.file || '—'}</td><td>${layers}</td><td>${row.summary || '—'}</td>`;
+            body.appendChild(tr);
+          }
+        } catch (e) {
+          document.getElementById('history-stats').textContent = e.message;
+        }
+      }
+
+      async function loadConvergence() {
+        try {
+          const res = await fetch('/api/convergence/matrix');
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed');
+          document.getElementById('conv-score').textContent = data.coherence?.score ?? '—';
+          document.getElementById('conv-pulse').textContent = data.pulse?.action ?? '—';
+          document.getElementById('conv-aligned').textContent = data.aligned ? 'yes' : 'no';
+          document.getElementById('conv-drift').textContent = (data.drift?.length ?? 0) + ' signals';
+          const convEl = document.getElementById('conv-graph');
+          convEl.innerHTML = '';
+          if (data.mermaid) {
+            const pre = document.createElement('pre');
+            pre.className = 'mermaid';
+            pre.textContent = data.mermaid;
+            convEl.appendChild(pre);
+            await mermaid.run({ nodes: [pre] });
+          }
+        } catch (e) {
+          document.getElementById('conv-score').textContent = e.message;
+        }
+      }
+
+      async function loadGraph() {
+        const file = exampleEl.value;
+        try {
+          const res = await fetch('/api/fusion/graph?file=' + encodeURIComponent(file) + '&save=1');
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to load graph');
+
+          document.getElementById('meta-profile').textContent = data.profile || '—';
+          document.getElementById('meta-layers').textContent = (data.layers || []).join(', ') || '—';
+          document.getElementById('meta-phases').textContent = (data.phases || []).join(' → ') || '—';
+          document.getElementById('meta-summary').textContent = data.summary || '—';
+          const mode = [];
+          if (data.triad) mode.push('triad');
+          if (data.bidirectional) mode.push('bidirectional');
+          document.getElementById('meta-mode').textContent = mode.join(' + ') || 'forward/reverse';
+
+          graphEl.innerHTML = '';
+          const pre = document.createElement('pre');
+          pre.className = 'mermaid';
+          pre.textContent = data.mermaid;
+          graphEl.appendChild(pre);
+          await mermaid.run({ nodes: [pre] });
+
+          jsonEl.textContent = JSON.stringify({
+            nodeCount: data.nodeCount,
+            edgeCount: data.edgeCount,
+            triad: data.triad,
+            bidirectional: data.bidirectional,
+            plan: data.plan,
+            graph: data.graph
+          }, null, 2);
+
+          loadHistory();
+        } catch (e) {
+          graphEl.textContent = e.message;
+          jsonEl.textContent = '';
+        }
+      }
+
+      function schedule() {
+        if (timer) clearInterval(timer);
+        if (autoEl.checked) timer = setInterval(loadGraph, 10000);
+      }
+
+      document.getElementById('btn-refresh').addEventListener('click', () => { loadGraph(); loadConvergence(); });
+      exampleEl.addEventListener('change', loadGraph);
+      autoEl.addEventListener('change', schedule);
+      loadGraph();
+      loadConvergence();
+    </script>
+  </body>
+</html>

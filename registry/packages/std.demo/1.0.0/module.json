@@ -1,0 +1,8 @@
+{
+  "module": "std.demo",
+  "effect": "pure",
+  "exports": {
+    "greet": { "kind": "fn", "effect": "pure" },
+    "version_tag": { "kind": "const", "effect": "pure" }
+  }
+}

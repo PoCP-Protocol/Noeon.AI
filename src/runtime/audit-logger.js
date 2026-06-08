@@ -95,6 +95,8 @@ function appendAuditEntries(filePath, cycle) {
 
   const next = cycle?.next || null;
   if (next) {
+    const ritualSummary = (next.reflection?.insights || []).find((x) => x.type === 'ritual-summary') || null;
+    const constitutionSummary = (next.reflection?.insights || []).find((x) => x.type === 'constitution-summary') || null;
     records.push({
       ts: cycle.cycleAt,
       network: cycle.contract.network,
@@ -107,6 +109,34 @@ function appendAuditEntries(filePath, cycle) {
       receipt: {
         verdict: next.reflection?.verdict || null,
         summary: next.reflection?.summary || null,
+        ritualSummary: ritualSummary
+          ? {
+              active: ritualSummary.active || 0,
+              deferred: ritualSummary.deferred || 0,
+              suspended: ritualSummary.suspended || 0,
+              unknown: ritualSummary.unknown || 0,
+              overridden: ritualSummary.overridden || 0,
+              dependencyBlocked: ritualSummary.dependencyBlocked || 0
+            }
+          : null,
+        constitutionSummary: constitutionSummary
+          ? {
+              passed: constitutionSummary.passed || 0,
+              failed: constitutionSummary.failed || 0,
+              unknown: constitutionSummary.unknown || 0,
+              hardFailed: constitutionSummary.hardFailed || 0
+            }
+          : null,
+        governance: next.governance
+          ? {
+              winner: next.governance.winner || 'none',
+              blocked: next.governance.blocked === true,
+              blockReason: next.governance.blockReason || null,
+              detail: next.governance.detail || null,
+              conflictCount: Number(next.governance.conflictCount || 0),
+              precedence: Array.isArray(next.governance.precedence) ? next.governance.precedence : []
+            }
+          : null,
         selectedStrategy: next.selectedStrategy
           ? {
               name: next.selectedStrategy.name || next.selectedStrategy.objective || "strategy",
@@ -144,9 +174,11 @@ function appendAuditEntries(filePath, cycle) {
       reason: null,
       failureCategory: null,
       receipt: {
+        source: next.memorySource || 'unknown',
         runCount: next.nextMemory?.runCount || 0,
         lastSelected: next.nextMemory?.lastSelected || null,
         trackedStrategies: Object.keys(next.nextMemory?.strategyStats || {}).length,
+        trackedRituals: Object.keys(next.nextMemory?.ritualStats || {}).length,
         evolutionHistorySize: Array.isArray(next.nextMemory?.evolutionHistory)
           ? next.nextMemory.evolutionHistory.length
           : 0

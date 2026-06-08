@@ -1,0 +1,25 @@
+PROFILE "general"
+VERSION "1.0.0"
+
+FUSE next {
+  file: "genesis.next"
+  mode: field
+  inject: [dominant, narrative, summary]
+}
+
+FUSE liminal {
+  mode: observe
+  resonance_floor: 0.55
+}
+
+AGENT "FieldAnalyst"
+  GOAL "Synthesize research report informed by live Next field evolution"
+  MEMORY type=episodic+semantic
+  TOOLS ["citation_manager", "field_reader"]
+  POLICY require_citation=true
+  FLOW
+    PERCEIVE source=next_field modality=field
+    REASON strategy=comparative depth=3
+    DECIDE action=write_report threshold=0.7
+    ACT action=write_report channel=document
+    REFLECT

@@ -60,7 +60,8 @@ assert(alignment > 0.5, 'heuristic alignment uses lexical overlap');
     uncertainty_resolved: true
   });
   assert(runPass.success === true, 'dual-source program runs when resonance passes');
-  assert(runPass.phases.includes('resonance'), 'resonance phase precedes cognition');
+  assert(runPass.phases.includes('alignment'), 'alignment phase precedes cognition');
+  assert(runPass.alignment?.layer === 'liminal', 'liminal result is exposed as alignment layer');
   assert(runPass.transcript != null, 'transcript attached on success');
 
   const runBlock = await executeProgram(lowAst, {
@@ -70,6 +71,7 @@ assert(alignment > 0.5, 'heuristic alignment uses lexical overlap');
   });
   assert(runBlock.success === false, 'hard gate stops VM on low alignment');
   assert(runBlock.resonance.blocked === true, 'result carries resonance block state');
+  assert(runBlock.alignment.blocked === true, 'result carries alignment block state');
 
   const transcript = buildTranscript(runPass, loaded, {});
   const md = formatTranscriptMarkdown(transcript);

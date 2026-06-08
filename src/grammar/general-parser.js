@@ -1,5 +1,9 @@
 'use strict';
 
+const { parseEffectTags } = require('./effects');
+const { tryParseExpr } = require('./expr');
+const { isStdAiExport, buildImportContext } = require('../stdlib/registry');
+
 const COGNITIVE_KEYWORDS = {
   observe: 'PERCEIVE',
   perceive: 'PERCEIVE',
@@ -68,41 +72,76 @@ function parseFunctionHeader(line, lineNo) {
   };
 }
 
-function parseCallStatement(line) {
+function parseCallStatement(line, importContext = {}) {
+  const dotted = line.match(/^std\.ai\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dotted) {
+    return {
+      kind: 'stdlib',
+      module: 'std.ai',
+      exportName: dotted[1],
+      args: parseCallArgs(dotted[2])
+    };
+  }
+
   const m = line.match(/^([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
   if (!m) return null;
-  const args = m[2].trim()
-    ? m[2].split(',').map((a) => {
-        const t = a.trim();
-        if (/^"[\s\S]*"$/.test(t)) return parseQuoted(t, 0);
-        if (/^\d+(\.\d+)?$/.test(t)) return Number(t);
-        return t;
-      })
-    : [];
-  return { callee: m[1], args };
+
+  if (isStdAiExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.ai',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
+
+  return { kind: 'call', callee: m[1], args: parseCallArgs(m[2]) };
 }
 
-function parseCognitiveStatement(line, lineNo) {
+function parseCallArgs(raw) {
+  if (!raw.trim()) return [];
+  return raw.split(',').map((a) => {
+    const t = a.trim();
+    if (/^"[\s\S]*"$/.test(t)) return parseQuoted(t, 0);
+    if (/^\d+(\.\d+)?$/.test(t)) return Number(t);
+    if (/^(true|false)$/i.test(t)) return t.toLowerCase() === 'true';
+    return t;
+  });
+}
+
+function parseCognitiveStatement(line, lineNo, importContext = {}) {
   const trimmed = line.trim();
   if (!trimmed || trimmed === '}') return null;
 
-  const call = parseCallStatement(trimmed);
-  if (call) return { kind: 'call', ...call };
+  const call = parseCallStatement(trimmed, importContext);
+  if (call) return call;
+
+  const assertMatch = trimmed.match(/^assert\s+(.+)$/i);
+  if (assertMatch) {
+    const exprSource = assertMatch[1].trim();
+    tryParseExpr(exprSource, lineNo);
+    return { kind: 'assert', exprSource };
+  }
 
   const letMatch = trimmed.match(/^let\s+([a-zA-Z_][\w]*)\s*=\s*(.+)$/);
   if (letMatch) {
-    const raw = letMatch[2].trim();
-    return {
-      kind: 'let',
-      name: letMatch[1],
-      value: /^"[\s\S]*"$/.test(raw) ? parseQuoted(raw, lineNo) : raw
-    };
+    const exprSource = letMatch[2].trim();
+    if (/^"[\s\S]*"$/.test(exprSource)) {
+      return { kind: 'let', name: letMatch[1], value: parseQuoted(exprSource, lineNo) };
+    }
+    tryParseExpr(exprSource, lineNo);
+    return { kind: 'let', name: letMatch[1], exprSource };
   }
 
   const space = trimmed.indexOf(' ');
   if (space === -1) throw new Error(`Line ${lineNo}: invalid statement '${trimmed}'`);
   const kw = trimmed.slice(0, space).toLowerCase();
   const rest = trimmed.slice(space + 1).trim();
+
+  if (isStdAiExport(kw, importContext)) {
+    return parseStdAiStatement(kw, rest, lineNo);
+  }
+
   const canonical = COGNITIVE_KEYWORDS[kw];
   if (!canonical) throw new Error(`Line ${lineNo}: unknown cognitive statement '${kw}'`);
 
@@ -133,23 +172,94 @@ function parseCognitiveStatement(line, lineNo) {
   return { kind: 'cognitive', keyword: canonical, params: parseKeyValuePairs(rest, lineNo) };
 }
 
+function parseStdAiStatement(exportName, rest, lineNo) {
+  if (/^"[\s\S]*"$/.test(rest)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.ai',
+      exportName,
+      args: [parseQuoted(rest, lineNo)],
+      params: {}
+    };
+  }
+
+  const eqIdx = rest.indexOf('=');
+  const spIdx = rest.indexOf(' ');
+  if (spIdx > 0 && (eqIdx === -1 || spIdx < eqIdx)) {
+    const subjectRaw = rest.slice(0, spIdx);
+    const tail = rest.slice(spIdx + 1).trim();
+    const subject = /^"[\s\S]*"$/.test(subjectRaw) ? parseQuoted(subjectRaw, lineNo) : subjectRaw;
+    return {
+      kind: 'stdlib',
+      module: 'std.ai',
+      exportName,
+      args: [subject],
+      params: tail ? parseKeyValuePairs(tail, lineNo) : {}
+    };
+  }
+
+  return {
+    kind: 'stdlib',
+    module: 'std.ai',
+    exportName,
+    args: [],
+    params: parseKeyValuePairs(rest, lineNo)
+  };
+}
+
 function parseEffect(line) {
-  const m = line.match(/^@effect\s*\(\s*(pure|io|ai|external)\s*\)\s*$/i);
-  return m ? m[1].toLowerCase() : null;
+  const parsed = parseEffectTags(line);
+  return parsed ? parsed.effect : null;
+}
+
+function parseFusionBlock(body, target, lineNo) {
+  const fusion = { target: String(target).toLowerCase(), mode: 'field', enabled: true, inject: ['dominant', 'narrative', 'summary'] };
+  for (let i = 0; i < body.length; i += 1) {
+    const line = body[i];
+    const idx = line.indexOf(':');
+    if (idx === -1) continue;
+    const key = line.slice(0, idx).trim();
+    const valRaw = line.slice(idx + 1).trim();
+    if (/^\[/.test(valRaw)) {
+      fusion[key] = valRaw.slice(1, -1).split(',').map((s) => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
+    } else if (/^"[\s\S]*"$/.test(valRaw)) {
+      fusion[key] = parseQuoted(valRaw, lineNo + i);
+    } else if (/^(true|false)$/i.test(valRaw)) {
+      fusion[key] = valRaw.toLowerCase() === 'true';
+    } else {
+      fusion[key] = valRaw;
+    }
+  }
+
+  if (fusion.target === 'triad') {
+    const { expandTriadFusionBlocks } = require('../runtime/fusion/fusion-triad');
+    return expandTriadFusionBlocks(fusion);
+  }
+
+  return fusion;
 }
 
 function parseGeneralProgram(source, options = {}) {
   const lines = source.split(/\r?\n/);
+  const preImports = [];
+  for (const line of lines) {
+    const m = stripComment(line).trim().match(/^import\s+(.+)$/i);
+    if (m) preImports.push(m[1].replace(/;$/, '').trim());
+  }
+  const importContext = buildImportContext(preImports);
+
   const program = {
     profile: 'general',
-    version: '1.0.0-alpha',
+    version: '1.0.0',
     module: null,
     imports: [],
     functions: [],
     exports: [],
     effects: {},
     programBlock: null,
-    topLevel: []
+    topLevel: [],
+    fusion: [],
+    fusionTriad: null
   };
 
   let pendingEffect = null;
@@ -181,7 +291,7 @@ function parseGeneralProgram(source, options = {}) {
         const bodyLine = stripComment(lines[i]);
         if (bodyLine.trim() === '}') { i += 1; break; }
         if (!bodyLine.trim()) { i += 1; continue; }
-        body.push(parseCognitiveStatement(bodyLine, i + 1));
+        body.push(parseCognitiveStatement(bodyLine, i + 1, importContext));
         i += 1;
       }
       const fn = { ...fnHeader, body, effect: pendingEffect };
@@ -189,6 +299,26 @@ function parseGeneralProgram(source, options = {}) {
       if (fn.exported) program.exports.push(fn.name);
       if (pendingEffect) program.effects[fn.name] = pendingEffect;
       pendingEffect = null;
+      continue;
+    }
+
+    const fuseMatch = trimmed.match(/^fuse\s+([a-zA-Z_][\w]*)\s*\{\s*$/i);
+    if (fuseMatch) {
+      const body = [];
+      i += 1;
+      while (i < lines.length) {
+        const bl = stripComment(lines[i]).trim();
+        if (bl === '}') { i += 1; break; }
+        if (bl) body.push(bl);
+        i += 1;
+      }
+      const parsed = parseFusionBlock(body, fuseMatch[1], lineNo);
+      if (Array.isArray(parsed)) {
+        program.fusion.push(...parsed);
+        if (fuseMatch[1].toLowerCase() === 'triad') program.fusionTriad = { enabled: true };
+      } else {
+        program.fusion.push(parsed);
+      }
       continue;
     }
 
@@ -213,7 +343,7 @@ function parseGeneralProgram(source, options = {}) {
           i += 1;
           continue;
         }
-        body.push(parseCognitiveStatement(bodyLine, i + 1));
+        body.push(parseCognitiveStatement(bodyLine, i + 1, importContext));
         i += 1;
       }
       program.programBlock = { name: programMatch[1], body };
@@ -245,19 +375,21 @@ function parseGeneralProgram(source, options = {}) {
           program.context = parseKeyValuePairs(value, lineNo);
           break;
         default:
-          program.topLevel.push(parseCognitiveStatement(trimmed, lineNo));
+          program.topLevel.push(parseCognitiveStatement(trimmed, lineNo, importContext));
       }
       i += 1;
       continue;
     }
 
-    program.topLevel.push(parseCognitiveStatement(trimmed, lineNo));
+    program.topLevel.push(parseCognitiveStatement(trimmed, lineNo, importContext));
     i += 1;
   }
 
   program.entry = program.exports.includes('main')
     ? 'main'
     : (program.programBlock?.name || program.functions[0]?.name || 'main');
+
+  program.importContext = buildImportContext(program.imports);
 
   return program;
 }

@@ -8,72 +8,116 @@
         "public"
       ],
       "program": "seed",
-      "published_at": "2026-06-07T22:25:57.110Z"
+      "published_at": "2026-06-07T23:06:36.846Z"
     },
     {
       "name": "hypothesis_risk_off",
       "claim": "Markets entering risk-off regime",
-      "energy": 0.47760937984,
+      "energy": 0.9527471133340418,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
+      "published_at": "2026-06-07T23:06:36.860Z"
     },
     {
       "name": "hypothesis_risk_on",
       "claim": "Liquidity wave still expanding",
-      "energy": 0.30676107999999996,
+      "energy": 0.9176564980244495,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
+      "published_at": "2026-06-07T23:06:36.860Z"
     },
     {
       "name": "hypothesis_soft",
       "claim": "Soft landing narrative gaining traction",
-      "energy": 0.31445568,
+      "energy": 0.9707724789052089,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
+      "published_at": "2026-06-07T23:06:36.860Z"
     },
     {
       "name": "cycle_gate",
       "claim": "Crystallized observe-reason-decide cycle",
-      "energy": 0.601232256,
+      "energy": 0.9735524936440735,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
-    },
-    {
-      "name": "cycle_gate__seed__peer_cell_hybrid",
-      "claim": "Hybrid(cycle_gate, seed__peer_cell): Crystallized observe-reason-decide cycle ⊗ Peer signal",
-      "energy": 0.6335,
-      "tags": [
-        "hybrid",
-        "auto-spawn"
-      ],
-      "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
-    },
-    {
-      "name": "hypothesis_risk_off__seed__peer_cell_hybrid",
-      "claim": "Hybrid(seed__peer_cell, hypothesis_risk_off): Peer signal ⊗ Markets entering risk-off regime",
-      "energy": 0.6385,
-      "tags": [
-        "hybrid",
-        "auto-spawn"
-      ],
-      "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
+      "published_at": "2026-06-07T23:06:36.860Z"
     },
     {
       "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
       "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
-      "energy": 0.548,
+      "energy": 0.9807654117498963,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T22:25:57.142Z"
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction",
+      "energy": 0.9742822835521191,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_off_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.9761012797905587,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction",
+      "energy": 0.968704307368822,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.9791681094603466,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.986,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
+    },
+    {
+      "name": "analyst_thread",
+      "claim": "Deep-dive the dominant cell after weave",
+      "energy": 1,
+      "tags": [
+        "spawn",
+        "declared"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-07T23:06:36.860Z"
     }
   ],
   "programs": [
@@ -81,5 +125,5 @@
     "genesis"
   ],
   "cluster": "dream_cluster",
-  "updated_at": "2026-06-07T22:25:57.142Z"
+  "updated_at": "2026-06-07T23:06:36.860Z"
 }

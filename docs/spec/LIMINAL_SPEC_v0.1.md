@@ -1,6 +1,6 @@
 # Liminal Language Specification v0.1 (Draft)
 
-**Status:** Draft — experimental symbiotic profile in Noeon toolchain  
+**Status:** Draft — experimental alignment layer in the Noeon toolchain  
 **Extension:** `.lim`  
 **Profile id:** `liminal`  
 **Author lineage:** Human-initiated, AI co-designed (Cursor agent draft)
@@ -9,7 +9,9 @@
 
 ## 1. Purpose
 
-Liminal is a **symbiotic programming** surface for the AI era. Where Noeon models *how an agent thinks*, Liminal models *how humans and agents co-hold intent, uncertainty, approval, and responsibility*.
+Liminal is a **human-AI alignment layer** for the AI era. Where Noeon's primary language surfaces model *how an agent thinks and acts*, Liminal models *how humans and agents co-hold intent, uncertainty, approval, and responsibility*.
+
+Liminal is intentionally not the primary general-purpose Noeon surface. It should remain small and composable: covenant, belief, resonance, proposal, approval/veto, dialogue, and transcript.
 
 Core formula:
 
@@ -20,7 +22,7 @@ Program = Covenant + BeliefField + Resonance + Proposal + Trace + Veto
 Programs compile through the same Noeon pipeline:
 
 ```text
-.lim  →  Liminal AST  →  Legacy AST  →  Cognitive IR  →  Unified VM
+.lim  →  Liminal AST  →  Alignment gate  →  Cognitive IR  →  Unified VM
 ```
 
 ---

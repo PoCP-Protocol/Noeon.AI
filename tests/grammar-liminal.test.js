@@ -69,7 +69,9 @@ assert(detectProfile(ast, { filename: 'code_reviewer.lim' }) === PROFILES.LIMINA
     uncertainty_resolved: true
   });
   assert(run.success === true, 'unified VM runs liminal program');
-  assert(run.phases.includes('resonance'), 'resonance phase executes for liminal');
+  assert(run.profileInfo.role === 'alignment-layer', 'liminal is classified as alignment layer');
+  assert(run.phases.includes('alignment'), 'alignment phase executes for liminal');
+  assert(run.alignment?.gate === 'resonance', 'alignment layer uses resonance gate');
   assert(run.phases.includes('cognitive'), 'cognitive phase executes for liminal');
 
   console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);

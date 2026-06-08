@@ -1,0 +1,20 @@
+profile "liminal"
+version "0.1.0"
+module risk_assess
+
+covenant RiskAssessor {
+  intent: "Assess market risk with evidence"
+  resonance_floor: 0.55
+  never: [uncited_publish]
+  human_must_approve: [external_send]
+}
+
+belief market_risk {
+  claim: "Market risk requires evidence-backed assessment"
+  confidence: 0.72
+  sources: [market]
+}
+
+resonate assess_goal -> market_risk {
+  mirror: "Assessment goal aligns with market risk belief"
+}

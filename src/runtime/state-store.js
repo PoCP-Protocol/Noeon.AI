@@ -62,8 +62,15 @@ function rollbackState(filePath, steps = 1) {
 
   const toDrop = Math.max(1, Number(steps) || 1);
   state.rounds = state.rounds.slice(0, Math.max(0, state.rounds.length - toDrop));
-  state.currentPolicy =
-    state.rounds.length > 0 ? state.rounds[state.rounds.length - 1].updates : null;
+  const lastRound = state.rounds.length > 0 ? state.rounds[state.rounds.length - 1] : null;
+  state.currentPolicy = lastRound ? lastRound.updates : null;
+
+  if (lastRound && lastRound.nextMemorySnapshot) {
+    state.currentNextMemory = lastRound.nextMemorySnapshot;
+  } else {
+    delete state.currentNextMemory;
+  }
+
   saveState(filePath, state);
   return state;
 }

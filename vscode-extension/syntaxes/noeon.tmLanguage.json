@@ -6,6 +6,7 @@
     { "include": "#comments" },
     { "include": "#strings" },
     { "include": "#numbers" },
+    { "include": "#keywords-general" },
     { "include": "#keywords-contract" },
     { "include": "#keywords-perception" },
     { "include": "#keywords-reasoning" },
@@ -68,6 +69,22 @@
         {
           "name": "constant.numeric.integer.noeon",
           "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "keywords-general": {
+      "patterns": [
+        {
+          "name": "keyword.control.general.noeon",
+          "match": "\\b(profile|version|module|import|export|fn|let|assert|program|objective|context|observe|understand|reason|decide|act|feedback|reflect|ask|embed|think_with)\\b"
+        },
+        {
+          "name": "meta.annotation.noeon",
+          "match": "@effect\\([^)]*\\)"
+        },
+        {
+          "name": "support.module.noeon",
+          "match": "\\bstd\\.[a-z][a-z0-9_.]*\\b"
         }
       ]
     },

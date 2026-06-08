@@ -181,13 +181,229 @@ function cmdExplain(filePath) {
   console.log(explainProgram(ast));
 }
 
-function cmdGraph(filePath) {
-  if (!filePath) { console.error('Usage: noeon graph <file> [--json] [--out graph.mmd] [--mycelium] [--mycelium-dir dir]'); process.exit(1); }
+async function cmdFuse(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon fuse <file.next|file.noeon> [--fuse liminal,general] [--json] [--graph] [--save]');
+    process.exit(1);
+  }
+  const { ast, resolved } = parseProgram(filePath);
+  const { detectProfile, PROFILES } = require('./core/profile');
+  const { runFusionPreview, formatFusionPreviewText } = require('./runtime/fusion/fusion-preview');
+  const { runFusionGraph } = require('./runtime/fusion/fusion-graph');
+  const profile = detectProfile(ast, { filename: resolved });
+
+  const opts = {
+    quiet: flags.quiet,
+    with_protocol: 'off',
+    fuse: flags.fuse || (profile === PROFILES.GENERAL ? undefined : 'liminal,general'),
+    filename: resolved,
+    source_path: resolved,
+    hot_reload: flags['no-hot-reload'] ? false : true,
+    field_memory_dir: flags['field-memory-dir'] || flags.field_memory_dir,
+    mycelium_dir: flags['mycelium-dir'] || flags.mycelium_dir,
+    evolved_dir: flags['evolved-dir'] || flags.evolved_dir,
+    publish_mycelium: false,
+    feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
+  };
+
+  const result = flags.graph
+    ? await runFusionGraph(ast, opts)
+    : await runFusionPreview(ast, opts);
+
+  if (flags.save || flags.record) {
+    const { recordFusionRun } = require('./runtime/fusion/fusion-history');
+    recordFusionRun({
+      file: resolved,
+      profile: result.profile,
+      layers: result.layers,
+      phases: result.phases,
+      success: result.success,
+      summary: result.summary,
+      triad: result.triad,
+      bidirectional: result.bidirectional
+    }, opts);
+  }
+
+  if (flags.graph) {
+    if (flags.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(`Profile: ${result.profile} | Layers: ${(result.layers || []).join(', ')}`);
+      if (result.summary) console.log(`Summary: ${result.summary}`);
+      console.log('\n--- Mermaid ---\n');
+      console.log(result.mermaid);
+    }
+  } else if (flags.json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(formatFusionPreviewText(result));
+  }
+  process.exit(result.success ? 0 : 1);
+}
+
+async function cmdTriad(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon triad <file.noeon> [--json] [--graph] [--save] [--run]');
+    process.exit(1);
+  }
+  const { ast, resolved } = parseProgram(filePath);
+  const { runFusionTriad, buildTriadGraph } = require('./runtime/fusion/fusion-triad');
+  const { executeProgram } = require('./vm/unified-executor');
+
+  const opts = {
+    quiet: flags.quiet,
+    with_protocol: 'off',
+    filename: resolved,
+    source_path: resolved,
+    field_memory_dir: flags['field-memory-dir'] || flags.field_memory_dir,
+    mycelium_dir: flags['mycelium-dir'] || flags.mycelium_dir,
+    publish_mycelium: false,
+    hot_reload: flags['no-hot-reload'] ? false : true,
+    save: flags.save || flags.record
+  };
+
+  const triad = await runFusionTriad(ast, opts);
+
+  if (flags.run) {
+    const run = await executeProgram(ast, { ...opts, triad: false, quiet: true });
+    triad.cognitive = { success: run.success, phases: run.phases };
+  }
+
+  if (flags.graph) {
+    const { mermaid } = buildTriadGraph(triad);
+    if (flags.json) {
+      console.log(JSON.stringify({ ...triad, mermaid }, null, 2));
+    } else {
+      console.log('\n\x1b[32m═══ Triad Fusion ═══\x1b[0m');
+      console.log(`Coherence: ${triad.coherence?.score ?? '—'} | Relay: ${triad.relay?.triggered ? triad.relay.action : 'idle'}`);
+      console.log(triad.summary || '');
+      console.log('\n--- Mermaid ---\n');
+      console.log(mermaid);
+    }
+  } else if (flags.json) {
+    console.log(JSON.stringify(triad, null, 2));
+  } else {
+    console.log('\n\x1b[32m═══ Triad Fusion ═══\x1b[0m');
+    console.log(`Forward: ${triad.forward?.dominant?.name || '—'} → Reverse: ${triad.reverse?.dominant?.name || '—'}`);
+    console.log(`Coherence: ${triad.coherence?.score ?? '—'} | Aligned: ${triad.coherence?.aligned}`);
+    console.log(`Relay: ${triad.relay?.triggered ? triad.relay.action : 'idle'}`);
+    if (triad.summary) console.log(`Summary: ${triad.summary}`);
+  }
+
+  process.exit(triad.success ? 0 : 1);
+}
+
+function cmdConverge(targetPath) {
+  const path = require('path');
+  const {
+    loadConvergenceFromDir,
+    loadConvergenceFromFiles,
+    formatConvergenceText,
+    DEFAULT_PARITY
+  } = require('./core/canonical-convergence');
+  const { computeSemanticPulse } = require('./core/canonical-pulse');
+
+  let matrix;
+  if (!targetPath || targetPath === 'parity') {
+    const dir = path.join(__dirname, '..', 'examples', 'parity');
+    matrix = loadConvergenceFromDir(dir, DEFAULT_PARITY);
+  } else if (fs.existsSync(resolveFile(targetPath)) && fs.statSync(resolveFile(targetPath)).isDirectory()) {
+    matrix = loadConvergenceFromDir(resolveFile(targetPath));
+  } else {
+    const files = positional.length ? positional.map(resolveFile) : [resolveFile(targetPath)];
+    matrix = loadConvergenceFromFiles(files);
+  }
+
+  matrix.pulse = computeSemanticPulse(matrix);
+  if (flags.out) {
+    fs.writeFileSync(resolveFile(flags.out), JSON.stringify(matrix, null, 2), 'utf8');
+    console.log(`Written: ${resolveFile(flags.out)}`);
+  } else if (flags.json) {
+    console.log(JSON.stringify(matrix, null, 2));
+  } else {
+    console.log(formatConvergenceText(matrix));
+    console.log(`\nPulse: ${matrix.pulse.action} (score=${matrix.pulse.score ?? '—'})`);
+    if (flags.graph && matrix.mermaid) {
+      console.log('\n--- Mermaid ---\n');
+      console.log(matrix.mermaid);
+    }
+  }
+  process.exit(matrix.aligned ? 0 : 1);
+}
+
+function cmdReport() {
+  const { readCanonicalAudit, formatAuditReport } = require('./core/canonical-audit-read');
+  const report = readCanonicalAudit({
+    dir: flags.dir,
+    limit: flags.limit ? Number(flags.limit) : 30
+  });
+  if (flags.json) {
+    console.log(JSON.stringify(report, null, 2));
+  } else {
+    console.log(formatAuditReport(report));
+  }
+  process.exit(0);
+}
+
+async function cmdEpoch(filePath) {
+  if (!filePath) { console.error('Usage: noeon epoch <file.next> [--runs N] [--json] [--bridge] [--field-memory-dir dir]'); process.exit(1); }
+  const { runFieldEpochFromFile } = require('./runtime/next/field-epoch');
+  const { bridgeNextToCognitive } = require('./runtime/next/cognitive-bridge');
+  const runs = Number(flags.runs || flags.epochs || 3);
+  const result = await runFieldEpochFromFile(resolveFile(filePath), {
+    epochs: runs,
+    field_memory_dir: flags['field-memory-dir'] || flags.field_memory_dir,
+    mycelium_dir: flags['mycelium-dir'] || flags.mycelium_dir,
+    evolved_dir: flags['evolved-dir'] || flags.evolved_dir,
+    hot_reload: flags['no-hot-reload'] ? false : true,
+    publish_mycelium: flags['no-mycelium'] ? false : true
+  });
+
+  if (flags.bridge) {
+    const { ast } = parseProgram(filePath);
+    result.cognitive = bridgeNextToCognitive(result.last, ast);
+  }
+
+  if (flags.json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log('\n\x1b[32m═══ Field Epoch ═══\x1b[0m');
+    console.log(`Epochs: ${result.completed}/${result.epochs} | Stable dominant: ${result.summary.stable_dominant || '(varied)'}`);
+    for (const r of result.results) {
+      console.log(`  ${r.epoch}. ${r.success ? '✓' : '✗'} dominant=${r.dominant?.name || '-'} energy=${r.dominant?.energy ?? '-'}`);
+    }
+    if (result.cognitive?.artifact?.summary) {
+      console.log(`Bridge: ${result.cognitive.artifact.summary}`);
+    }
+  }
+  process.exit(result.summary.success ? 0 : 1);
+}
+
+async function cmdGraph(filePath) {
+  if (!filePath) { console.error('Usage: noeon graph <file> [--json] [--out graph.mmd] [--mycelium] [--memory] [--fusion] [--mycelium-dir dir] [--field-memory-dir dir]'); process.exit(1); }
   const { ast, resolved } = parseProgram(filePath);
   let graph;
   let output;
 
-  if (flags.mycelium || (ast.profile === 'next' && ast.next?.cells?.length)) {
+  if (flags.fusion) {
+    const { runFusionGraph } = require('./runtime/fusion/fusion-graph');
+    const fusionResult = await runFusionGraph(ast, {
+      filename: resolved,
+      source_path: resolved,
+      field_memory_dir: flags['field-memory-dir'] || flags.field_memory_dir,
+      publish_mycelium: false,
+      hot_reload: false
+    });
+    output = flags.json ? JSON.stringify(fusionResult.graph, null, 2) : fusionResult.mermaid;
+  } else if (flags.memory) {
+    const { buildMemoryGraph, formatMermaidGraph: fmt } = require('./runtime/next/memory-graph');
+    const { loadFieldMemory } = require('./runtime/next/field-memory');
+    const memDir = flags['field-memory-dir'] || flags.field_memory_dir;
+    const program = flags.program || ast.program || ast.task || path.basename(filePath, path.extname(filePath));
+    const memory = loadFieldMemory(program, { dir: memDir });
+    graph = buildMemoryGraph({ program, memory, dir: memDir });
+    output = flags.json ? JSON.stringify(graph, null, 2) : fmt(graph);
+  } else if (flags.mycelium || (ast.profile === 'next' && ast.next?.cells?.length)) {
     const { buildMyceliumGraph, buildNextFieldGraph, mergeGraphs, formatMermaidGraph: fmt } = require('./runtime/next/mycelium-graph');
     const { runFieldEngine } = require('./runtime/next/field-engine');
     const myceliumDir = flags['mycelium-dir'] || flags.mycelium_dir;
@@ -484,28 +700,150 @@ function cmdInit(name) {
   const dir = path.join(process.cwd(), name);
   if (fs.existsSync(dir)) { console.error(`Directory exists: ${name}`); process.exit(1); }
   const profile = String(flags.profile || 'general').toLowerCase();
-  if (!['general', 'ael', 'liminal'].includes(profile)) {
-    console.error('Usage: noeon init <project-name> [--profile general|ael|liminal]');
+  if (!['general', 'ael', 'liminal', 'next'].includes(profile)) {
+    console.error('Usage: noeon init <project-name> [--profile general|ael|liminal|next]');
     process.exit(1);
   }
 
   fs.mkdirSync(dir, { recursive: true });
-  const entry = profile === 'general' ? 'main.noeon' : profile === 'liminal' ? 'main.lim' : 'main.ael';
-  const source = profile === 'liminal'
+  const entry = profile === 'general'
+    ? 'main.noeon'
+    : profile === 'liminal'
+      ? 'main.lim'
+      : profile === 'next'
+        ? 'genesis.next'
+        : 'main.ael';
+  const source = profile === 'next'
+    ? `profile "next"\nversion "${VERSION}"\nprogram "genesis"\n\nGOAL "Evolve a living field toward the primary objective"\n\nCONSTITUTION name=evidence rule="Claims require field evidence" priority=1.0\n\nFIELD core {\n  ingest: [signals]\n  decay: 1h\n}\n\nCELL seed {\n  claim: "Initial field hypothesis"\n  energy: 0.55\n}\n\nACT action=observe channel=field\nREFLECT target=execution method=causal\n`
+    : profile === 'liminal'
     ? `profile "liminal"\nversion "${VERSION}"\nmodule "${name}"\n\ncovenant ${name.replace(/[^a-zA-Z0-9_]/g, '_')} {\n  intent: "Achieve the primary user goal with human-AI alignment"\n  never: [autonomous_spend, unsupervised_publish]\n  human_must_approve: [external_action]\n  resonance_floor: 0.70\n\n  when uncertain(confidence < 0.55) {\n    ask human\n  }\n}\n\nbelief user_goal {\n  claim: "User wants a helpful, auditable outcome"\n  confidence: 0.65\n  sources: [user_input]\n}\n\n@effect(ai, trace)\nresonate user_input -> user_goal {\n  mirror: "Confirming I understood the request correctly"\n}\n\npropose respond(body) {\n  requires: belief(user_goal) >= 0.55\n  on approve(human) -> act respond channel=runtime\n  on veto(human) -> reflect\n}\n`
     : profile === 'general'
-    ? `PROFILE "general"\nVERSION "${VERSION}"\n\nAGENT "${name}"\n  GOAL "Solve the primary user goal"\n  POLICY audit=true\n  FLOW\n    PERCEIVE source=user_input modality=text\n    REASON strategy=deductive depth=2\n    DECIDE action=proceed threshold=0.7 fallback=escalate\n    ACT action=respond channel=runtime safety=standard\n    REFLECT "execution quality" depth=standard\n`
+    ? `profile "general"\nversion "${VERSION}"\nmodule "${name}"\n\nimport std.ai\n\n@effect(external)\nfn main() {\n  observe input modality=text source="user"\n  ask("What is the primary goal?")\n  reason strategy=deductive depth=2\n  decide action=respond threshold=0.7\n  act action=respond channel=runtime\n  reflect "execution quality" depth=standard\n}\n`
     : `VERSION "0.8"\nNETWORK "local"\nTASK "${name}"\n\nGOAL "Primary objective"\nBUDGET 1000 msat\n\nPERCEIVE input modality=text\nREASON strategy=deductive\nDECIDE action=proceed threshold=0.7\n`;
   fs.writeFileSync(path.join(dir, entry), source);
   fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({
     environment: 'development',
     profile,
+    profile_role: profile === 'next' ? 'core' : profile === 'liminal' ? 'alignment' : profile === 'ael' ? 'protocol' : 'authoring',
     entry,
     cognition: { enable_llm: true, with_protocol: profile === 'general' || profile === 'liminal' ? 'off' : 'auto' },
     observability: { log_level: 'debug' },
     llm: { mode: 'auto' }
   }, null, 2));
-  console.log(`\x1b[32m✓ Created ${name}/ (${profile}, ${entry})\x1b[0m`);
+  if (profile === 'general') {
+    fs.writeFileSync(path.join(dir, 'noeon.json'), JSON.stringify({
+      name,
+      version: VERSION,
+      profile: 'general',
+      dependencies: { 'std.ai': 'builtin', 'std.cognition': 'builtin' }
+    }, null, 2));
+    const { installPackages } = require('./pkg/manifest');
+    installPackages(dir);
+  }
+  const role = profile === 'next' ? 'core' : profile === 'liminal' ? 'alignment' : profile === 'ael' ? 'protocol' : 'authoring';
+  console.log(`\x1b[32m✓ Created ${name}/ (${profile}, ${role}, ${entry})\x1b[0m`);
+}
+
+function cmdPkg(subcommand, arg) {
+  const {
+    addDependency,
+    listDependencies,
+    installPackages,
+    BUILTIN_PACKAGES
+  } = require('./pkg/manifest');
+  const {
+    searchPackages,
+    searchPackagesAsync,
+    publishPackage,
+    getBundledRegistryDir,
+    getUserRegistryDir
+  } = require('./pkg/registry');
+
+  const action = subcommand || 'help';
+
+  if (action === 'help' || action === '--help') {
+    console.log(`Usage:
+  noeon pkg list
+  noeon pkg search [query]
+  noeon pkg add <package> [--spec builtin|registry[:version]|path:./lib]
+  noeon pkg install
+  noeon pkg publish [--local] [--registry-dir path]
+
+Builtin packages: ${BUILTIN_PACKAGES.join(', ')}
+Bundled registry: ${getBundledRegistryDir()}
+User registry:    ${getUserRegistryDir()}
+Remote index:     ${process.env.NOEON_REGISTRY_URL || '(not set)'}`);
+    return;
+  }
+
+  if (action === 'search') {
+    const query = arg || positional[1] || '';
+    const run = async () => {
+      const results = await searchPackagesAsync(query, { registryUrl: flags.registry });
+      if (flags.json) {
+        console.log(JSON.stringify({ query, results }, null, 2));
+        return;
+      }
+      if (results.length === 0) {
+        console.log(query ? `No packages match '${query}'` : 'No registry packages found');
+        return;
+      }
+      for (const pkg of results) {
+        console.log(`${pkg.name}@${pkg.latest}  ${pkg.description || ''}`.trim());
+      }
+    };
+    run().catch((e) => {
+      console.error(e.message);
+      process.exit(1);
+    });
+    return;
+  }
+
+  if (action === 'publish') {
+    try {
+      const result = publishPackage(process.cwd(), {
+        local: flags.local === true,
+        registryDir: flags['registry-dir'] || flags.registry_dir
+      });
+      console.log(`\x1b[32m✓ Published ${result.name}@${result.version}\x1b[0m`);
+      console.log(`  registry: ${result.registryDir}`);
+      console.log(`  package:  ${result.packageRoot}`);
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    return;
+  }
+
+  if (action === 'list') {
+    const deps = listDependencies(process.cwd());
+    console.log(JSON.stringify(deps, null, 2));
+    return;
+  }
+
+  if (action === 'add') {
+    const pkg = arg || positional[1];
+    if (!pkg) {
+      console.error('Usage: noeon pkg add <package>');
+      process.exit(1);
+    }
+    const spec = flags.spec || 'builtin';
+    const result = addDependency(process.cwd(), pkg, spec);
+    const installed = installPackages(process.cwd());
+    console.log(`\x1b[32m✓ Added ${result.added} to ${result.manifestPath}\x1b[0m`);
+    console.log(`\x1b[32m✓ Lockfile updated (${installed.installed.length} packages)\x1b[0m`);
+    return;
+  }
+
+  if (action === 'install') {
+    const result = installPackages(process.cwd());
+    console.log(`\x1b[32m✓ Installed ${result.installed.length} packages → ${result.lockPath}\x1b[0m`);
+    return;
+  }
+
+  console.error(`Unknown pkg subcommand: ${action}`);
+  cmdPkg('help');
+  process.exit(1);
 }
 
 function cmdStatus() {
@@ -590,12 +928,131 @@ function cmdLsp() {
   child.on('exit', (code) => process.exit(code || 0));
 }
 
+async function cmdPipeline(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon pipeline <file> [--json] [--plan-only]');
+    process.exit(1);
+  }
+  const { runNoeonPipeline } = require('./core/pipeline');
+  const out = await runNoeonPipeline(filePath, {
+    filename: path.resolve(process.cwd(), filePath),
+    with_protocol: flags['with-protocol'] || flags.with_protocol || 'off',
+    quiet: !flags.verbose,
+    trace: flags.trace === true
+  });
+  if (flags.json) {
+    console.log(JSON.stringify({
+      success: out.result?.success,
+      blocked: out.result?.blocked,
+      profile: out.profile,
+      coreSurface: out.coreSurface,
+      routeLabel: out.routeLabel,
+      stack: out.stack,
+      plan: out.plan,
+      architecture: out.architecture,
+      phases: out.result?.phases,
+      scheduler: out.result?.scheduler,
+      report: out.report
+    }, null, 2));
+  } else {
+    console.log(`\x1b[36mPipeline\x1b[0m ${filePath}`);
+    console.log(`  core: ${out.coreSurface} | profile: ${out.profile} | route: ${out.routeLabel}`);
+    console.log(`  layers: ${(out.stack?.layers || []).join(', ') || '(none)'}`);
+    console.log(`  success: ${out.result?.success !== false}`);
+  }
+  process.exit(out.result?.success === false ? 1 : 0);
+}
+
+function cmdArchitecture() {
+  const { buildArchitectureManifest } = require('./core/canonical-architecture');
+  const manifest = buildArchitectureManifest();
+  if (flags.json) {
+    console.log(JSON.stringify(manifest, null, 2));
+    return;
+  }
+  console.log(`\x1b[36mNoeon Canonical Architecture v${manifest.version}\x1b[0m`);
+  console.log(`  core: ${manifest.coreSurface} | rule: ${manifest.rule}`);
+  console.log('  pipeline:');
+  for (const stage of manifest.pipeline) {
+    console.log(`    · ${stage.id} — ${stage.label}`);
+  }
+  console.log('  frozen extensions:', Object.keys(manifest.frozenExtensions).join(', '));
+  console.log('  golden:', manifest.goldenManifest);
+}
+
+function cmdPlan(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon plan <file> [--json]');
+    process.exit(1);
+  }
+  const { planNoeonProgram, parseNoeonInput } = require('./core/pipeline');
+  const { ast } = parseNoeonInput(filePath, { filename: path.resolve(process.cwd(), filePath) });
+  const out = planNoeonProgram(ast, { filename: path.resolve(process.cwd(), filePath), plan_only: true });
+  const payload = {
+    profile: out.profile,
+    coreSurface: out.coreSurface,
+    mode: out.mode,
+    routeLabel: out.routeLabel,
+    route: out.route,
+    stack: out.stack,
+    plan: out.plan,
+    governance: {
+      winner: out.governance?.winner?.tier || null,
+      rule_count: out.governance?.rule_count,
+      model: out.governance?.model
+    },
+    intent: out.canonical?.intent,
+    fusion_layers: out.canonical?.fusion?.layers || []
+  };
+  console.log(flags.json ? JSON.stringify(payload, null, 2) : JSON.stringify(payload, null, 2));
+}
+
+function cmdStack(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon stack <file> [--json]');
+    process.exit(1);
+  }
+  const { parseNoeonInput } = require('./core/pipeline');
+  const { ast } = parseNoeonInput(filePath, { filename: path.resolve(process.cwd(), filePath) });
+  console.log(flags.json ? JSON.stringify(ast.noeonStack, null, 2) : JSON.stringify(ast.noeonStack, null, 2));
+}
+
+function cmdBrain(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon brain <file> [--json]');
+    process.exit(1);
+  }
+  const { planNoeonProgram, parseNoeonInput } = require('./core/pipeline');
+  const { BRAIN_REGIONS } = require('./core/cognitive-architecture');
+  const { ast } = parseNoeonInput(filePath, { filename: path.resolve(process.cwd(), filePath) });
+  const out = planNoeonProgram(ast, {
+    filename: path.resolve(process.cwd(), filePath),
+    with_protocol: 'off'
+  });
+  const payload = {
+    model: out.architecture?.model,
+    disclaimer: out.architecture?.disclaimer,
+    cognitive_cycle: out.cognitiveCycle,
+    active_regions: out.architecture?.active_regions,
+    agent_flows: out.architecture?.agent_flows,
+    regions: out.architecture?.active_regions?.map((id) => ({
+      id,
+      ...BRAIN_REGIONS[id]
+    }))
+  };
+  console.log(flags.json ? JSON.stringify(payload, null, 2) : JSON.stringify(payload, null, 2));
+}
+
 function cmdHelp() {
   showBanner();
   console.log(`
+\x1b[1mSystem:\x1b[0m    plan | stack | pipeline | brain
 \x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
 \x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
-\x1b[1mTools:\x1b[0m      validate | parse | graph | diff | merge | mycelium | field-memory | test | init | status | doctor | playground | lsp
+\x1b[1mFusion:\x1b[0m     fuse | triad | converge
+\x1b[1mCanonical:\x1b[0m report
+\x1b[1mNext:\x1b[0m       epoch | diff | merge | mycelium | field-memory
+\x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | lsp
 
 \x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --out file
        --with-protocol auto|on|off --strict-protocol --port 5177 --file program.ael
@@ -604,8 +1061,20 @@ function cmdHelp() {
 \x1b[1mLLM:\x1b[0m Set OPENAI_API_KEY or NOEON_API_KEY (NOEON_LLM_MODE=auto|live|mock|off)
 
 \x1b[1mExamples:\x1b[0m
-  noeon init my-agent --profile general
-  noeon run main.noeon --trace
+  noeon brain examples/agent_research.noeon
+  noeon architecture --json
+  noeon stack examples/agent_research.noeon
+  noeon pipeline examples/agent_research.noeon
+  noeon init my-field --profile next
+  noeon run examples/genesis.next
+  noeon fuse examples/genesis.next
+  noeon fuse examples/agent_field.noeon --json
+  noeon triad examples/fusion_triad.noeon --graph --save
+  noeon triad examples/fusion_triad.noeon --run
+  noeon converge parity --graph
+  noeon converge examples/parity --json --out artifacts/convergence.json
+  noeon report --limit 20
+  noeon graph examples/genesis.next --memory
   noeon graph examples/hello.noeon --out hello.mmd
   noeon diff examples/genesis.next
   noeon merge examples/genesis.next --three-way --theirs file.merged
@@ -621,11 +1090,21 @@ function cmdHelp() {
 
 async function main() {
   switch (command) {
+    case 'brain': cmdBrain(target); break;
+    case 'architecture': cmdArchitecture(); break;
+    case 'plan': cmdPlan(target); break;
+    case 'stack': cmdStack(target); break;
+    case 'pipeline': await cmdPipeline(target); break;
     case 'run': await cmdRun(target); break;
+    case 'epoch': await cmdEpoch(target); break;
+    case 'fuse': await cmdFuse(target); break;
+    case 'triad': await cmdTriad(target); break;
+    case 'converge': cmdConverge(target); break;
+    case 'report': cmdReport(); break;
     case 'parse': cmdParse(target); break;
     case 'compile': cmdCompile(target); break;
     case 'explain': cmdExplain(target); break;
-    case 'graph': cmdGraph(target); break;
+    case 'graph': await cmdGraph(target); break;
     case 'diff': cmdDiff(target); break;
     case 'merge': cmdMerge(target); break;
     case 'mycelium': cmdMycelium(target); break;
@@ -634,6 +1113,7 @@ async function main() {
     case 'inspect': await cmdInspect(target); break;
     case 'repl': await cmdRepl(); break;
     case 'init': cmdInit(target); break;
+    case 'pkg': cmdPkg(target, positional[1]); break;
     case 'status': cmdStatus(); break;
     case 'doctor': cmdDoctor(); break;
     case 'test': await cmdTest(); break;

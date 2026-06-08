@@ -1,0 +1,44 @@
+{
+  "schema": "noeon.golden.manifest/v1",
+  "version": "1.0.0",
+  "description": "Proof programs for Noeon — one language, capability entry modes.",
+  "programs": [
+    {
+      "id": "general",
+      "title": "General logic (.noeon)",
+      "metaphor": "hand",
+      "capability": "general",
+      "primary": "examples/hello.noeon",
+      "proof": "Structured program block with observe→reflect cognitive cycle through unified VM"
+    },
+    {
+      "id": "governance",
+      "title": "Next governance & autonomy (.next)",
+      "metaphor": "will",
+      "capability": "governance",
+      "primary": "examples/genesis.next",
+      "proof": "Field, cells, evolution, FUSE sidecars — constitution-tier governance semantics"
+    },
+    {
+      "id": "alignment",
+      "title": "Alignment sidecar (.noeon + .lim)",
+      "metaphor": "conscience",
+      "capability": "alignment",
+      "primary": "examples/agent_field.noeon",
+      "sidecar": "examples/agent_field.lim",
+      "proof": "Agent synthesis with liminal observe covenant — resonance without blocking execution"
+    }
+  ],
+  "parity": {
+    "id": "parity",
+    "title": "Same intent, four surfaces",
+    "shared_goal": "Assess market risk with evidence",
+    "files": {
+      "general": "examples/parity/risk_assess.noeon",
+      "governance": "examples/parity/risk_assess.next",
+      "contract": "examples/parity/risk_assess.ael",
+      "alignment": "examples/parity/risk_assess.lim"
+    },
+    "proof": "Four capability entry modes lower to the same canonical intent and unified runtime"
+  }
+}

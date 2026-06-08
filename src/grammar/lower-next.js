@@ -1,6 +1,7 @@
 'use strict';
 
 const { createLegacyAstShell } = require('./lower');
+const { buildStackManifest } = require('../core/noeon-unified');
 
 function lowerNextProgram(nextProgram) {
   const shell = createLegacyAstShell({
@@ -39,6 +40,18 @@ function lowerNextProgram(nextProgram) {
     shell.metaRules.push({ type: 'next_guarantee', ...guarantee });
   }
 
+  for (const vow of nextProgram.vows || []) {
+    shell.metaRules.push({ type: 'next_vow', ...vow });
+  }
+
+  for (const constitution of nextProgram.constitutions || []) {
+    shell.metaRules.push({ type: 'next_constitution', ...constitution });
+  }
+
+  for (const ritual of nextProgram.rituals || []) {
+    shell.metaRules.push({ type: 'next_ritual', ...ritual });
+  }
+
   for (const act of nextProgram.acts || []) {
     shell.cognition.acts.push({ ...act, plugin: act.plugin || 'runtime' });
   }
@@ -52,6 +65,14 @@ function lowerNextProgram(nextProgram) {
 
   for (const evolve of nextProgram.evolves || []) {
     shell.evolution.evolves.push({ ...evolve });
+  }
+
+  if ((nextProgram.selfModels || []).length > 0) {
+    shell.cognition.context.next_selfmodels = nextProgram.selfModels.map((m) => ({ ...m }));
+  }
+
+  if ((nextProgram.myths || []).length > 0) {
+    shell.cognition.context.next_myths = nextProgram.myths.map((m) => ({ ...m }));
   }
 
   for (const field of nextProgram.fields || []) {
@@ -148,9 +169,14 @@ function lowerNextProgram(nextProgram) {
     models: nextProgram.models || [],
     strategies: nextProgram.strategies || [],
     guarantees: nextProgram.guarantees || [],
+    vows: nextProgram.vows || [],
+    constitutions: nextProgram.constitutions || [],
+    rituals: nextProgram.rituals || [],
     acts: nextProgram.acts || [],
     reflects: nextProgram.reflects || [],
     evolves: nextProgram.evolves || [],
+    selfModels: nextProgram.selfModels || [],
+    myths: nextProgram.myths || [],
     fields: nextProgram.fields || [],
     cells: nextProgram.cells || [],
     weaves: nextProgram.weaves || [],
@@ -160,9 +186,11 @@ function lowerNextProgram(nextProgram) {
     fluxes: nextProgram.fluxes || [],
     bonds: nextProgram.bonds || [],
     mycelium: nextProgram.mycelium || [],
-    autobond: nextProgram.autobond || null
+    autobond: nextProgram.autobond || null,
+    fusion: nextProgram.fusion || []
   };
 
+  shell.noeonStack = buildStackManifest(shell);
   return shell;
 }
 

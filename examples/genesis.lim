@@ -1,0 +1,32 @@
+profile "liminal"
+version "0.1.0"
+module genesis_field
+
+covenant FieldObserver {
+  intent: "Observe autonomous field evolution without blocking emergence"
+  resonance_floor: 0.55
+
+  when uncertain(confidence < 0.40) {
+    observe only
+  }
+}
+
+belief hypothesis_risk_off {
+  claim: "Markets entering risk-off regime"
+  confidence: 0.72
+  sources: [field]
+}
+
+belief hypothesis_soft {
+  claim: "Soft landing narrative gaining traction"
+  confidence: 0.58
+  sources: [field]
+}
+
+resonate field_goal -> hypothesis_risk_off {
+  mirror: "Dominant risk-off hypothesis aligns with field goal"
+}
+
+resonate field_signal -> hypothesis_soft {
+  mirror: "Soft landing cell participates in narrative weave"
+}

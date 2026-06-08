@@ -1,4 +1,38 @@
 {
+  "General Profile": {
+    "prefix": "general",
+    "body": [
+      "profile \"general\"",
+      "version \"1.0.0-alpha\"",
+      "",
+      "module ${1:demo}",
+      "",
+      "import std.ai",
+      "",
+      "@effect(ai)",
+      "fn main() {",
+      "  ask(\"${2:Hello}\") model=default",
+      "}"
+    ],
+    "description": "General profile starter with std.ai"
+  },
+  "General Function": {
+    "prefix": "fn",
+    "body": [
+      "@effect(${1|pure,io,ai,external|})",
+      "fn ${2:name}(${3:}) {",
+      "  ${4:// body}",
+      "}"
+    ],
+    "description": "General profile function with effect annotation"
+  },
+  "Import std.ai": {
+    "prefix": "importai",
+    "body": [
+      "import std.ai"
+    ],
+    "description": "Import std.ai module"
+  },
   "Cognitive Contract": {
     "prefix": "contract",
     "body": [

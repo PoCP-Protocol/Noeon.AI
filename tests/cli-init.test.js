@@ -39,25 +39,29 @@ console.log('\n\x1b[36m═══ CLI Init Tests ═══\x1b[0m\n');
     const projectDir = path.join(tmp, project);
     const entry = path.join(projectDir, 'main.noeon');
     const configPath = path.join(projectDir, '.noeonrc.json');
+    const manifestPath = path.join(projectDir, 'noeon.json');
     assert(fs.existsSync(entry), 'general init creates main.noeon');
     assert(fs.existsSync(configPath), 'general init creates .noeonrc.json');
+    assert(fs.existsSync(manifestPath), 'general init creates noeon.json');
 
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     assert(config.profile === 'general', 'config records general profile');
     assert(config.entry === 'main.noeon', 'config records entry file');
     assert(config.cognition.with_protocol === 'off', 'general init defaults protocol off');
 
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    assert(manifest.dependencies['std.ai'] === 'builtin', 'manifest includes std.ai');
+
     const ast = parseAel(fs.readFileSync(entry, 'utf8'));
-    const validation = validateAel(ast);
+    const validation = validateAel(ast, { cwd: projectDir });
     assert(ast.profile === 'general', 'generated main.noeon parses as general');
-    assert(ast.agents.length === 1, 'generated main.noeon includes AGENT block');
-    assert(ast.agents[0].name === project, 'AGENT name matches project name');
-    assert(ast.agents[0].goal === 'Solve the primary user goal', 'AGENT includes GOAL');
-    assert(ast.cognitive.perceptions.length === 1, 'generated main.noeon includes PERCEIVE');
-    assert(ast.cognitive.reasonings.length === 1, 'generated main.noeon includes REASON');
-    assert(ast.cognitive.decisions.length === 1, 'generated main.noeon includes DECIDE');
-    assert(ast.cognition.acts.length === 1, 'generated main.noeon includes ACT');
-    assert(ast.cognitive.reflections.length === 1, 'generated main.noeon includes REFLECT');
+    assert(ast.general?.functions?.length >= 1, 'generated main.noeon includes fn block');
+    assert(ast.general.functions.some((f) => f.name === 'main'), 'generated fn main exists');
+    assert(ast.llm.asks.length >= 1, 'generated main.noeon includes std.ai ask');
+    assert(ast.cognitive.reasonings.length >= 1, 'generated main.noeon includes REASON');
+    assert(ast.cognitive.decisions.length >= 1, 'generated main.noeon includes DECIDE');
+    assert(ast.cognition.acts.length >= 1, 'generated main.noeon includes ACT');
+    assert(ast.cognitive.reflections.length >= 1, 'generated main.noeon includes REFLECT');
     assert(validation.valid === true, 'generated main.noeon validates');
 
     const run = await runProgram(ast, {

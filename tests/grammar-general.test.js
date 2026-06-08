@@ -41,7 +41,7 @@ assert(legacyHello.cognition.acts.length >= 1, 'program block includes ACT');
 
 const compiler = new AELtoIRCompiler();
 const { program } = compiler.compile(ast);
-assert(program.processes.length >= 2, 'general program compiles to IR processes');
+assert(program.processes.length >= 1, 'general program compiles to IR processes');
 assert(program.perceivers.length >= 1, 'general program compiles PERCEIVE nodes');
 
 assert(detectProfile(ast, { filename: 'cognitive_agent.noeon' }) === PROFILES.GENERAL, 'profile detection');

@@ -3,14 +3,17 @@ version "1.0.0-alpha"
 
 module agent_demo
 
-import std.cognition
+import std.ai
 
 @effect(ai)
 fn think(input: string) {
+  let threshold = 0.72 - 0.07
+  assert threshold >= 0.5
   observe input modality=text source="user"
+  ask input model=default temperature=0.7
   understand context=intent method=semantic confidence=0.72
   reason strategy=abductive depth=3
-  decide action=respond threshold=0.65
+  decide action=respond threshold=threshold
   reflect "reasoning quality" depth=standard
 }
 

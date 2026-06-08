@@ -501,6 +501,20 @@ class ConsciousnessStream {
   async _runCycle() {
     if (!this.running) return;
 
+    await this.runCycleOnce();
+
+    if (!this.running) return;
+
+    // Schedule next cycle (adaptive timing)
+    const nextInterval = this._adaptiveTiming();
+    this._cycleTimer = setTimeout(() => this._runCycle(), nextInterval);
+  }
+
+  /**
+   * Run a single consciousness cycle synchronously (no timer).
+   * Returns true if unprocessed salient thoughts remain.
+   */
+  async runCycleOnce() {
     this.stats.totalCycles++;
 
     // 1. PERCEIVE: Gather current thoughts and stimuli
@@ -533,9 +547,39 @@ class ConsciousnessStream {
     // 9. DECAY: Old thoughts fade
     this._decayThoughts();
 
-    // Schedule next cycle (adaptive timing)
-    const nextInterval = this._adaptiveTiming();
-    this._cycleTimer = setTimeout(() => this._runCycle(), nextInterval);
+    return this._gatherActiveThoughts().length > 0;
+  }
+
+  /**
+   * Run bounded consciousness cycles without background timers.
+   * Used by Unified VM as the default cognitive scheduler (Phase 4).
+   */
+  async runBounded(maxCycles = 32, options = {}) {
+    const untilIdle = options.untilIdle !== false;
+    const wasRunning = this.running;
+    this.running = true;
+
+    this.temporal.record({ type: 'consciousness_bounded_start', maxCycles });
+
+    let cycles = 0;
+    let hasWork = true;
+
+    while (cycles < maxCycles) {
+      hasWork = await this.runCycleOnce();
+      cycles += 1;
+      if (untilIdle && !hasWork) break;
+    }
+
+    if (!wasRunning) this.running = false;
+
+    this.temporal.record({ type: 'consciousness_bounded_complete', cycles, idle: !hasWork });
+
+    return {
+      cycles,
+      idle: !hasWork,
+      state: this.getState(),
+      stats: { ...this.stats }
+    };
   }
 
   _gatherActiveThoughts() {

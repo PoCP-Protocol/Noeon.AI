@@ -136,6 +136,7 @@ console.log('\n\x1b[36m═══ Next Profile v0.1 Tests ═══\x1b[0m\n');
     quiet: true,
     with_protocol: 'off',
     auto_evolve: true,
+    field_memory: false,
     feedback: {
       signals: ['price momentum'],
       friction: { latency: 0.85 }

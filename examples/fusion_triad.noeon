@@ -1,0 +1,24 @@
+PROFILE "general"
+VERSION "1.0.0"
+
+FUSE triad {
+  next: "genesis.next"
+  next_mode: field
+  liminal: observe
+  general: bridge
+  relay: true
+  resonance_floor: 0.55
+  inject: [dominant, narrative, summary]
+}
+
+AGENT "TriadSynthesizer"
+  GOAL "Close the loop: live Next field, Liminal alignment, General synthesis"
+  MEMORY type=episodic+semantic
+  TOOLS ["field_reader", "citation_manager", "triad_coherence"]
+  POLICY require_citation=true
+  FLOW
+    PERCEIVE source=triad_field modality=fusion
+    REASON strategy=cross_profile depth=4
+    DECIDE action=synthesize threshold=0.65
+    ACT action=write_report channel=document
+    REFLECT

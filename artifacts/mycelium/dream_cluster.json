@@ -3,39 +3,116 @@
     {
       "name": "hypothesis_risk_off",
       "claim": "Markets entering risk-off regime",
-      "energy": 0.4416,
+      "energy": 0.9674776732157886,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:21:40.865Z"
+      "published_at": "2026-06-08T00:16:18.277Z"
     },
     {
       "name": "hypothesis_risk_on",
       "claim": "Liquidity wave still expanding",
-      "energy": 0.30827499999999997,
+      "energy": 0.9542249080640001,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:21:40.865Z"
+      "published_at": "2026-06-08T00:16:18.277Z"
     },
     {
       "name": "hypothesis_soft",
       "claim": "Soft landing narrative gaining traction",
-      "energy": 0.3084,
+      "energy": 0.9711146685863605,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:21:40.865Z"
+      "published_at": "2026-06-08T00:16:18.277Z"
     },
     {
       "name": "cycle_gate",
       "claim": "Crystallized observe-reason-decide cycle",
-      "energy": 0.63,
+      "energy": 0.971427783765471,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T22:21:40.865Z"
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
+      "energy": 0.9757967255247412,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction",
+      "energy": 0.9814294260642569,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_off_hybrid",
+      "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.9709357690139815,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction",
+      "energy": 0.9733854190303726,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_on_hybrid",
+      "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.9836525877390723,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_soft_hybrid",
+      "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle",
+      "energy": 0.977959855854365,
+      "tags": [
+        "hybrid",
+        "auto-spawn"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
+    },
+    {
+      "name": "analyst_thread",
+      "claim": "Deep-dive the dominant cell after weave",
+      "energy": 0.992781035652039,
+      "tags": [
+        "spawn",
+        "declared"
+      ],
+      "program": "genesis",
+      "published_at": "2026-06-08T00:16:18.277Z"
     }
   ],
   "programs": [
     "genesis"
   ],
   "cluster": "dream_cluster",
-  "updated_at": "2026-06-07T22:21:40.865Z"
+  "updated_at": "2026-06-08T00:16:18.278Z"
 }

@@ -1,0 +1,3915 @@
+{
+  "program": "genesis",
+  "runs": 25,
+  "updated_at": "2026-06-08T00:16:18.298Z",
+  "cells": {
+    "hypothesis_risk_off": {
+      "energy": 0.9695130034491194,
+      "claim": "Markets entering risk-off regime"
+    },
+    "hypothesis_risk_on": {
+      "energy": 0.950703678324813,
+      "claim": "Liquidity wave still expanding"
+    },
+    "hypothesis_soft": {
+      "energy": 0.9675141741741374,
+      "claim": "Soft landing narrative gaining traction"
+    },
+    "cycle_gate": {
+      "energy": 0.9540069734141495,
+      "claim": "Crystallized observe-reason-decide cycle"
+    },
+    "cycle_gate__hypothesis_risk_off_hybrid": {
+      "energy": 0.9718526839505023,
+      "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+    },
+    "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+      "energy": 0.9780542568127399,
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+    },
+    "cycle_gate__hypothesis_soft_hybrid": {
+      "energy": 0.9824083852014677,
+      "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+    },
+    "hypothesis_risk_off__hypothesis_soft_hybrid": {
+      "energy": 0.9790345189159321,
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+    },
+    "analyst_thread": {
+      "energy": 0.9968646032092198,
+      "claim": "Deep-dive the dominant cell after weave"
+    },
+    "hypothesis_risk_on__hypothesis_soft_hybrid": {
+      "energy": 0.977570282222985,
+      "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+    },
+    "cycle_gate__hypothesis_risk_on_hybrid": {
+      "energy": 0.9772711473649254,
+      "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+    },
+    "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid": {
+      "energy": 0.9784347087118858,
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_off__hypothesis_soft_hybrid): Markets entering risk-off regime ⊗ Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+    },
+    "cycle_gate__hypothesis_risk_off_hybrid__hypothesis_risk_off_hybrid": {
+      "energy": 0.9730087277994454,
+      "claim": "Hybrid(hypothesis_risk_off, cycle_gate__hypothesis_risk_off_hybrid): Markets entering risk-off regime ⊗ Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+    },
+    "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid": {
+      "energy": 0.9777924152020389,
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_off__hypothesis_risk_on_hybrid): Markets entering risk-off regime ⊗ Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+    },
+    "cycle_gate__hypothesis_soft_hybrid__hypothesis_risk_off_hybrid": {
+      "energy": 0.9700323740315704,
+      "claim": "Hybrid(hypothesis_risk_off, cycle_gate__hypothesis_soft_hybrid): Markets entering risk-off regime ⊗ Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+    },
+    "hypothesis_risk_off__hypothesis_risk_on__hypothesis_soft_hybrid_hybrid": {
+      "energy": 0.9722782695363866,
+      "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on__hypothesis_soft_hybrid): Markets entering risk-off regime ⊗ Hybrid(hypothesis_soft, hypothesis_risk_on): Soft landing narrative gaining traction ⊗ Liquidity wave still expanding"
+    },
+    "seed__peer_cell": {
+      "energy": 0.619121330601689,
+      "claim": "Peer signal"
+    },
+    "ember__ember_volatility_spike": {
+      "energy": 0.9633114932582627,
+      "claim": "Volatility spike confirms risk-off pressure"
+    },
+    "ember__ember_liquidity_echo": {
+      "energy": 0.7875821016078789,
+      "claim": "Liquidity echo from cross-market flows"
+    },
+    "ember__ember_volatility_spike__hypothesis_risk_off_hybrid": {
+      "energy": 0.9535813615954473,
+      "claim": "Hybrid(hypothesis_risk_off, ember__ember_volatility_spike): Markets entering risk-off regime ⊗ Volatility spike confirms risk-off pressure"
+    },
+    "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid": {
+      "energy": 0.8733160282285561,
+      "claim": "Hybrid(hypothesis_risk_on, ember__ember_liquidity_echo): Liquidity wave still expanding ⊗ Liquidity echo from cross-market flows"
+    },
+    "ember__ember_volatility_spike__hypothesis_risk_on_hybrid": {
+      "energy": 0.9850440520367122,
+      "claim": "Hybrid(hypothesis_risk_on, ember__ember_volatility_spike): Liquidity wave still expanding ⊗ Volatility spike confirms risk-off pressure"
+    }
+  },
+  "dominant_history": [
+    {
+      "name": "cycle_gate__hypothesis_risk_off_hybrid",
+      "energy": 0.7326697783123526,
+      "at": "2026-06-07T22:33:50.841Z"
+    },
+    {
+      "name": "cycle_gate__hypothesis_risk_off_hybrid",
+      "energy": 0.7352834808461849,
+      "at": "2026-06-07T22:44:39.321Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T22:54:35.529Z"
+    },
+    {
+      "name": "hypothesis_risk_on",
+      "energy": 0.986,
+      "at": "2026-06-07T22:54:35.754Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T22:57:34.301Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9931385231863533,
+      "at": "2026-06-07T22:58:12.920Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T22:59:47.786Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T23:00:11.226Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9956760597187458,
+      "at": "2026-06-07T23:00:46.596Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9869422212590134,
+      "at": "2026-06-07T23:02:07.356Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9910821046387226,
+      "at": "2026-06-07T23:02:07.556Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9951749815592252,
+      "at": "2026-06-07T23:03:04.103Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9895240244074943,
+      "at": "2026-06-07T23:04:25.019Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9880916561262919,
+      "at": "2026-06-07T23:05:11.274Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T23:05:11.335Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T23:06:36.562Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9997978225594722,
+      "at": "2026-06-07T23:06:36.719Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-07T23:06:36.864Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9906091480401819,
+      "at": "2026-06-08T00:13:37.035Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-08T00:13:37.060Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-08T00:13:53.633Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-08T00:13:53.655Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 1,
+      "at": "2026-06-08T00:15:20.069Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.992781035652039,
+      "at": "2026-06-08T00:16:18.279Z"
+    },
+    {
+      "name": "analyst_thread",
+      "energy": 0.9968646032092198,
+      "at": "2026-06-08T00:16:18.298Z"
+    }
+  ],
+  "echoes": {
+    "memory.episodic": [
+      {
+        "at": "2026-06-07T22:58:12.919Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9931385231863533,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9792529667987588,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9305357549909351,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9544764478528779,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9566744852836441,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9836065848789478,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9774210221002606,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9773359474198732,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9753213833366938,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9852773313690009,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9931385231863533,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T22:59:47.786Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.973754249522165,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.916641644407456,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9715656270641966,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.97547775988224,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9761410179406668,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9814372943326958,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9728332281402666,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9857514470137122,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9714860859395397,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9697789861377935,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:00:11.226Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9773319467680378,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9172649086675139,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9732987451306281,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9654072176928596,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9738804848800154,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9759903004319523,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.978575576370468,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.965240237774376,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:00:46.596Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9956760597187458,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9720302473590572,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9542249080640001,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9704614782974531,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9649226241692347,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9751498265958046,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9753363999203533,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9842914975842291,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9822036205226327,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9748191937751489,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9956760597187458,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:02:07.355Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9869422212590134,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.961920202577094,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9336568419751399,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9622489636853562,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9675154518381583,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9723231898268201,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.978213648689149,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9856154598902628,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9749577179107998,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.977414219809358,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9824828058905839,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9869422212590134,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:02:07.556Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9910821046387226,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9748735996744162,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9068843336081782,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9626048041032009,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9671704004130707,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike": {
+            "energy": 0.9547359110414069,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember__ember_liquidity_echo": {
+            "energy": 0.7466705076213248,
+            "claim": "Liquidity echo from cross-market flows"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9767833266295018,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9757064304127766,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike__hypothesis_risk_off_hybrid": {
+            "energy": 0.9769502422980811,
+            "claim": "Hybrid(hypothesis_risk_off, ember__ember_volatility_spike): Markets entering risk-off regime ⊗ Volatility spike confirms risk-off pressure"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9720475504652087,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9778709833718208,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid": {
+            "energy": 0.8604808166323142,
+            "claim": "Hybrid(hypothesis_risk_on, ember__ember_liquidity_echo): Liquidity wave still expanding ⊗ Liquidity echo from cross-market flows"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9693140516723088,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9910821046387226,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9618
+          }
+        ],
+        "dream_feedback": 15,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:03:04.103Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9951749815592252,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9800719600020231,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9234191047777922,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9626157796108449,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9751236742689435,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "seed__peer_cell": {
+            "energy": 0.6128861867350676,
+            "claim": "Peer signal"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9830987288899741,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.97906828467561,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9695444642954679,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9786582009185586,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9856792380766726,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9760077454093519,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9951749815592252,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 12,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:04:25.019Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9895240244074943,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.981599136347727,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9418550686059203,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.971254535677572,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9588029723635457,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9590696625719529,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9837928423779697,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9779111146787088,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9762607555743126,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9832265605761854,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.977362411124693,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9895240244074943,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:05:11.273Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9880916561262919,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.977020758708356,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9100011741194624,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9546962892419797,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9597879169854706,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike": {
+            "energy": 0.9761748951981758,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember__ember_liquidity_echo": {
+            "energy": 0.7348314439353606,
+            "claim": "Liquidity echo from cross-market flows"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9610661790628677,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9555395335850089,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9702383574045564,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike__hypothesis_risk_off_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, ember__ember_volatility_spike): Markets entering risk-off regime ⊗ Volatility spike confirms risk-off pressure"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9681921223151513,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9784301968478947,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike__hypothesis_risk_on_hybrid": {
+            "energy": 0.9817575084185708,
+            "claim": "Hybrid(hypothesis_risk_on, ember__ember_volatility_spike): Liquidity wave still expanding ⊗ Volatility spike confirms risk-off pressure"
+          },
+          "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid": {
+            "energy": 0.8765980318407977,
+            "claim": "Hybrid(hypothesis_risk_on, ember__ember_liquidity_echo): Liquidity wave still expanding ⊗ Liquidity echo from cross-market flows"
+          },
+          "analyst_thread": {
+            "energy": 0.9880916561262919,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.964
+          }
+        ],
+        "dream_feedback": 15,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:05:11.335Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9826356499522946,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9112136092764047,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9716079069026268,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.94865059536606,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "seed__peer_cell": {
+            "energy": 0.6049744623517429,
+            "claim": "Peer signal"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9813000949293909,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9805047287675016,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9798784051304766,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9775993622816216,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 12,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:06:36.562Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9770047358082239,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.949114854996496,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9671900131894289,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9557716722982362,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9752016868061584,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.985132508916917,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9831150135433531,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.97466069452163,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9780738735352513,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9702890115976509,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:06:36.719Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9997978225594722,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9720235073684929,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9386144591548805,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9609902276830546,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.966044480440903,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike": {
+            "energy": 0.9633114932582627,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember__ember_liquidity_echo": {
+            "energy": 0.7875821016078789,
+            "claim": "Liquidity echo from cross-market flows"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.980429899697964,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9683745759319028,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9781234171225801,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike__hypothesis_risk_off_hybrid": {
+            "energy": 0.9535813615954473,
+            "claim": "Hybrid(hypothesis_risk_off, ember__ember_volatility_spike): Markets entering risk-off regime ⊗ Volatility spike confirms risk-off pressure"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9757042382726457,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9829610797128121,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "ember__ember_volatility_spike__hypothesis_risk_on_hybrid": {
+            "energy": 0.9850440520367122,
+            "claim": "Hybrid(hypothesis_risk_on, ember__ember_volatility_spike): Liquidity wave still expanding ⊗ Volatility spike confirms risk-off pressure"
+          },
+          "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid": {
+            "energy": 0.8733160282285561,
+            "claim": "Hybrid(hypothesis_risk_on, ember__ember_liquidity_echo): Liquidity wave still expanding ⊗ Liquidity echo from cross-market flows"
+          },
+          "analyst_thread": {
+            "energy": 0.9997978225594722,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9656
+          }
+        ],
+        "dream_feedback": 15,
+        "run": 1
+      },
+      {
+        "at": "2026-06-07T23:06:36.863Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9527471133340418,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9176564980244495,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9707724789052089,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9735524936440735,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "seed__peer_cell": {
+            "energy": 0.619121330601689,
+            "claim": "Peer signal"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9807654117498963,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9742822835521191,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9761012797905587,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.968704307368822,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9791681094603466,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 12,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:13:37.035Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9906091480401819,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9838416613312938,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9450050998065826,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9591163585520127,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9707235228901466,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9704398845150078,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9752022753883397,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9766544921024071,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9806186046042941,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9780525945925921,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9718987328393517,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9906091480401819,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:13:37.060Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9737081295533678,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9443035281268053,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9612968088389718,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9740452195274395,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9562916612478862,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9803732801840793,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9453389073651735,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9720024702531058,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9784093374988282,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9847423266392549,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:13:53.633Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9768633226230364,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9344918228357808,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9721427574165183,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9754718170999164,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9844671324805783,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9833787275893573,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9768332353002657,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9806372433357742,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9709329299070528,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9799411161705814,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:13:53.655Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.979164874948103,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9340391006492501,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.972494264227296,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9752999342856641,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9702009293822123,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9792777371639,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9849743616761266,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9833107812404915,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.986,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9616294294287481,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:15:20.069Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 1,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9838846336,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9425413714259384,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9700074830370746,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9545259207452962,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9755557521141741,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9817250957026822,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9632793874201262,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9854219132557408,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9830566876964566,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.954180554865882,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 1,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:16:18.279Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.992781035652039,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9674776732157886,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.9542249080640001,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9711146685863605,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.971427783765471,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9757967255247412,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9814294260642569,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9709357690139815,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.9733854190303726,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9836525877390723,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.977959855854365,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.992781035652039,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T00:16:18.298Z",
+        "dominant": {
+          "name": "analyst_thread",
+          "energy": 0.9968646032092198,
+          "claim": "Deep-dive the dominant cell after weave"
+        },
+        "cells": {
+          "hypothesis_risk_off": {
+            "energy": 0.9695130034491194,
+            "claim": "Markets entering risk-off regime"
+          },
+          "hypothesis_risk_on": {
+            "energy": 0.950703678324813,
+            "claim": "Liquidity wave still expanding"
+          },
+          "hypothesis_soft": {
+            "energy": 0.9675141741741374,
+            "claim": "Soft landing narrative gaining traction"
+          },
+          "cycle_gate": {
+            "energy": 0.9540069734141495,
+            "claim": "Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+            "energy": 0.9780542568127399,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+          },
+          "hypothesis_risk_off__hypothesis_soft_hybrid": {
+            "energy": 0.9790345189159321,
+            "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_off_hybrid": {
+            "energy": 0.9718526839505023,
+            "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "hypothesis_risk_on__hypothesis_soft_hybrid": {
+            "energy": 0.977570282222985,
+            "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+          },
+          "cycle_gate__hypothesis_risk_on_hybrid": {
+            "energy": 0.9772711473649254,
+            "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "cycle_gate__hypothesis_soft_hybrid": {
+            "energy": 0.9824083852014677,
+            "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+          },
+          "analyst_thread": {
+            "energy": 0.9968646032092198,
+            "claim": "Deep-dive the dominant cell after weave"
+          }
+        },
+        "woven": [
+          {
+            "into": "narrative",
+            "pattern": "hypothesis_*",
+            "strategy": "competitive",
+            "winners": [
+              "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+              "hypothesis_risk_off__hypothesis_soft_hybrid",
+              "hypothesis_risk_on__hypothesis_soft_hybrid",
+              "hypothesis_risk_off",
+              "hypothesis_soft",
+              "hypothesis_risk_on"
+            ],
+            "coherence": 0.9693
+          }
+        ],
+        "dream_feedback": 11,
+        "run": 1
+      }
+    ],
+    "memory.semantic": [
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.8125,
+            "count": 13
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.125,
+            "count": 2
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.0625,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9375,
+            "count": 15
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 16
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 16
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9375,
+            "count": 15
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.875,
+            "count": 14
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0625,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0625,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-07T23:06:36.563Z",
+        "from_episodes": 16
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.8235,
+            "count": 14
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.1176,
+            "count": 2
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.0588,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9412,
+            "count": 16
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 17
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 17
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9412,
+            "count": 16
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.8824,
+            "count": 15
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0588,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0588,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-07T23:06:36.719Z",
+        "from_episodes": 17
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.8333,
+            "count": 15
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.1111,
+            "count": 2
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.0556,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9444,
+            "count": 17
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 18
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 18
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9444,
+            "count": 17
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.8889,
+            "count": 16
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0556,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0556,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-07T23:06:36.864Z",
+        "from_episodes": 18
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.8421,
+            "count": 16
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.1053,
+            "count": 2
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.0526,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9474,
+            "count": 18
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9474,
+            "count": 18
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.8947,
+            "count": 17
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0526,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.0526,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:13:37.036Z",
+        "from_episodes": 19
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.85,
+            "count": 17
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.1,
+            "count": 2
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.9,
+            "count": 18
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:13:37.060Z",
+        "from_episodes": 20
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.9,
+            "count": 18
+          },
+          {
+            "pattern": "cycle_gate__hypothesis_risk_off_hybrid",
+            "kind": "dominant",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:13:53.634Z",
+        "from_episodes": 20
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:13:53.656Z",
+        "from_episodes": 20
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 0.95,
+            "count": 19
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "dominant",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+            "kind": "weave-winner",
+            "weight": 0.05,
+            "count": 1
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:15:20.070Z",
+        "from_episodes": 20
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:16:18.280Z",
+        "from_episodes": 20
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "analyst_thread",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_off",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_soft",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          },
+          {
+            "pattern": "hypothesis_risk_on",
+            "kind": "weave-winner",
+            "weight": 1,
+            "count": 20
+          }
+        ],
+        "consolidated_at": "2026-06-08T00:16:18.298Z",
+        "from_episodes": 20
+      }
+    ]
+  },
+  "last_snapshot": {
+    "at": "2026-06-08T00:16:18.298Z",
+    "dominant": {
+      "name": "analyst_thread",
+      "energy": 0.9968646032092198,
+      "claim": "Deep-dive the dominant cell after weave"
+    },
+    "cells": {
+      "hypothesis_risk_off": {
+        "energy": 0.9695130034491194,
+        "claim": "Markets entering risk-off regime"
+      },
+      "hypothesis_risk_on": {
+        "energy": 0.950703678324813,
+        "claim": "Liquidity wave still expanding"
+      },
+      "hypothesis_soft": {
+        "energy": 0.9675141741741374,
+        "claim": "Soft landing narrative gaining traction"
+      },
+      "cycle_gate": {
+        "energy": 0.9540069734141495,
+        "claim": "Crystallized observe-reason-decide cycle"
+      },
+      "hypothesis_risk_off__hypothesis_risk_on_hybrid": {
+        "energy": 0.9780542568127399,
+        "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding"
+      },
+      "hypothesis_risk_off__hypothesis_soft_hybrid": {
+        "energy": 0.9790345189159321,
+        "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction"
+      },
+      "cycle_gate__hypothesis_risk_off_hybrid": {
+        "energy": 0.9718526839505023,
+        "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle"
+      },
+      "hypothesis_risk_on__hypothesis_soft_hybrid": {
+        "energy": 0.977570282222985,
+        "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction"
+      },
+      "cycle_gate__hypothesis_risk_on_hybrid": {
+        "energy": 0.9772711473649254,
+        "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle"
+      },
+      "cycle_gate__hypothesis_soft_hybrid": {
+        "energy": 0.9824083852014677,
+        "claim": "Hybrid(hypothesis_soft, cycle_gate): Soft landing narrative gaining traction ⊗ Crystallized observe-reason-decide cycle"
+      },
+      "analyst_thread": {
+        "energy": 0.9968646032092198,
+        "claim": "Deep-dive the dominant cell after weave"
+      }
+    },
+    "woven": [
+      {
+        "into": "narrative",
+        "pattern": "hypothesis_*",
+        "strategy": "competitive",
+        "winners": [
+          "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "hypothesis_risk_off",
+          "hypothesis_soft",
+          "hypothesis_risk_on"
+        ],
+        "coherence": 0.9693
+      }
+    ],
+    "dream_feedback": 11
+  },
+  "lineage": [
+    {
+      "at": "2026-06-07T22:44:39.321Z",
+      "dominant": "cycle_gate__hypothesis_risk_off_hybrid",
+      "hybrids": [
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "cycle_gate",
+            "hypothesis_risk_off"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "cycle_gate",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T22:54:35.529Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "cycle_gate",
+            "hypothesis_risk_on"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T22:54:35.754Z",
+      "dominant": "hypothesis_risk_on",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_off__hypothesis_risk_on__hypothesis_soft_hybrid_hybrid"
+      ],
+      "declared": [],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_soft_hybrid_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_off__hypothesis_soft_hybrid"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate__hypothesis_risk_off_hybrid"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_off__hypothesis_risk_on_hybrid_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_off__hypothesis_risk_on_hybrid"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate__hypothesis_soft_hybrid"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on__hypothesis_soft_hybrid_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on__hypothesis_soft_hybrid"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T22:57:34.301Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T22:58:12.920Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T22:59:47.786Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:00:11.226Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:00:46.596Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:02:07.356Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:02:07.556Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "ember__ember_volatility_spike"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "ember__ember_liquidity_echo"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:03:04.103Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:04:25.019Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:05:11.274Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "ember__ember_volatility_spike__hypothesis_risk_on_hybrid",
+        "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "ember__ember_volatility_spike"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_volatility_spike__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "ember__ember_volatility_spike"
+          ]
+        },
+        {
+          "name": "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "ember__ember_liquidity_echo"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:05:11.335Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:06:36.562Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:06:36.719Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "ember__ember_volatility_spike__hypothesis_risk_on_hybrid",
+        "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "ember__ember_volatility_spike"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "ember__ember_volatility_spike__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "ember__ember_volatility_spike"
+          ]
+        },
+        {
+          "name": "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "ember__ember_liquidity_echo"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-07T23:06:36.864Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:13:37.035Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:13:37.060Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:13:53.633Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:13:53.655Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:15:20.069Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:16:18.280Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "at": "2026-06-08T00:16:18.298Z",
+      "dominant": "analyst_thread",
+      "hybrids": [
+        "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_off_hybrid",
+        "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "cycle_gate__hypothesis_risk_on_hybrid",
+        "cycle_gate__hypothesis_soft_hybrid"
+      ],
+      "declared": [
+        "analyst_thread"
+      ],
+      "auto_spawns": [
+        {
+          "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_risk_on"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_off_hybrid",
+          "parents": [
+            "hypothesis_risk_off",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "hypothesis_soft"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_risk_on_hybrid",
+          "parents": [
+            "hypothesis_risk_on",
+            "cycle_gate"
+          ]
+        },
+        {
+          "name": "cycle_gate__hypothesis_soft_hybrid",
+          "parents": [
+            "hypothesis_soft",
+            "cycle_gate"
+          ]
+        }
+      ]
+    }
+  ],
+  "semantic": {
+    "patterns": [
+      {
+        "pattern": "analyst_thread",
+        "kind": "dominant",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_risk_off__hypothesis_soft_hybrid",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_risk_on__hypothesis_soft_hybrid",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_risk_off",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_soft",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      },
+      {
+        "pattern": "hypothesis_risk_on",
+        "kind": "weave-winner",
+        "weight": 1,
+        "count": 20
+      }
+    ],
+    "consolidated_at": "2026-06-08T00:16:18.298Z",
+    "from_episodes": 20
+  }
+}

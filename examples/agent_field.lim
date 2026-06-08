@@ -1,0 +1,32 @@
+profile "liminal"
+version "0.1.0"
+module agent_field_observer
+
+covenant FieldAnalystObserver {
+  intent: "Observe field-informed research without blocking agent synthesis"
+  resonance_floor: 0.55
+
+  when uncertain(confidence < 0.40) {
+    observe only
+  }
+}
+
+belief hypothesis_risk_off {
+  claim: "Markets entering risk-off regime"
+  confidence: 0.72
+  sources: [field, next_field]
+}
+
+belief hypothesis_soft {
+  claim: "Soft landing narrative gaining traction"
+  confidence: 0.58
+  sources: [field]
+}
+
+resonate agent_goal -> hypothesis_risk_off {
+  mirror: "Field analyst goal aligns with dominant risk-off hypothesis"
+}
+
+resonate next_field -> hypothesis_soft {
+  mirror: "Next field narrative includes soft landing cell"
+}

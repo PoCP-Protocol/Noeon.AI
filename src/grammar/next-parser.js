@@ -90,12 +90,15 @@ function parseWhenRule(line, lineNo) {
 }
 
 function parseFieldBlock(body, lineNo) {
-  const field = { ingest: [], decay: null, resonance: null };
+  const field = { ingest: [], decay: null, resonance: null, recall: true, consolidate_after: 5 };
   for (let i = 0; i < body.length; i += 1) {
     const { key, value } = parseKeyValueLine(body[i], lineNo + i);
     if (key === 'ingest') field.ingest = value;
     else if (key === 'decay') field.decay = value;
     else if (key === 'resonance') field.resonance = value;
+    else if (key === 'recall') field.recall = value === true || value === 'true';
+    else if (key === 'consolidate_after') field.consolidate_after = value;
+    else if (key === 'recall_depth') field.recall_depth = value;
     else field[key] = value;
   }
   return field;
@@ -247,6 +250,18 @@ function parseAutobondBlock(body, lineNo) {
   return cfg;
 }
 
+function parseFusionBlock(body, target, lineNo) {
+  const fusion = { target: String(target).toLowerCase(), mode: 'observe', enabled: true };
+  for (let i = 0; i < body.length; i += 1) {
+    const { key, value } = parseKeyValueLine(body[i], lineNo + i);
+    if (key === 'mode') fusion.mode = value;
+    else if (key === 'enabled') fusion.enabled = value === true || value === 'true';
+    else if (key === 'resonance_floor') fusion.resonance_floor = value;
+    else fusion[key] = value;
+  }
+  return fusion;
+}
+
 function parseBondLine(rest, lineNo) {
   const sym = rest.match(/^([a-zA-Z_][\w]*)\s*<->\s*([a-zA-Z_][\w]*)\s*(.*)$/i);
   if (sym) {
@@ -275,16 +290,21 @@ function parseNextProgram(source, options = {}) {
   const lines = String(source || '').split(/\r?\n/);
   const program = {
     profile: 'next',
-    version: '0.8.0',
+    version: '1.0.0',
     module: null,
     name: null,
     goal: null,
     models: [],
     strategies: [],
     guarantees: [],
+    vows: [],
+    constitutions: [],
+    rituals: [],
     acts: [],
     reflects: [],
     evolves: [],
+    selfModels: [],
+    myths: [],
     fields: [],
     cells: [],
     weaves: [],
@@ -294,7 +314,8 @@ function parseNextProgram(source, options = {}) {
     fluxes: [],
     bonds: [],
     mycelium: [],
-    autobond: null
+    autobond: null,
+    fusion: []
   };
 
   let i = 0;
@@ -360,6 +381,14 @@ function parseNextProgram(source, options = {}) {
       continue;
     }
 
+    const fuseMatch = trimmed.match(/^fuse\s+([a-zA-Z_][\w]*)\s*\{\s*$/i);
+    if (fuseMatch) {
+      const { body, nextIdx } = readBlock(lines, i);
+      program.fusion.push(parseFusionBlock(body, fuseMatch[1], lineNo));
+      i = nextIdx;
+      continue;
+    }
+
     const autobondMatch = trimmed.match(/^autobond\s*\{\s*$/i);
     if (autobondMatch) {
       const { body, nextIdx } = readBlock(lines, i);
@@ -412,6 +441,15 @@ function parseNextProgram(source, options = {}) {
       case 'guarantee':
         program.guarantees.push(parseKeyValuePairs(rest, lineNo));
         break;
+      case 'vow':
+        program.vows.push(parseKeyValuePairs(rest, lineNo));
+        break;
+      case 'constitution':
+        program.constitutions.push(parseKeyValuePairs(rest, lineNo));
+        break;
+      case 'ritual':
+        program.rituals.push(parseKeyValuePairs(rest, lineNo));
+        break;
       case 'act':
         program.acts.push(parseKeyValuePairs(rest, lineNo));
         break;
@@ -421,6 +459,18 @@ function parseNextProgram(source, options = {}) {
       case 'evolve':
         program.evolves.push(parseKeyValuePairs(rest, lineNo));
         break;
+      case 'selfmodel':
+        program.selfModels.push(parseKeyValuePairs(rest, lineNo));
+        break;
+      case 'myth': {
+        const m = String(rest || '').match(/^"([\s\S]*?)"(\s+.*)?$/);
+        if (!m) throw new Error(`Line ${lineNo}: MYTH requires quoted text`);
+        const myth = { text: m[1] };
+        const tail = (m[2] || '').trim();
+        if (tail) Object.assign(myth, parseKeyValuePairs(tail, lineNo));
+        program.myths.push(myth);
+        break;
+      }
       case 'weave':
         program.weaves.push(parseWeave(rest, lineNo));
         break;

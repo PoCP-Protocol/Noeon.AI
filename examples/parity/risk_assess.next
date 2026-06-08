@@ -1,0 +1,23 @@
+profile "next"
+version "1.0.0"
+program "risk_assess"
+
+GOAL "Assess market risk with evidence"
+
+CONSTITUTION name=no_unverified_claims rule="All field claims require evidence tag" priority=1.0
+
+VOW name=cite_sources pledge="Every synthesis cites provenance"
+
+FIELD signals {
+  ingest: [market]
+  decay: 1h
+}
+
+CELL hypothesis_risk {
+  claim: "Elevated market risk detected"
+  energy: 0.65
+}
+
+ACT action=write_report channel=report
+
+REFLECT target=execution method=causal

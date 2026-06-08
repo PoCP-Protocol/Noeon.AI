@@ -1,7 +1,8 @@
 'use strict';
 
 function buildDreamCrystallizePatch(dreamFeedback, config = {}) {
-  const minDelta = config.min_delta ?? config.dream_crystallize_delta ?? 0.06;
+  const cfg = config && typeof config === 'object' ? config : {};
+  const minDelta = cfg.min_delta ?? cfg.dream_crystallize_delta ?? 0.06;
   const chunks = [];
 
   for (const row of dreamFeedback?.applied || []) {

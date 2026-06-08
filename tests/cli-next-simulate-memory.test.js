@@ -99,6 +99,7 @@ console.log('\n\x1b[36m═══ CLI Next Simulate Memory Tests ═══\x1b[0m
     assert(run1.status === 2, 'simulate run1 exits blocked on strict guarantee failure');
     assert(cycle1 && cycle1.profile === 'next', 'simulate run1 writes next cycle artifact');
     assert(cycle1 && cycle1.blocked === true, 'simulate run1 cycle records blocked status');
+    assert(cycle1 && cycle1.next && cycle1.next.memorySource === 'fresh', 'simulate run1 marks memory source as fresh');
     assert(state1 && Array.isArray(state1.rounds) && state1.rounds.length >= 1, 'simulate run1 appends state round');
     assert(state1 && state1.currentNextMemory && state1.currentNextMemory.runCount >= 1, 'simulate run1 persists next memory to state');
     assert(report1 && report1.kpis && typeof report1.kpis.failedSteps === 'number', 'simulate run1 writes report');
@@ -131,6 +132,7 @@ console.log('\n\x1b[36m═══ CLI Next Simulate Memory Tests ═══\x1b[0m
 
     assert(run2.status === 0, 'simulate run2 exits success with safe feedback');
     assert(cycle2 && cycle2.next && cycle2.next.selectedStrategy && cycle2.next.selectedStrategy.name === 'beta', 'simulate run2 shifts strategy based on memory');
+    assert(cycle2 && cycle2.next && cycle2.next.memorySource === 'explicit', 'simulate run2 marks memory source as explicit');
     assert(state2 && Array.isArray(state2.rounds) && state2.rounds.length >= 2, 'simulate run2 appends second state round');
     assert(report2 && report2.metaPolicy && typeof report2.metaPolicy.enabled === 'boolean', 'simulate run2 writes report');
     assert(report2 && report2.next && report2.next.selectedStrategy && report2.next.selectedStrategy.name === 'beta', 'simulate report includes next selected strategy');
@@ -160,6 +162,7 @@ console.log('\n\x1b[36m═══ CLI Next Simulate Memory Tests ═══\x1b[0m
     const cycle3 = parseJsonFile(cycle3Path);
     assert(run3.status === 0, 'simulate run3 exits success using state-inherited next memory');
     assert(cycle3 && cycle3.next && cycle3.next.selectedStrategy && cycle3.next.selectedStrategy.name === 'beta', 'simulate run3 reuses state next memory without explicit next-memory-in');
+    assert(cycle3 && cycle3.next && cycle3.next.memorySource === 'state', 'simulate run3 marks memory source as state');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

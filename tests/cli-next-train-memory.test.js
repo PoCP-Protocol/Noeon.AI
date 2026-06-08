@@ -88,7 +88,9 @@ console.log('\n\x1b[36m═══ CLI Next Train Memory Tests ═══\x1b[0m\n'
     assert(training && training.profile === 'next', 'training artifact is next profile');
     assert(training && Array.isArray(training.rounds) && training.rounds.length === 3, 'training artifact includes all rounds');
     assert(training && training.rounds[0].next && training.rounds[0].next.selectedStrategy === 'alpha', 'round1 starts with alpha strategy');
+    assert(training && training.rounds[0].next && training.rounds[0].next.memorySource === 'fresh', 'round1 memory source is fresh');
     assert(training && training.rounds[1].next && training.rounds[1].next.selectedStrategy === 'beta', 'round2 shifts strategy due to memory');
+    assert(training && training.rounds[1].next && training.rounds[1].next.memorySource === 'round-carry', 'round2 memory source is round-carry');
     assert(state && state.currentNextMemory && state.currentNextMemory.runCount >= 3, 'state stores accumulated next memory after training');
     assert(convergence && convergence.totalRounds === 3, 'convergence artifact includes total rounds');
     assert(memory && memory.runCount >= 3, 'next-memory-out file is generated and accumulated');

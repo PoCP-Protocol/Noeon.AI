@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { parseAel } = require('../parser');
+const { assertFrozenFilename } = require('../core/canonical-architecture');
 const { validateAel } = require('../validator');
 const { compileAel } = require('../compiler');
 const { explainAel } = require('../explainer');
@@ -15,13 +16,20 @@ const { CognitiveKernel } = require('../core/kernel');
 const { ObservabilitySystem } = require('../core/observability');
 const { runGovernancePreflight } = require('../core/governance');
 const { loadProjectConfig, resolveRunOptions } = require('../core/config');
-const { executeProgram, VM_VERSION } = require('../vm/unified-executor');
+const { prepareCanonicalExecution, finalizeCanonicalResult } = require('../core/canonical-runtime');
+const { planExecutionPhases } = require('../core/canonical-plan');
+const { loadConvergenceFromDir, buildConvergenceMatrix } = require('../core/canonical-convergence');
+const { deriveExecutionRoute } = require('../core/canonical-route');
+const { computeSemanticPulse } = require('../core/canonical-pulse');
+const { readCanonicalAudit } = require('../core/canonical-audit-read');
+const { lowerToCanonical } = require('../core/canonical-lower');
 const { runProtocolCycle } = require('../vm/protocol-phase');
 const { hasProtocolFeatures, enrichWithProtocol } = require('../core/protocol-bridge');
 const { runTraining } = require('./trainer');
 const { loadState, saveState, rollbackState } = require('./state-store');
 const { generateReport } = require('./report');
 const { appendAuditEntries } = require('./audit-logger');
+const { VM_VERSION, executeProgram } = require('../vm/unified-executor');
 
 const RUNTIME_VERSION = VM_VERSION;
 
@@ -33,7 +41,8 @@ function readSource(filePath) {
   return { resolved, source: fs.readFileSync(resolved, 'utf8') };
 }
 
-function parseFromSource(source, filename = '<input>') {
+function parseFromSource(source, filename = '<input>', options = {}) {
+  assertFrozenFilename(filename, options);
   try {
     const ast = parseAel(source, { filename });
     return { ast, source, filename };
@@ -61,6 +70,7 @@ function readFeedbackBatch(filePath) {
 
 function parseProgram(filePath, options = {}) {
   const resolved = path.resolve(process.cwd(), filePath);
+  assertFrozenFilename(resolved, options);
   const { config } = loadProjectConfig({ cwd: path.dirname(resolved), ...options });
 
   const humanSidecar = resolved.endsWith('.lim.human')
@@ -97,8 +107,8 @@ function parseProgram(filePath, options = {}) {
   return { ast, resolved, source, config };
 }
 
-function validateProgram(ast) {
-  return validateAel(ast);
+function validateProgram(ast, options = {}) {
+  return validateAel(ast, options);
 }
 
 function compileProgram(ast, format = 'ir') {
@@ -195,7 +205,8 @@ function buildKernelStatus(result) {
   };
 }
 
-function buildNextCycleFromExecution(ast, execution, feedback, cycleAt = new Date().toISOString()) {
+function buildNextCycleFromExecution(ast, execution, feedback, cycleAt = new Date().toISOString(), options = {}) {
+  const memorySource = options.memorySource || 'fresh';
   const steps = [];
   if (execution.next?.selectedStrategy) {
     steps.push({
@@ -249,7 +260,10 @@ function buildNextCycleFromExecution(ast, execution, feedback, cycleAt = new Dat
         : {},
       diagnostics: execution.next?.reflection?.insights || []
     },
-    next: execution.next,
+    next: {
+      ...execution.next,
+      memorySource
+    },
     profile: 'next',
     protocolSuccess: execution.success,
     blocked: execution.blocked === true,
@@ -271,6 +285,9 @@ async function simulateContract(ast, feedback = {}, outputOptions = {}) {
 
   if (isNextProfile) {
     const inheritedNextMemory = outputOptions.nextMemoryIn || state?.currentNextMemory || null;
+    const memorySource = outputOptions.nextMemoryIn
+      ? 'explicit'
+      : (state?.currentNextMemory ? 'state' : 'fresh');
     const execution = await executeProgram(ast, {
       with_protocol: outputOptions.withProtocol || 'off',
       strict_next: outputOptions.strictNext === true,
@@ -279,7 +296,9 @@ async function simulateContract(ast, feedback = {}, outputOptions = {}) {
       feedback
     });
 
-    cycle = buildNextCycleFromExecution(ast, execution, feedback);
+    cycle = buildNextCycleFromExecution(ast, execution, feedback, new Date().toISOString(), {
+      memorySource
+    });
 
     nextMemoryOut = execution.next?.nextMemory || null;
   } else {
@@ -303,9 +322,13 @@ async function simulateContract(ast, feedback = {}, outputOptions = {}) {
           ? (cycle.next.selectedStrategy.name || cycle.next.selectedStrategy.objective || 'strategy')
           : null,
         reflectionVerdict: cycle.next?.reflection?.verdict || null,
+        memorySource: cycle.next?.memorySource || null,
         evolutionApplied: cycle.next?.evolution?.applied || null,
         memoryRunCount: nextMemoryOut?.runCount || 0
       };
+      if (nextMemoryOut) {
+        round.nextMemorySnapshot = nextMemoryOut;
+      }
     }
     state.rounds.push(round);
     state.currentPolicy = cycle.adaptation.updates;
@@ -353,6 +376,9 @@ async function trainContract(ast, feedbackBatch, outputOptions = {}) {
     const statePath = outputOptions.statePath;
     const state = statePath ? loadState(statePath) : null;
     let nextMemory = outputOptions.nextMemoryIn || state?.currentNextMemory || null;
+    let memorySource = outputOptions.nextMemoryIn
+      ? 'explicit'
+      : (state?.currentNextMemory ? 'state' : 'fresh');
     const trainingRounds = [];
     let lastCycle = null;
 
@@ -366,7 +392,9 @@ async function trainContract(ast, feedbackBatch, outputOptions = {}) {
         feedback
       });
 
-      const cycle = buildNextCycleFromExecution(ast, execution, feedback, new Date().toISOString());
+      const cycle = buildNextCycleFromExecution(ast, execution, feedback, new Date().toISOString(), {
+        memorySource
+      });
       lastCycle = cycle;
       nextMemory = execution.next?.nextMemory || nextMemory;
 
@@ -384,10 +412,14 @@ async function trainContract(ast, feedbackBatch, outputOptions = {}) {
             ? (execution.next.selectedStrategy.name || execution.next.selectedStrategy.objective || 'strategy')
             : null,
           reflectionVerdict: execution.next?.reflection?.verdict || null,
+          memorySource,
           evolutionApplied: execution.next?.evolution?.applied || null,
           memoryRunCount: nextMemory?.runCount || 0
-        }
+        },
+        nextMemorySnapshot: nextMemory
       });
+
+      memorySource = 'round-carry';
 
       if (outputOptions.auditPath) {
         appendAuditEntries(outputOptions.auditPath, cycle);
@@ -416,7 +448,8 @@ async function trainContract(ast, feedbackBatch, outputOptions = {}) {
           updates: round.policy,
           diagnostics: round.diagnostics,
           round: round.round,
-          next: round.next
+          next: round.next,
+          nextMemorySnapshot: round.nextMemorySnapshot || null
         });
       }
       state.currentPolicy = training.finalPolicy;
@@ -530,5 +563,17 @@ module.exports = {
   hasProtocolFeatures,
   enrichWithProtocol,
   executeProgram,
-  VM_VERSION
+  VM_VERSION,
+  lowerToCanonical,
+  prepareCanonicalExecution,
+  finalizeCanonicalResult,
+  planExecutionPhases,
+  loadConvergenceFromDir,
+  buildConvergenceMatrix,
+  deriveExecutionRoute,
+  computeSemanticPulse,
+  readCanonicalAudit,
+  get runNoeonPipeline() { return require('../core/pipeline').runNoeonPipeline; },
+  get planNoeonProgram() { return require('../core/pipeline').planNoeonProgram; },
+  get parseNoeonInput() { return require('../core/pipeline').parseNoeonInput; }
 };

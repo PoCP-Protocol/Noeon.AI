@@ -395,6 +395,12 @@ class AELtoIRCompiler {
       this._compileEvolution(ast.evolution, program);
     }
 
+    const bridge = ast.cognition?.context?._cognitiveBridge;
+    if (bridge) {
+      const { injectCanonicalBridge } = require('./canonical-cognitive-bridge');
+      injectCanonicalBridge(program, bridge);
+    }
+
     // Compute execution order based on dependencies
     this._computeExecutionOrder(program);
 

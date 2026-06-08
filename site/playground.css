@@ -59,14 +59,80 @@
 #source {
   flex: 1;
   min-height: 420px;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 3.5rem;
   border: 0;
   resize: vertical;
   font-family: "IBM Plex Mono", "Consolas", monospace;
   font-size: 13px;
   line-height: 1.5;
-  background: rgba(0, 0, 0, 0.35);
+  background: transparent;
   color: #e8f0ff;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.source-panel {
+  position: relative;
+}
+
+.source-route-bar {
+  margin: 0;
+  padding: 0.45rem 1rem;
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(180, 140, 255, 0.2);
+  background: rgba(40, 20, 60, 0.35);
+  color: #dcc8ff;
+}
+
+.source-route-bar.hidden {
+  display: none;
+}
+
+.source-editor {
+  display: flex;
+  flex: 1;
+  min-height: 420px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.source-gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  padding: 1rem 0.25rem;
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+  font-size: 9px;
+  line-height: 1.5;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+  color: transparent;
+}
+
+.source-gutter .brain-line-tag {
+  display: block;
+  height: 19.5px;
+  border-left: 3px solid var(--brain-color, transparent);
+  padding-left: 2px;
+  color: rgba(220, 200, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-gutter .brain-line-tag.lens {
+  font-size: 8px;
+  color: #f0e6ff;
+  border-left-width: 4px;
+}
+
+.source-gutter .brain-line-tag.empty {
+  border-left-color: transparent;
 }
 
 .output-pane {
@@ -98,6 +164,131 @@
   font-size: 0.85rem;
   opacity: 0.6;
   margin-left: auto;
+}
+
+.fusion-badge {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(80, 180, 255, 0.15);
+  border: 1px solid rgba(80, 180, 255, 0.35);
+  color: #9fd4ff;
+}
+
+.fusion-badge.hidden,
+.fusion-panel.hidden,
+.brain-panel.hidden {
+  display: none;
+}
+
+.fusion-panel {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(80, 180, 255, 0.2);
+  background: rgba(0, 40, 80, 0.25);
+}
+
+.fusion-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+#fusion-summary {
+  opacity: 0.85;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.fusion-detail {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  opacity: 0.9;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.fusion-mermaid {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: auto;
+  min-height: 120px;
+}
+
+.fusion-mermaid:empty {
+  display: none;
+}
+
+.brain-panel {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(180, 140, 255, 0.25);
+  background: rgba(40, 20, 60, 0.3);
+}
+
+.brain-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+#brain-summary {
+  opacity: 0.85;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.brain-regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.brain-region-chip {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(180, 140, 255, 0.12);
+  border: 1px solid rgba(180, 140, 255, 0.3);
+  color: #dcc8ff;
+}
+
+.brain-flow {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  opacity: 0.9;
+  max-height: 140px;
+  overflow: auto;
+}
+
+.brain-mermaid {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: auto;
+  min-height: 120px;
+}
+
+.brain-mermaid:empty {
+  display: none;
 }
 
 .playground-status {

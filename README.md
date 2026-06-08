@@ -16,7 +16,7 @@ Noeon is an **AI-native general programming language** — a **Cognitive Workflo
 
 Traditional languages center machine execution primitives: variables, functions, branches, loops, classes, and threads. Noeon keeps the ability to compute, but raises AI-era concepts to first-class language objects: **Goal, Context, Perception, Understanding, Hypothesis, Evidence, Confidence, Decision, Action, Memory, Policy, Trace, Reflection, and Evolution**.
 
-Every program — whether a `.noeon` general program, a cognitive flow, or an AEL task contract — compiles to **Cognitive Intermediate Representation (IR)** and executes through the unified runtime.
+Every program — whether authored with General, Governance (Next), Contract (AEL), or Alignment (Liminal) capabilities — lowers into the same **Cognitive Intermediate Representation (IR)** shape and executes through the unified runtime.
 
 **Core formula:**
 
@@ -119,11 +119,18 @@ noeon run examples/hello.noeon --trace
 noeon run examples/agent_research.noeon --trace
 ```
 
-For governance and protocol contracts, use the AEL profile:
+For contract-oriented execution policies, use the AEL capability entry:
 
 ```bash
 noeon init my-contract --profile ael
 noeon run my-contract/main.ael --with-protocol auto --trace
+```
+
+For human-AI alignment gates, use the Liminal capability sparingly. It is not the primary authoring surface; it captures covenant, belief, resonance, approval, veto, and dialogue checks that can gate a cognitive program before execution:
+
+```bash
+noeon init review-gate --profile liminal
+noeon run review-gate/main.lim --trace
 ```
 
 ---
@@ -136,7 +143,7 @@ noeon run my-contract/main.ael --with-protocol auto --trace
 | **Uncertainty-native** | Confidence and evidence are structural, not afterthoughts |
 | **Observable cognition** | Traces, receipts, and reflection are inspectable artifacts |
 | **Governed execution** | META rules, policies, and human approval gates are language-level |
-| **Profile unity** | One IR, one kernel — general, cognitive, and protocol surfaces share the same runtime |
+| **Capability unity** | One language, one IR, one kernel — all capabilities share the same runtime semantics |
 | **Offline-first** | Deterministic mock reasoning when no LLM key is configured |
 
 ---
@@ -149,25 +156,41 @@ noeon run my-contract/main.ael --with-protocol auto --trace
 ├─────────────────────────────────────────────────────────────────┤
 │  L4  Execution & Tools — plugins, HTTP, MCP, LLM bridge         │
 ├─────────────────────────────────────────────────────────────────┤
-│  L3  Governance — META rules, POLICY profiles, human gates      │
+│  L3  Governance & Alignment — META rules, Liminal gates         │
 ├─────────────────────────────────────────────────────────────────┤
 │  L2  Unified Cognitive Kernel — perceive → decide → act → learn │
 ├─────────────────────────────────────────────────────────────────┤
 │  L1  Cognitive IR — 14 node types, single compilation target      │
 ├─────────────────────────────────────────────────────────────────┤
-│  L0  Parser & Compiler — general, cognitive, and AEL profiles     │
+│  L0  Parser & Compiler — general, next, cognitive, liminal, AEL   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 **Cognitive IR node types:** INTENT, CONSTRAINT, PROCESS, VALIDATE, LEARN, PERCEIVE, DECIDE, COMMIT, COLLABORATE, EVOLVE, REMEMBER, ATTEND, PREDICT, META
 
-**Profiles:**
+**Noeon Capability Layers (Single Language System):**
 
-| Profile | Surface | Use case |
+| Capability | Entry Surface | Role |
 |---|---|---|
-| `general` | `.noeon` — AGENT, program, functions | AI-native applications and agents |
-| `cognitive` | Cognitive primitives (PERCEIVE, REASON, …) | Workflow scripts and research |
-| `ael` / `protocol` | TASK, BUDGET, VERIFY, FLOW, … | Governed task contracts |
+| `general` | `.noeon` — AGENT, program, functions | Primary authoring surface for applications and agents |
+| `governance` (next) | `.next` / `profile "next"` | Governance and autonomous decision semantics (`constitution/vow/ritual`) |
+| `contract` (ael/protocol) | `.ael` and protocol clauses | Contract constraints, verification, and execution policy |
+| `alignment` (liminal) | `.lim` — covenant/belief/resonance/approve/veto | Alignment gate before execution in sensitive scenarios |
+| `cognitive kernel` | PERCEIVE/REASON/DECIDE/ACT/... | Shared semantic vocabulary used by all capabilities |
+
+Rule of thumb: Noeon is one language. `general/next/ael/liminal` are capability entry modes, not separate language branches.
+
+**Canonical pipeline (v1.0):**
+
+```text
+Surface Syntax → Parse AST → Canonical Semantic IR → Governance & Route
+    → Cognitive IR → Runtime Phases → Trace / Memory / Feedback
+```
+
+Full spec: [`docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md`](docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md)  
+ADR: [`docs/adr/ADR-003-canonical-architecture-and-dual-ir.md`](docs/adr/ADR-003-canonical-architecture-and-dual-ir.md)  
+Golden proof set: [`examples/golden/`](examples/golden/) — run `npm run test:golden`  
+Inspect stack: `noeon architecture --json`
 
 ---
 
@@ -200,7 +223,7 @@ node src/cli.js --help
 | `noeon parse <file>` | Show AST structure |
 | `noeon explain <file>` | Natural language explanation |
 | `noeon repl` | Interactive cognitive session |
-| `noeon init <name>` | Create project (`--profile general\|ael`) |
+| `noeon init <name>` | Create project (`--profile general\|ael\|liminal`) |
 | `noeon doctor` | Environment and dependency check |
 | `noeon status` | Show kernel status |
 | `noeon playground` | Start web playground + API (port 5177) |
@@ -209,7 +232,7 @@ node src/cli.js --help
 | `noeon train` | Multi-round policy training |
 | `noeon rollback` | Roll back persisted state |
 
-**Common flags:** `--trace`, `--verbose`, `--json`, `--with-protocol auto|on|off`, `--profile general|ael`
+**Common flags:** `--trace`, `--verbose`, `--json`, `--with-protocol auto|on|off`, `--profile general|ael|liminal` (capability entry selector)
 
 ---
 
@@ -247,6 +270,9 @@ Noeon provides 50+ cognitive keywords organized by phase:
 
 | Document | Description |
 |---|---|
+| [NOEON_CAPABILITY_NAMING_v1.0.md](docs/spec/NOEON_CAPABILITY_NAMING_v1.0.md) | Official naming and copy rules for presenting Noeon as one language with capability layers |
+| [NOEON_LANGUAGE_SYSTEM_COMPARISON_v1.0.md](docs/spec/NOEON_LANGUAGE_SYSTEM_COMPARISON_v1.0.md) | Unified comparison matrix across general/next/ael/liminal families |
+| [NOEON_UNIFIED_LANGUAGE_FUSION_PLAN_v1.0.md](docs/spec/NOEON_UNIFIED_LANGUAGE_FUSION_PLAN_v1.0.md) | Single semantic-kernel fusion plan for all Noeon language surfaces |
 | [NOEON_SPEC_v1.0.md](docs/spec/NOEON_SPEC_v1.0.md) | Normative language specification (v1.0.0-alpha) |
 | [NOEON_GENERAL_SYNTAX_v1.0.md](docs/spec/NOEON_GENERAL_SYNTAX_v1.0.md) | General Profile block syntax (`fn`, `program {}`, `@effect`) |
 | [NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md](docs/NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md) | System architecture and cognitive programming paradigm |

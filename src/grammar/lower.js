@@ -1,5 +1,7 @@
 'use strict';
 
+const { syncAgentsToUnifiedStack, buildStackManifest } = require('../core/noeon-unified');
+
 /**
  * Lower General Profile AST → legacy AEL AST (for Unified VM / Cognitive IR).
  */
@@ -76,9 +78,48 @@ function createLegacyAstShell(general) {
       imports: general.imports || [],
       functions: general.functions || [],
       exports: general.exports || [],
-      effects: general.effects || {}
+      effects: general.effects || {},
+      importContext: general.importContext || null,
+      assertions: [],
+      fusion: general.fusion || []
     }
   };
+}
+
+const { evalExprSource } = require('./expr');
+
+function applyStdlibStatement(ast, stmt, paramBindings = {}) {
+  const p = substParams(stmt.params || {}, paramBindings);
+  const arg0 = stmt.args?.[0] != null ? substValue(stmt.args[0], paramBindings) : null;
+
+  switch (stmt.exportName) {
+    case 'ask':
+      ast.llm.asks.push({
+        query: arg0 || p.query || 'unknown',
+        model: p.model || 'default',
+        temperature: p.temperature !== undefined ? Number(p.temperature) : 0.7,
+        max_tokens: p.max_tokens !== undefined ? Number(p.max_tokens) : 2048,
+        context: p.context || 'workspace'
+      });
+      break;
+    case 'embed':
+      ast.llm.embeds.push({
+        text: arg0 || p.text || 'unknown',
+        store_as: p.store_as || null,
+        tags: p.tags ? String(p.tags).split(',').map((t) => t.trim()) : []
+      });
+      break;
+    case 'think_with':
+      ast.llm.thinkWiths.push({
+        query: arg0 || p.query || 'unknown',
+        model: p.model || 'gpt-5-nano',
+        strategy: p.strategy || 'analytical',
+        depth: p.depth !== undefined ? Number(p.depth) : 3
+      });
+      break;
+    default:
+      break;
+  }
 }
 
 function applyCognitiveStatement(ast, stmt, paramBindings = {}) {
@@ -92,7 +133,20 @@ function applyCognitiveStatement(ast, stmt, paramBindings = {}) {
     return;
   }
   if (stmt.kind === 'let') {
-    ast.cognition.context[stmt.name] = substValue(stmt.value, paramBindings);
+    if (stmt.exprSource) {
+      const env = { ...paramBindings, ...ast.cognition.context };
+      ast.cognition.context[stmt.name] = evalExprSource(stmt.exprSource, env);
+    } else {
+      ast.cognition.context[stmt.name] = substValue(stmt.value, paramBindings);
+    }
+    return;
+  }
+  if (stmt.kind === 'assert') {
+    ast.general.assertions.push({ expr: stmt.exprSource });
+    return;
+  }
+  if (stmt.kind === 'stdlib') {
+    applyStdlibStatement(ast, stmt, paramBindings);
     return;
   }
   if (stmt.kind === 'call') {
@@ -208,7 +262,11 @@ function substParams(params, bindings) {
 
 function cloneStmtWithBindings(stmt, bindings) {
   if (stmt.kind === 'let') {
+    if (stmt.exprSource) return { ...stmt };
     return { ...stmt, value: substValue(stmt.value, bindings) };
+  }
+  if (stmt.kind === 'stdlib' || stmt.kind === 'assert') {
+    return { ...stmt, args: (stmt.args || []).map((a) => substValue(a, bindings)) };
   }
   if (stmt.kind === 'cognitive') {
     return {
@@ -276,14 +334,15 @@ function lowerGeneralProgram(general) {
     }
   }
 
-  for (const fn of general.functions) {
-    if (fn === entryFn) continue;
-    if (!general.exports.includes(fn.name)) {
-      for (const stmt of fn.body) {
-        applyCognitiveStatement(ast, stmt);
-      }
-    }
+  if (general.fusion?.length) {
+    ast.fusion = general.fusion;
   }
+  if (general.fusionTriad?.enabled) {
+    ast.fusionTriad = general.fusionTriad;
+  }
+
+  syncAgentsToUnifiedStack(ast);
+  ast.noeonStack = buildStackManifest(ast);
 
   return ast;
 }

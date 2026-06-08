@@ -1,4 +1,13 @@
 const {
+  lineIndent,
+  isSkippableLine,
+  collectIndentedLines,
+  parseAgentBlockBody,
+  promoteAgentToAst
+} = require('./grammar/agent-block');
+const { parseFuseStatement } = require('./grammar/fuse-block');
+
+const {
   parseDrive: parseCogDrive,
   parseAttend,
   parseWorkspace,
@@ -805,267 +814,14 @@ function parseComputeCall(value, lineNo) {
   };
 }
 
-function lineIndent(rawLine) {
-  const m = String(rawLine || "").match(/^(\s*)/);
-  return m ? m[1].length : 0;
-}
-
-function isSkippableLine(rawLine) {
-  const trimmed = String(rawLine || "").trim();
-  return (
-    !trimmed ||
-    trimmed.startsWith("#") ||
-    trimmed.startsWith("//") ||
-    trimmed.startsWith("/*") ||
-    trimmed.startsWith("*") ||
-    trimmed.startsWith("*/") ||
-    trimmed === "'use strict';" ||
-    trimmed === '"use strict";'
-  );
-}
-
-function collectIndentedLines(lines, startIndex, parentIndent) {
-  const blockLines = [];
-  let index = startIndex;
-
-  while (index < lines.length) {
-    const raw = lines[index];
-    if (isSkippableLine(raw)) {
-      index += 1;
-      continue;
-    }
-
-    const indent = lineIndent(raw);
-    if (indent <= parentIndent) {
-      break;
-    }
-
-    blockLines.push({ raw, lineNo: index + 1, indent });
-    index += 1;
-  }
-
-  return { blockLines, nextIndex: index };
-}
-
-function parseToolsList(value, lineNo) {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) {
-    throw new Error(`Line ${lineNo}: TOOLS requires a tool list`);
-  }
-
-  if (trimmed.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (!Array.isArray(parsed)) {
-        throw new Error("not an array");
-      }
-      return parsed.map((item) => String(item));
-    } catch (_err) {
-      const quoted = trimmed.match(/"([^"]+)"/g);
-      if (quoted && quoted.length > 0) {
-        return quoted.map((item) => item.slice(1, -1));
-      }
-      throw new Error(`Line ${lineNo}: TOOLS array must be valid JSON or quoted list`);
-    }
-  }
-
-  const quoted = trimmed.match(/"([^"]+)"/g);
-  if (quoted && quoted.length > 0) {
-    return quoted.map((item) => item.slice(1, -1));
-  }
-
-  return trimmed.split(/\s+/).filter(Boolean).map(String);
-}
-
-function parseAgentMemory(value, lineNo) {
-  const kv = parseKeyValuePairs(value, lineNo);
-  if (Object.keys(kv).length === 0) {
-    throw new Error(`Line ${lineNo}: MEMORY requires key=value pairs`);
-  }
-  return kv;
-}
-
-function parseFlowReflectStep(value, lineNo) {
-  if (!value) {
-    return { kind: "reflect" };
-  }
-
-  const quoted = value.match(/^"([\s\S]*)"(\s+[\s\S]*)?$/);
-  if (quoted) {
-    const step = {
-      kind: "reflect",
-      subject: quoted[1]
-    };
-    const rest = (quoted[2] || "").trim();
-    if (rest) {
-      Object.assign(step, parseKeyValuePairs(rest, lineNo));
-    }
-    return step;
-  }
-
-  return {
-    kind: "reflect",
-    ...parseKeyValuePairs(value, lineNo)
-  };
-}
-
-function parseCognitiveFlowStep(rawLine, lineNo, variables, keywordAliases) {
-  const trimmed = rawLine.trim();
-  const firstSpace = trimmed.indexOf(" ");
-  const rawKeyword = (firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace)).toUpperCase();
-  const keyword = keywordAliases[rawKeyword] || rawKeyword;
-  const rawValue = firstSpace === -1 ? "" : trimmed.slice(firstSpace + 1).trim();
-  const value = rawValue ? interpolate(rawValue, variables, lineNo) : "";
-
-  switch (keyword) {
-    case "PERCEIVE":
-      return { kind: "perceive", ...parseKeyValuePairs(value, lineNo) };
-    case "REASON":
-      return { kind: "reason", ...parseKeyValuePairs(value, lineNo) };
-    case "ACT":
-      return { kind: "act", ...parseKeyValuePairs(value, lineNo) };
-    case "REFLECT":
-      return parseFlowReflectStep(value, lineNo);
-    case "UNDERSTAND":
-      return { kind: "understand", ...parseKeyValuePairs(value, lineNo) };
-    case "DECIDE":
-      return { kind: "decide", ...parseKeyValuePairs(value, lineNo) };
-    case "FEEDBACK":
-      return { kind: "feedback", ...parseKeyValuePairs(value, lineNo) };
-    default:
-      throw new Error(`Line ${lineNo}: unsupported FLOW step keyword '${rawKeyword}'`);
-  }
-}
-
-function parseCognitiveFlowSteps(blockLines, variables, keywordAliases) {
-  const steps = [];
-  for (const entry of blockLines) {
-    steps.push(parseCognitiveFlowStep(entry.raw, entry.lineNo, variables, keywordAliases));
-  }
-  return steps;
-}
-
-function parseAgentBlockBody(blockLines, variables, keywordAliases) {
-  const agent = {
-    goal: null,
-    memory: null,
-    tools: [],
-    policy: {},
-    flow: []
-  };
-
-  let index = 0;
-  while (index < blockLines.length) {
-    const { raw, lineNo, indent } = blockLines[index];
-    const trimmed = raw.trim();
-    const firstSpace = trimmed.indexOf(" ");
-    const rawKeyword = (firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace)).toUpperCase();
-    const keyword = keywordAliases[rawKeyword] || rawKeyword;
-    const rawValue = firstSpace === -1 ? "" : trimmed.slice(firstSpace + 1).trim();
-    const value = rawValue ? interpolate(rawValue, variables, lineNo) : "";
-
-    switch (keyword) {
-      case "GOAL":
-        agent.goal = parseQuoted(value, lineNo);
-        index += 1;
-        break;
-      case "MEMORY":
-        agent.memory = parseAgentMemory(value, lineNo);
-        index += 1;
-        break;
-      case "TOOLS":
-        agent.tools = parseToolsList(value, lineNo);
-        index += 1;
-        break;
-      case "POLICY":
-        agent.policy = {
-          ...agent.policy,
-          ...parseKeyValuePairs(value, lineNo)
-        };
-        index += 1;
-        break;
-      case "FLOW":
-        if (value) {
-          throw new Error(`Line ${lineNo}: AGENT FLOW must be an indented block, not inline value`);
-        }
-        index += 1;
-        const subLines = [];
-        while (index < blockLines.length && blockLines[index].indent > indent) {
-          subLines.push(blockLines[index]);
-          index += 1;
-        }
-        agent.flow = parseCognitiveFlowSteps(subLines, variables, keywordAliases);
-        break;
-      default:
-        throw new Error(`Line ${lineNo}: unsupported AGENT child keyword '${rawKeyword}'`);
-    }
-  }
-
-  return agent;
-}
-
-function promoteAgentToAst(ast, agent) {
-  ast.agents.push(agent);
-
-  if (!ast.task) {
-    ast.task = agent.name;
-  }
-  if (!ast.cognition.goal && agent.goal) {
-    ast.cognition.goal = agent.goal;
-  }
-  if (agent.memory && !ast.cognition.memory) {
-    const type = agent.memory.type || "balanced";
-    ast.cognition.memory = {
-      shortSeconds: Number(agent.memory.short || 300),
-      longDays: Number(agent.memory.long || 30),
-      mode: String(type).split("+")[0] || "balanced"
-    };
-  }
-
-  for (const step of agent.flow) {
-    switch (step.kind) {
-      case "perceive":
-        ast.cognitive.perceptions.push(step);
-        break;
-      case "reason":
-        ast.cognitive.reasonings.push(step);
-        break;
-      case "act":
-        ast.cognition.acts.push(step);
-        break;
-      case "reflect":
-        ast.cognitive.reflections.push(
-          step.subject
-            ? { subject: step.subject, depth: step.depth || "standard", trigger: step.trigger || "uncertainty" }
-            : { subject: "self", depth: step.depth || "standard", trigger: step.trigger || "uncertainty" }
-        );
-        break;
-      case "understand":
-        ast.cognition.understandings.push(step);
-        break;
-      case "decide":
-        ast.cognitive.decisions.push(step);
-        break;
-      case "feedback":
-        ast.cognition.feedback.push(step);
-        break;
-      default:
-        break;
-    }
-  }
-}
-
 function parseAel(source, options = {}) {
-  const { tryParseLiminal, tryParseNext, tryParseGeneral } = require('./grammar');
-  const liminalAst = tryParseLiminal(source, options);
-  if (liminalAst) return liminalAst;
-  const nextAst = tryParseNext(source, options);
-  if (nextAst) return nextAst;
-  const generalAst = tryParseGeneral(source, options);
-  if (generalAst) return generalAst;
+  const { dispatchParseSurface } = require('./grammar/parse-dispatch');
+
+  let ast = dispatchParseSurface(source, options);
+  if (ast) return ast;
 
   const lines = source.split(/\r?\n/);
-  const ast = {
+  ast = {
     language: "Noeon Contract Language",
     version: "0.2",
     network: null,
@@ -1163,7 +919,9 @@ function parseAel(source, options = {}) {
       thinkWiths: [],
       embeds: []
     },
-    agents: []
+    agents: [],
+    fusion: [],
+    fusionTriad: null
   };
 
   const variables = {};
@@ -1256,6 +1014,17 @@ function parseAel(source, options = {}) {
     }
 
     const rawKeyword = raw.slice(0, firstSpace).toUpperCase();
+
+    if (rawKeyword === "FUSE") {
+      const rawValue = raw.slice(firstSpace + 1).trim();
+      const fuseResult = parseFuseStatement(lines, i, lineNo, rawLine, rawValue);
+      if (fuseResult.fusionTriad) ast.fusionTriad = fuseResult.fusionTriad;
+      ast.fusion.push(...fuseResult.fusionEntries);
+      if (fuseResult.nextIndex > i) {
+        i = fuseResult.nextIndex;
+        continue;
+      }
+    }
 
     if (rawKeyword === "AGENT") {
       const rawValue = raw.slice(firstSpace + 1).trim();
@@ -1564,6 +1333,8 @@ function parseAel(source, options = {}) {
     }
   }
 
+  const { detectSurface, SURFACES } = require('./grammar/parse-dispatch');
+  ast.detectedSurface = ast.detectedSurface || ast.profile || detectSurface(source, options) || SURFACES.AEL;
   return ast;
 }
 

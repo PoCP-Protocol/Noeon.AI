@@ -1,5 +1,5 @@
 profile "next"
-version "0.7.0"
+version "0.8.0"
 program "genesis"
 module dream_weaver
 
@@ -98,7 +98,7 @@ FLUX syntax {
 ACT action=emit_narrative capability=runtime channel=synthesis
 REFLECT target=dominant_cell method=divergent
 
-# --- noeon hot-reload 2026-06-07T22:31:46.991Z ---
+# --- noeon hot-reload 2026-06-07T22:33:50.843Z ---
 # source: genesis.next
 # flux crystallize from syntax
 # crystallized @cycle({{threshold}})

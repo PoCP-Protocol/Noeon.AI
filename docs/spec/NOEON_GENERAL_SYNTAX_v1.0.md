@@ -112,8 +112,29 @@ Forms:
 - `examples/hello.noeon` — `program { }` block style
 - `examples/cognitive_agent.noeon` — `fn` + `@effect(ai)` style
 
-## Phase 3 (planned)
+## Phase 3 (implemented)
 
-- Expression grammar and type annotations
-- `@effect` enforcement at compile time
-- `std.ai` language bindings
+- **Expressions:** `let threshold = 0.72 - 0.07`, `assert threshold >= 0.5`
+- **Types:** primitive annotations on `fn` params/returns validated at compile time
+- **Effects:** `@effect` body superset check (`pure` < `io` < `ai` < `external`)
+- **std.ai:** `import std.ai` enables `ask`, `embed`, `think_with` → lowered to `ast.llm.*`
+
+## Phase 4 (implemented)
+
+- **ConsciousnessStream** default scheduler for cognitive/full VM modes
+- Bounded attention cycles before kernel IR execution
+- Opt out: `NOEON_SCHEDULER=sequential` or `scheduler: 'sequential'` in run options
+
+## Phase 5 (implemented)
+
+- **Package manager:** `noeon.json` + `.noeon-lock.json`, `noeon pkg add|list|install`
+- **Import enforcement:** `import std.ai` requires manifest + lockfile when `noeon.json` exists
+- **LSP/IDE:** general syntax completions (`fn`, `@effect`, `std.ai`), hover, document symbols
+
+## Phase 6 (implemented)
+
+- **Registry:** bundled `registry/index.json`, user cache at `~/.noeon/registry`, optional remote via `NOEON_REGISTRY_URL`
+- **CLI:** `noeon pkg search`, `noeon pkg publish`, `noeon pkg add … --spec registry:version`
+- **Install:** registry packages materialize to `.noeon/packages/<name>/<version>/`
+- **Playground:** `GET/POST /api/pkg/search`, validate response includes import/registry hints
+- **VS Code:** general syntax scopes, snippets (`general`, `fn`, `importai`), extension `1.0.0` publish prep

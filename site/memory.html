@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon Field Memory Graph</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      .wrap { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+      .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .controls input { flex: 1; min-width: 160px; padding: 0.5rem; border-radius: 8px; border: 1px solid #334; background: #0d1117; color: #e6edf3; }
+      .controls button { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: #238636; color: #fff; cursor: pointer; }
+      #graph { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1rem; min-height: 360px; overflow: auto; }
+      .stats { color: #8b949e; margin-bottom: 1rem; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Field Memory Graph</h1>
+      <p>可视化 Next 场域记忆 — lineage、semantic、cell 谱系</p>
+      <div class="controls">
+        <input id="program" value="genesis" placeholder="program" />
+        <input id="dir" placeholder="field-memory dir (optional)" />
+        <button id="refresh">Refresh</button>
+        <label><input id="auto" type="checkbox" checked /> Auto (8s)</label>
+      </div>
+      <div class="stats" id="stats">Loading…</div>
+      <div id="graph"></div>
+    </div>
+    <script>
+      mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+      const programEl = document.getElementById('program');
+      const dirEl = document.getElementById('dir');
+      const statsEl = document.getElementById('stats');
+      const graphEl = document.getElementById('graph');
+      const autoEl = document.getElementById('auto');
+      let timer = null;
+
+      async function load() {
+        const params = new URLSearchParams({ program: programEl.value.trim() || 'genesis' });
+        if (dirEl.value.trim()) params.set('dir', dirEl.value.trim());
+        try {
+          const res = await fetch('/api/field-memory/graph?' + params.toString());
+          const data = await res.json();
+          statsEl.textContent = `Program: ${data.program} · Nodes: ${data.nodeCount} · Edges: ${data.edgeCount}`;
+          graphEl.innerHTML = '';
+          const pre = document.createElement('pre');
+          pre.className = 'mermaid';
+          pre.textContent = data.mermaid;
+          graphEl.appendChild(pre);
+          await mermaid.run({ nodes: [pre] });
+        } catch (e) {
+          statsEl.textContent = e.message;
+        }
+      }
+
+      function schedule() {
+        if (timer) clearInterval(timer);
+        if (autoEl.checked) timer = setInterval(load, 8000);
+      }
+
+      document.getElementById('refresh').addEventListener('click', load);
+      autoEl.addEventListener('change', schedule);
+      load();
+      schedule();
+    </script>
+  </body>
+</html>

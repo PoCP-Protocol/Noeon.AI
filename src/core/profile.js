@@ -1,23 +1,35 @@
 'use strict';
 
 /**
- * Language profiles for unified VM (Phase 1 → v1.0 dual-profile model)
- *
- * ael       — Governance/contract profile (.ael default)
- * general   — AI-era general profile (.noeon, future syntax)
- * liminal   — Symbiotic profile (.lim): covenant, resonance, proposal, veto
- * cognitive — Cognitive-only scripts (no full contract header)
+ * Language profiles — aliases of unified Noeon surfaces.
+ * Next is the semantic core; General/Liminal/AEL are stack layers.
  */
 
-const PROFILES = {
-  AEL: 'ael',
-  GENERAL: 'general',
-  NEXT: 'next',
-  LIMINAL: 'liminal',
-  COGNITIVE: 'cognitive'
-};
+const {
+  SURFACES,
+  CORE_SURFACE,
+  SURFACE_ROLES,
+  SURFACE_DESCRIPTIONS,
+  getSurfaceInfo,
+  resolveIntentGoal,
+  resolveProgramTask
+} = require('./surfaces');
+
+const { detectSurface } = require('../grammar/detect');
+
+const PROFILES = SURFACES;
+const PROFILE_ROLES = SURFACE_ROLES;
+const PROFILE_DESCRIPTIONS = SURFACE_DESCRIPTIONS;
+
+function getProfileInfo(profile) {
+  return getSurfaceInfo(profile);
+}
 
 function detectProfile(ast, options = {}) {
+  if (ast?.detectedSurface && Object.values(PROFILES).includes(ast.detectedSurface)) {
+    return ast.detectedSurface;
+  }
+
   if (options.profile && Object.values(PROFILES).includes(options.profile)) {
     return options.profile;
   }
@@ -66,9 +78,7 @@ function resolveExecutionMode(profile, options = {}) {
     case PROFILES.COGNITIVE:
       return options.with_protocol === 'on' ? 'full' : 'cognitive';
     case PROFILES.GENERAL:
-      return options.with_protocol === 'off' ? 'cognitive' : 'full';
     case PROFILES.NEXT:
-      return options.with_protocol === 'off' ? 'cognitive' : 'full';
     case PROFILES.LIMINAL:
       return options.with_protocol === 'off' ? 'cognitive' : 'full';
     case PROFILES.AEL:
@@ -81,6 +91,17 @@ function resolveExecutionMode(profile, options = {}) {
 
 module.exports = {
   PROFILES,
+  SURFACES,
+  CORE_SURFACE,
+  PROFILE_ROLES,
+  SURFACE_ROLES,
+  PROFILE_DESCRIPTIONS,
+  SURFACE_DESCRIPTIONS,
   detectProfile,
-  resolveExecutionMode
+  detectSurface,
+  resolveExecutionMode,
+  getProfileInfo,
+  getSurfaceInfo,
+  resolveIntentGoal,
+  resolveProgramTask
 };

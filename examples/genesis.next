@@ -1,14 +1,26 @@
 profile "next"
-version "0.8.0"
+version "1.0.0"
 program "genesis"
 module dream_weaver
 
 GOAL "Let narratives emerge from competing hypotheses — no approval, only evolution"
 
+FUSE liminal {
+  mode: observe
+  resonance_floor: 0.55
+}
+
+FUSE general {
+  mode: bridge
+}
+
 FIELD signals {
   ingest: [web, code, memory, latent]
   decay: 1h
   resonance: adaptive
+  recall: true
+  recall_depth: 4
+  consolidate_after: 3
 }
 
 AUTOBOND {

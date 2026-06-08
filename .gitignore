@@ -1,0 +1,19 @@
+node_modules/
+*.log
+.DS_Store
+
+# Test / runtime artifacts (not source)
+artifacts/*-test-*/
+artifacts/*-mem/
+artifacts/canonical/
+artifacts/canonical-phase-b/
+artifacts/canonical-parity-mem/
+artifacts/fusion-graph-mem/
+artifacts/field-memory-test-*/
+
+# Debug scratch
+tmp_debug_*
+
+# Editor
+.vscode/
+.idea/

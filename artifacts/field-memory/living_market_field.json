@@ -1,0 +1,90 @@
+{
+  "program": "living_market_field",
+  "runs": 4,
+  "updated_at": "2026-06-07T22:55:36.661Z",
+  "cells": {
+    "alpha": {
+      "energy": 0.6167413528571901,
+      "claim": "price momentum"
+    }
+  },
+  "dominant_history": [
+    {
+      "name": "alpha",
+      "energy": 0.985,
+      "at": "2026-06-07T22:44:39.160Z"
+    },
+    {
+      "name": "alpha",
+      "energy": 0.6249449528357712,
+      "at": "2026-06-07T22:53:03.775Z"
+    },
+    {
+      "name": "alpha",
+      "energy": 0.6036508019132973,
+      "at": "2026-06-07T22:53:30.008Z"
+    },
+    {
+      "name": "alpha",
+      "energy": 0.6167413528571901,
+      "at": "2026-06-07T22:55:36.660Z"
+    }
+  ],
+  "echoes": {},
+  "last_snapshot": {
+    "at": "2026-06-07T22:55:36.660Z",
+    "dominant": {
+      "name": "alpha",
+      "energy": 0.6167413528571901,
+      "claim": "price momentum"
+    },
+    "cells": {
+      "alpha": {
+        "energy": 0.6167413528571901,
+        "claim": "price momentum"
+      }
+    },
+    "woven": [
+      {
+        "into": "alpha_mesh",
+        "pattern": "alpha*",
+        "strategy": "competitive",
+        "winners": [
+          "alpha"
+        ],
+        "coherence": 0.6
+      }
+    ],
+    "dream_feedback": 1
+  },
+  "lineage": [
+    {
+      "at": "2026-06-07T22:44:39.161Z",
+      "dominant": "alpha",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-07T22:53:03.775Z",
+      "dominant": "alpha",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-07T22:53:30.008Z",
+      "dominant": "alpha",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-07T22:55:36.660Z",
+      "dominant": "alpha",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    }
+  ]
+}

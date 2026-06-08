@@ -105,6 +105,7 @@ function startServer(port = PORT) {
       console.log(`Noeon site + playground API at http://localhost:${port}`);
       console.log(`  Playground: http://localhost:${port}/playground.html`);
       console.log(`  Mycelium:   http://localhost:${port}/mycelium.html`);
+      console.log(`  Memory:     http://localhost:${port}/memory.html`);
       resolve(server);
     });
   });

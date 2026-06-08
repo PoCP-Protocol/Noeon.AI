@@ -7,7 +7,7 @@
 
 const readline = require('readline');
 const { TextDocument } = require('./document');
-const { validateSource, getCompletions, getHover, getDocumentSymbols } = require('./noeon-service');
+const { validateSource, getCompletions, getHover, getDocumentSymbols, getCodeLenses } = require('./noeon-service');
 
 let documents = new Map();
 let rootUri = '';
@@ -50,7 +50,8 @@ function handleMessage(msg) {
           textDocumentSync: 1,
           completionProvider: { triggerCharacters: [' ', '=', '"'] },
           hoverProvider: true,
-          documentSymbolProvider: true
+          documentSymbolProvider: true,
+          codeLensProvider: { resolveProvider: false }
         },
         serverInfo: { name: 'noeon-language-server', version: '0.9.0' }
       }
@@ -115,7 +116,7 @@ function handleMessage(msg) {
     const { textDocument } = params;
     const doc = documents.get(textDocument.uri);
     const symbols = getDocumentSymbols(doc ? doc.getText() : '');
-    const kindMap = { intent: 18, goal: 12, cognitive: 14 };
+    const kindMap = { intent: 18, goal: 12, cognitive: 14, agent: 5 };
     send({
       jsonrpc: '2.0',
       id,
@@ -133,6 +134,54 @@ function handleMessage(msg) {
         children: []
       }))
     });
+    return;
+  }
+
+  if (method === 'textDocument/codeLens') {
+    const doc = documents.get(params.textDocument.uri);
+    const source = doc ? doc.getText() : '';
+    const filename = decodeURIComponent(String(params.textDocument.uri).split('/').pop() || 'buffer.noeon');
+    const lenses = getCodeLenses(source, filename);
+    send({
+      jsonrpc: '2.0',
+      id,
+      result: lenses.map((l) => ({
+        range: {
+          start: { line: Math.max(0, l.line - 1), character: 0 },
+          end: { line: Math.max(0, l.line - 1), character: 120 }
+        },
+        command: l.command ? { title: l.title, command: l.command } : undefined,
+        data: { title: l.title }
+      }))
+    });
+    return;
+  }
+
+  if (method === 'noeon/architecture') {
+    const doc = documents.get(params.textDocument?.uri || params.uri);
+    const source = doc ? doc.getText() : params.source || '';
+    const filename = params.filename || decodeURIComponent(String(params.textDocument?.uri || params.uri || '').split('/').pop() || 'buffer.noeon');
+    const { resolveArchitectureRequest } = require('./noeon-service');
+    send({
+      jsonrpc: '2.0',
+      id,
+      result: resolveArchitectureRequest(source, filename, params.mode || 'summary')
+    });
+    return;
+  }
+
+  if (method === 'noeon/run') {
+    const doc = documents.get(params.textDocument?.uri || params.uri);
+    const source = doc ? doc.getText() : params.source || '';
+    const filename = params.filename || decodeURIComponent(String(params.textDocument?.uri || params.uri || '').split('/').pop() || 'buffer.noeon');
+    const { runPipelineRequest } = require('./noeon-service');
+    void runPipelineRequest(source, filename, params.options || params)
+      .then((result) => send({ jsonrpc: '2.0', id, result }))
+      .catch((err) => send({
+        jsonrpc: '2.0',
+        id,
+        error: { code: -32603, message: err.message || String(err) }
+      }));
     return;
   }
 

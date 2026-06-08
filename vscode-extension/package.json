@@ -1,13 +1,18 @@
 {
   "name": "noeon-language",
   "displayName": "Noeon AI — Cognitive Programming Language",
-  "description": "Syntax highlighting, LSP diagnostics, completion, and run command for Noeon (.ael)",
-  "version": "0.9.0",
+  "description": "Syntax highlighting, LSP diagnostics, completion, and run command for Noeon (.noeon / .ael) including general profile syntax",
+  "version": "1.0.0",
   "publisher": "PoCP-Protocol",
   "main": "./extension.js",
   "activationEvents": [
     "onLanguage:noeon",
-    "onCommand:noeon.runFile"
+    "onCommand:noeon.runFile",
+    "onCommand:noeon.planFile",
+    "onCommand:noeon.brainMap",
+    "onCommand:noeon.pipelineFile",
+    "onCommand:noeon.toggleBrainHighlight",
+    "onCommand:noeon.showArchitecturePanel"
   ],
   "engines": {
     "vscode": "^1.75.0"
@@ -49,13 +54,88 @@
     "commands": [
       {
         "command": "noeon.runFile",
-        "title": "Noeon: Run Current File"
+        "title": "Noeon: Run Current File (Pipeline)"
+      },
+      {
+        "command": "noeon.planFile",
+        "title": "Noeon: Plan Current File"
+      },
+      {
+        "command": "noeon.brainMap",
+        "title": "Noeon: Show Brain Architecture Map"
+      },
+      {
+        "command": "noeon.pipelineFile",
+        "title": "Noeon: Run Unified Pipeline (JSON Report)"
+      },
+      {
+        "command": "noeon.showArchitecturePanel",
+        "title": "Noeon: Open Architecture Panel"
+      },
+      {
+        "command": "noeon.toggleBrainHighlight",
+        "title": "Noeon: Toggle Brain Region Highlight"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "noeon.architecture",
+          "name": "Cognitive Architecture",
+          "when": "resourceExtname == .noeon || resourceExtname == .ael"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "noeon.showArchitecturePanel",
+          "when": "resourceExtname == .noeon || resourceExtname == .ael",
+          "group": "navigation@99"
+        },
+        {
+          "command": "noeon.brainMap",
+          "when": "resourceExtname == .noeon || resourceExtname == .ael",
+          "group": "navigation@98"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Noeon",
+      "properties": {
+        "noeon.brainHighlight": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight cognitive primitives by functional brain region."
+        },
+        "noeon.codeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show architecture CodeLens on AGENT, FLOW, FUSE, and cognitive lines."
+        },
+        "noeon.runInTerminal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run Noeon pipeline in terminal instead of background JSON (disables architecture panel auto-refresh on run)."
+        },
+        "noeon.runViaLsp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run pipeline via LSP noeon/run request (in-process) instead of CLI subprocess when language server is active."
+        }
+      }
+    }
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/PoCP-Protocol/Noeon.AI"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "vscode:prepublish": "node -e \"require('fs').accessSync(require('path').join(__dirname,'extension.js'))\""
+  },
+  "optionalDependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
 }

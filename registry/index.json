@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "packages": {
+    "std.demo": {
+      "latest": "1.0.0",
+      "description": "Demo registry package for general profile imports",
+      "versions": {
+        "1.0.0": {
+          "description": "Demo registry package for general profile imports",
+          "path": "packages/std.demo/1.0.0"
+        }
+      }
+    }
+  }
+}

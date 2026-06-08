@@ -43,6 +43,8 @@ assert(resolveExecutionMode(PROFILES.AEL, { simulate: true }) === 'protocol', 'a
   });
   assert(runResult.success === true, 'executeProgram cognitive-only');
   assert(runResult.phases.includes('cognitive'), 'cognitive phase executed');
+  assert(runResult.phases.includes('consciousness'), 'consciousness scheduler runs by default');
+  assert(runResult.scheduler === 'consciousness', 'default scheduler is consciousness');
   assert(!runResult.phases.includes('protocol'), 'protocol skipped when off');
 
   const generalResult = await executeProgram(hello, {

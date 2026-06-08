@@ -2,11 +2,133 @@
 
 const vscode = require('vscode');
 const path = require('path');
-const { spawn } = require('child_process');
+const { execFile } = require('child_process');
+const { loadNoeonService, buildDecorationTypes, applyBrainDecorations } = require('./brain-decorations');
+const { registerCodeLensProvider } = require('./code-lens');
+const { registerArchitecturePanel } = require('./architecture-panel');
 
 /** @param {vscode.ExtensionContext} context */
 function activate(context) {
-  const serverModule = path.join(context.extensionPath, '..', 'language-server', 'server.js');
+  const repoRoot = path.join(context.extensionPath, '..');
+  const cliPath = path.join(repoRoot, 'src', 'cli.js');
+  const service = loadNoeonService(context.extensionPath);
+  const output = vscode.window.createOutputChannel('Noeon Architecture');
+  context.subscriptions.push(output);
+  let architecturePanel = null;
+  let lspClient = null;
+
+  const brainHighlightEnabled = () =>
+    vscode.workspace.getConfiguration('noeon').get('brainHighlight', true);
+
+  let decorationTypes = service ? buildDecorationTypes(vscode, service) : {};
+  context.subscriptions.push(...Object.values(decorationTypes));
+
+  function refreshBrainDecorations(editor) {
+    if (!brainHighlightEnabled() || !service || !editor) return;
+    if (editor.document.languageId !== 'noeon' &&
+        !editor.document.fileName.endsWith('.ael') &&
+        !editor.document.fileName.endsWith('.noeon')) {
+      return;
+    }
+    applyBrainDecorations(editor, service, decorationTypes, vscode);
+  }
+
+  function refreshActiveDecorations() {
+    refreshBrainDecorations(vscode.window.activeTextEditor);
+  }
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(refreshBrainDecorations),
+    vscode.workspace.onDidChangeTextDocument((e) => {
+      if (vscode.window.activeTextEditor?.document === e.document) {
+        refreshBrainDecorations(vscode.window.activeTextEditor);
+      }
+    }),
+    vscode.workspace.onDidOpenTextDocument((doc) => {
+      if (vscode.window.activeTextEditor?.document === doc) {
+        refreshBrainDecorations(vscode.window.activeTextEditor);
+      }
+    })
+  );
+  refreshActiveDecorations();
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('noeon.brainHighlight')) {
+        refreshActiveDecorations();
+      }
+    })
+  );
+
+  function runCli(args, title, options = {}) {
+    const { showOutput = true } = options;
+    return new Promise((resolve, reject) => {
+      execFile(process.execPath, [cliPath, ...args], { cwd: repoRoot, maxBuffer: 4 * 1024 * 1024 }, (err, stdout, stderr) => {
+        if (err) {
+          reject(new Error(stderr || err.message));
+          return;
+        }
+        if (showOutput) {
+          output.clear();
+          output.appendLine(`── ${title} ──`);
+          output.append(stdout);
+          output.show(true);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
+  async function applyPipelineJson(payload) {
+    const result = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    if (architecturePanel) {
+      architecturePanel.applyRuntime({
+        success: result.success,
+        blocked: result.blocked,
+        phases: result.phases,
+        scheduler: result.scheduler,
+        architecture: result.architecture
+      });
+      await vscode.commands.executeCommand('noeon.architecture.focus');
+    }
+    return result;
+  }
+
+  async function runPipelineViaClient(file, options = {}) {
+    const editor = vscode.window.activeTextEditor;
+    const useLsp = vscode.workspace.getConfiguration('noeon').get('runViaLsp', true);
+    if (lspClient && useLsp) {
+      try {
+        return await lspClient.sendRequest('noeon/run', {
+          textDocument: editor ? { uri: editor.document.uri.toString() } : undefined,
+          source: editor?.document.getText(),
+          filename: file,
+          options: {
+            with_protocol: options.withProtocol ?? 'off',
+            trace: options.trace === true,
+            canonical_audit: options.canonicalAudit !== false
+          }
+        });
+      } catch {
+        // fall back to CLI subprocess
+      }
+    }
+    const args = ['pipeline', file, '--json'];
+    if (options.trace) args.push('--trace');
+    const stdout = await runCli(args, 'Pipeline Run', { showOutput: false });
+    return JSON.parse(stdout);
+  }
+
+  async function getActiveFile() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showWarningMessage('No active Noeon file.');
+      return null;
+    }
+    return editor.document.uri.fsPath;
+  }
+
+  const serverModule = path.join(repoRoot, 'language-server', 'server.js');
   const fallbackServer = path.join(context.extensionPath, 'language-server', 'server.js');
   const fs = require('fs');
   const resolvedServer = fs.existsSync(serverModule) ? serverModule : fallbackServer;
@@ -18,47 +140,142 @@ function activate(context) {
 
   const clientOptions = {
     documentSelector: [{ scheme: 'file', language: 'noeon' }],
-    synchronize: { fileEvents: vscode.workspace.createFileSystemWatcher('**/*.ael') }
+    synchronize: {
+      fileEvents: vscode.workspace.createFileSystemWatcher('**/*.{ael,noeon}')
+    }
   };
 
-  let client;
   try {
     const LanguageClient = require('vscode-languageclient/node').LanguageClient;
-    client = new LanguageClient('noeonLanguageServer', 'Noeon Language Server', serverOptions, clientOptions);
-    context.subscriptions.push(client.start());
+    lspClient = new LanguageClient('noeonLanguageServer', 'Noeon Language Server', serverOptions, clientOptions);
+    context.subscriptions.push(lspClient.start());
   } catch {
-    // Fallback: diagnostics via direct validation when language client unavailable
+    const codeLensProvider = registerCodeLensProvider(vscode, service, context);
+    if (codeLensProvider) context.subscriptions.push(codeLensProvider);
+
     const diagCollection = vscode.languages.createDiagnosticCollection('noeon');
     context.subscriptions.push(diagCollection);
 
     async function validateDocument(doc) {
-      if (doc.languageId !== 'noeon' && !doc.fileName.endsWith('.ael')) return;
-      try {
-        const { validateSource } = require(path.join(context.extensionPath, '..', 'language-server', 'noeon-service'));
-        const issues = validateSource(doc.getText());
-        diagCollection.set(doc.uri, issues.map((d) => new vscode.Diagnostic(
-          new vscode.Range(Math.max(0, d.line - 1), 0, Math.max(0, d.line - 1), 200),
-          d.message,
-          d.severity === 'error' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning
-        )));
-      } catch {
-        // silent if service unavailable
-      }
+      if (doc.languageId !== 'noeon' && !doc.fileName.endsWith('.ael') && !doc.fileName.endsWith('.noeon')) return;
+      if (!service) return;
+      const issues = service.validateSource(doc.getText());
+      diagCollection.set(doc.uri, issues.map((d) => new vscode.Diagnostic(
+        new vscode.Range(Math.max(0, d.line - 1), 0, Math.max(0, d.line - 1), 200),
+        d.message,
+        d.severity === 'error' ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning
+      )));
     }
 
-    vscode.workspace.onDidOpenTextDocument(validateDocument);
-    vscode.workspace.onDidChangeTextDocument((e) => validateDocument(e.document));
+    context.subscriptions.push(
+      vscode.workspace.onDidOpenTextDocument(validateDocument),
+      vscode.workspace.onDidChangeTextDocument((e) => validateDocument(e.document))
+    );
     vscode.workspace.textDocuments.forEach(validateDocument);
+  }
+
+  if (service) {
+    const resolveViewModel = async (editor) => {
+      if (lspClient) {
+        try {
+          return await lspClient.sendRequest('noeon/architecture', {
+            textDocument: { uri: editor.document.uri.toString() },
+            filename: editor.document.fileName,
+            mode: 'view'
+          });
+        } catch {
+          // fall back to in-process service
+        }
+      }
+      return service.buildArchitectureViewModel(editor.document.getText(), editor.document.fileName);
+    };
+    architecturePanel = registerArchitecturePanel(context, service, { resolveViewModel });
   }
 
   context.subscriptions.push(
     vscode.commands.registerCommand('noeon.runFile', async () => {
+      const file = await getActiveFile();
+      if (!file) return;
+      const runInTerminal = vscode.workspace.getConfiguration('noeon').get('runInTerminal', false);
+      if (runInTerminal) {
+        const term = vscode.window.createTerminal('Noeon Run');
+        term.sendText(`node "${cliPath}" pipeline "${file}" --json --trace`);
+        term.show();
+        return;
+      }
+      try {
+        await vscode.window.withProgress(
+          { location: vscode.ProgressLocation.Notification, title: 'Noeon pipeline', cancellable: false },
+          async () => {
+            const result = await runPipelineViaClient(file, { trace: true, withProtocol: 'off' });
+            await applyPipelineJson(result);
+            const phaseSummary = (result.phases || []).join(' → ') || 'done';
+            vscode.window.showInformationMessage(`Noeon: ${phaseSummary} (${result.success !== false ? 'ok' : 'failed'})`);
+          }
+        );
+      } catch (e) {
+        vscode.window.showErrorMessage(e.message);
+      }
+    }),
+    vscode.commands.registerCommand('noeon.planFile', async () => {
+      const file = await getActiveFile();
+      if (!file) return;
+      try {
+        await runCli(['plan', file, '--json'], 'Plan');
+      } catch (e) {
+        vscode.window.showErrorMessage(e.message);
+      }
+    }),
+    vscode.commands.registerCommand('noeon.brainMap', async () => {
       const editor = vscode.window.activeTextEditor;
-      if (!editor) return;
-      const file = editor.document.uri.fsPath;
-      const term = vscode.window.createTerminal('Noeon Run');
-      term.sendText(`node "${path.join(context.extensionPath, '..', 'src', 'cli.js')}" run "${file}" --trace`);
-      term.show();
+      const file = await getActiveFile();
+      if (!file || !service) return;
+      try {
+        const summary = service.getArchitectureSummary(editor.document.getText(), file);
+        if (summary.error) throw new Error(summary.error);
+        output.clear();
+        output.appendLine('── Cognitive Architecture ──');
+        output.appendLine(`route: ${summary.routeLabel || '—'}`);
+        output.appendLine(`active: ${(summary.active_regions || []).join(', ')}`);
+        for (const flow of summary.agent_flows || []) {
+          const steps = (flow.steps || []).map((s) => `${s.kind}→${s.region}`).join(' · ');
+          output.appendLine(`${flow.name}: ${steps}`);
+        }
+        output.appendLine('');
+        output.appendLine(JSON.stringify(summary, null, 2));
+        output.show(true);
+        if (architecturePanel && editor) architecturePanel.refresh(editor);
+      } catch (e) {
+        vscode.window.showErrorMessage(e.message);
+      }
+    }),
+    vscode.commands.registerCommand('noeon.pipelineFile', async () => {
+      const file = await getActiveFile();
+      if (!file) return;
+      try {
+        const result = await runPipelineViaClient(file, { withProtocol: 'off' });
+        if (result) await applyPipelineJson(result);
+      } catch (e) {
+        vscode.window.showErrorMessage(e.message);
+      }
+    }),
+    vscode.commands.registerCommand('noeon.toggleBrainHighlight', () => {
+      const config = vscode.workspace.getConfiguration('noeon');
+      const next = !config.get('brainHighlight', true);
+      config.update('brainHighlight', next, vscode.ConfigurationTarget.Workspace);
+      if (next) {
+        refreshActiveDecorations();
+      } else if (vscode.window.activeTextEditor) {
+        for (const type of Object.values(decorationTypes)) {
+          vscode.window.activeTextEditor.setDecorations(type, []);
+        }
+      }
+      vscode.window.showInformationMessage(`Noeon brain highlight: ${next ? 'on' : 'off'}`);
+    }),
+    vscode.commands.registerCommand('noeon.showArchitecturePanel', async () => {
+      await vscode.commands.executeCommand('noeon.architecture.focus');
+      const editor = vscode.window.activeTextEditor;
+      if (architecturePanel && editor) architecturePanel.refresh(editor);
     })
   );
 }

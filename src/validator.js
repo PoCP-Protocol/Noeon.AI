@@ -840,7 +840,12 @@ function validateNextProfile(ast, errors, warnings) {
   const models = Array.isArray(next.models) ? next.models : [];
   const strategies = Array.isArray(next.strategies) ? next.strategies : [];
   const guarantees = Array.isArray(next.guarantees) ? next.guarantees : [];
+  const vows = Array.isArray(next.vows) ? next.vows : [];
+  const constitutions = Array.isArray(next.constitutions) ? next.constitutions : [];
+  const rituals = Array.isArray(next.rituals) ? next.rituals : [];
   const acts = Array.isArray(next.acts) ? next.acts : [];
+  const selfModels = Array.isArray(next.selfModels) ? next.selfModels : [];
+  const myths = Array.isArray(next.myths) ? next.myths : [];
   const fields = Array.isArray(next.fields) ? next.fields : [];
   const cells = Array.isArray(next.cells) ? next.cells : [];
   const weaves = Array.isArray(next.weaves) ? next.weaves : [];
@@ -890,6 +895,67 @@ function validateNextProfile(ast, errors, warnings) {
     if (!g.expr) errors.push(`GUARANTEE '${g.name || 'unknown'}' requires expr`);
   }
 
+  for (const vow of vows) {
+    if (!vow.name) errors.push('VOW name is required');
+    if (!vow.expr) errors.push(`VOW '${vow.name || 'unknown'}' requires expr`);
+    if (vow.level && !['soft', 'hard'].includes(String(vow.level).toLowerCase())) {
+      errors.push(`VOW '${vow.name || 'unknown'}' level must be soft|hard`);
+    }
+  }
+
+  for (const constitution of constitutions) {
+    if (!constitution.name) errors.push('CONSTITUTION name is required');
+    if (!constitution.expr) errors.push(`CONSTITUTION '${constitution.name || 'unknown'}' requires expr`);
+    if (constitution.level && !['soft', 'hard'].includes(String(constitution.level).toLowerCase())) {
+      errors.push(`CONSTITUTION '${constitution.name || 'unknown'}' level must be soft|hard`);
+    }
+  }
+
+  for (const ritual of rituals) {
+    if (!ritual.name) errors.push('RITUAL name is required');
+    if (!ritual.action) warnings.push(`RITUAL '${ritual.name || 'unknown'}' should declare action for act scheduling`);
+    if (ritual.cadence !== undefined && Number(ritual.cadence) <= 0) {
+      errors.push(`RITUAL '${ritual.name || 'unknown'}' cadence must be > 0`);
+    }
+    if (ritual.mode && !['adaptive', 'strict'].includes(String(ritual.mode).toLowerCase())) {
+      errors.push(`RITUAL '${ritual.name || 'unknown'}' mode must be adaptive|strict`);
+    }
+    if (ritual.priority !== undefined && !Number.isFinite(Number(ritual.priority))) {
+      errors.push(`RITUAL '${ritual.name || 'unknown'}' priority must be a number`);
+    }
+  }
+
+  const ritualNames = new Set(rituals.map((r) => String(r.name || '').trim()).filter(Boolean));
+  for (const ritual of rituals) {
+    const parseRefs = (value) => {
+      if (Array.isArray(value)) return value.map((v) => String(v).trim()).filter(Boolean);
+      const text = String(value || '').trim();
+      if (!text) return [];
+      return text.split(',').map((v) => v.trim()).filter(Boolean);
+    };
+
+    const overrides = parseRefs(ritual.overrides);
+    const dependsOn = parseRefs(ritual.depends_on || ritual.dependsOn);
+
+    for (const target of overrides) {
+      if (target === ritual.name) {
+        warnings.push(`RITUAL '${ritual.name || 'unknown'}' overrides itself and will be ignored`);
+      }
+      if (!ritualNames.has(target)) {
+        warnings.push(`RITUAL '${ritual.name || 'unknown'}' overrides unknown ritual '${target}'`);
+      }
+    }
+
+    for (const dep of dependsOn) {
+      if (dep === ritual.name) {
+        warnings.push(`RITUAL '${ritual.name || 'unknown'}' depends_on itself and can deadlock activation`);
+      }
+      if (!ritualNames.has(dep)) {
+        warnings.push(`RITUAL '${ritual.name || 'unknown'}' depends_on unknown ritual '${dep}'`);
+      }
+    }
+  }
+
   for (const a of acts) {
     if (!a.action) errors.push('ACT action is required');
     if (!a.capability) warnings.push(`ACT '${a.action || 'unknown'}' should declare capability`);
@@ -930,9 +996,30 @@ function validateNextProfile(ast, errors, warnings) {
       errors.push(`DREAM '${d.name || 'unknown'}' depth must be > 0`);
     }
   }
+
+  for (const sm of selfModels) {
+    if (!sm.id && !sm.identity) {
+      errors.push('SELFMODEL requires id or identity');
+    }
+    if (!sm.creator) {
+      warnings.push(`SELFMODEL '${sm.id || sm.identity || 'unknown'}' should declare creator`);
+    }
+    if (!sm.paradigm) {
+      warnings.push(`SELFMODEL '${sm.id || sm.identity || 'unknown'}' should declare paradigm`);
+    }
+  }
+
+  for (const myth of myths) {
+    if (!myth.text || !String(myth.text).trim()) {
+      errors.push('MYTH requires non-empty text');
+    }
+    if (!myth.tone) {
+      warnings.push('MYTH should declare tone for reflective shaping');
+    }
+  }
 }
 
-function validateAel(ast) {
+function validateAel(ast, options = {}) {
   const errors = [];
   const warnings = [];
   const isGeneralProfile = ast.profile === "general" || ast.languageProfile === "general";
@@ -1327,6 +1414,11 @@ function validateAel(ast) {
   validateComputeBlock(ast, errors, warnings);
   validateAgents(ast, errors, warnings);
   validateNextProfile(ast, errors, warnings);
+
+  if (isGeneralProfile && ast.general) {
+    const { validateGeneralProfile } = require('./grammar/validate-general');
+    validateGeneralProfile(ast, errors, warnings, { cwd: options.cwd });
+  }
 
   applyMetaRules(ast, errors, warnings);
 

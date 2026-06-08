@@ -1,0 +1,10 @@
+VERSION "1.0.0"
+NETWORK "noeon-parity"
+TASK "risk_assess"
+
+GOAL "Assess market risk with evidence"
+BUDGET 1000 msat
+
+REASON strategy=deductive depth=2
+ACT action=write_report channel=report
+REFLECT "execution quality" depth=standard

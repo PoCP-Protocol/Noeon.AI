@@ -55,7 +55,20 @@ function formatSpawnCell(spawn) {
   ].join('\n');
 }
 
-function buildHotReloadPatch({ fluxCrystals = [], autoBonds = [], autoSpawns = [], field = null } = {}) {
+function formatDeclaredSpawn(spawn) {
+  const claim = String(spawn.claim || spawn.name).replace(/"/g, '\\"');
+  const tags = (spawn.tags || ['spawn', 'declared']).map((t) => `"${t}"`).join(', ');
+  return [
+    `CELL ${spawn.name} {`,
+    `  energy: ${Number(spawn.energy ?? 0.6).toFixed(2)}`,
+    `  claim: "${claim}"`,
+    `  tags: [${tags}]`,
+    `  when energy > 0.52 { emit narrative.spawn } # declared-spawn`,
+    '}'
+  ].join('\n');
+}
+
+function buildHotReloadPatch({ fluxCrystals = [], autoBonds = [], autoSpawns = [], declaredSpawns = [], field = null } = {}) {
   const chunks = [];
   for (const crystal of fluxCrystals) {
     const block = formatFluxPatch(crystal);
@@ -63,6 +76,9 @@ function buildHotReloadPatch({ fluxCrystals = [], autoBonds = [], autoSpawns = [
   }
   for (const spawn of autoSpawns) {
     chunks.push(formatSpawnCell(spawn));
+  }
+  for (const spawn of declaredSpawns) {
+    chunks.push(formatDeclaredSpawn(spawn));
   }
   for (const bond of autoBonds) {
     chunks.push(formatBondLine(bond));

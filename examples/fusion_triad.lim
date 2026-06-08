@@ -1,0 +1,18 @@
+profile "liminal"
+version "0.1.0"
+module fusion_triad_observer
+
+covenant TriadObserver {
+  intent: "Observe triad coherence without blocking synthesis"
+  resonance_floor: 0.55
+}
+
+belief hypothesis_risk_off {
+  claim: "Risk-off hypothesis active in field"
+  confidence: 0.70
+  sources: [triad, field]
+}
+
+resonate triad_goal -> hypothesis_risk_off {
+  mirror: "Triad synthesizer goal aligns with field dominant"
+}

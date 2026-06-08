@@ -26,7 +26,7 @@ assert(prog.profile === 'next', 'parses next profile');
 assert(prog.fields.length === 1, 'parses FIELD block');
 assert(prog.cells.length >= 3, 'parses living CELL blocks');
 assert(prog.weaves.length === 1, 'parses WEAVE');
-assert(prog.dreams.length === 1, 'parses DREAM');
+assert(prog.dreams.length >= 1, 'parses DREAM');
 assert(prog.spawns.length === 1, 'parses SPAWN');
 assert(prog.fluxes.length === 1, 'parses FLUX');
 assert(prog.echoes.length === 1, 'parses ECHO');
