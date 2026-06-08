@@ -1,3 +1,5 @@
+> **ARCHIVED** — Superseded. See [docs/archive/INDEX.md](docs/archive/INDEX.md) and [NOEON_CANONICAL_ARCHITECTURE_v1.0.md](docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md).
+
 # Noeon Next v0.4
 
 ## AUTOBOND — emergent chemistry
