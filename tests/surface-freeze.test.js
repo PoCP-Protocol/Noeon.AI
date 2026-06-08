@@ -47,7 +47,7 @@ assert(
   'detectSurface allows .lim'
 );
 
-parseFromSource('profile "general"\nprogram p { objective "ok" }', 'ok.noeon');
+parseFromSource('PROFILE "general"\nAGENT "Ok"\n  GOAL "test"\n  FLOW\n    ACT action=run', 'ok.noeon');
 assert(true, 'parseFromSource allows .noeon');
 
 assert(
