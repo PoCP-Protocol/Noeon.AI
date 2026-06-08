@@ -68,8 +68,14 @@ function isNextSyntax(source, options = {}) {
   );
 }
 
+function isLiminalFilename(filename) {
+  if (!filename) return false;
+  const lower = String(filename).toLowerCase();
+  return lower.endsWith('.lim') || lower.endsWith('.lim.human') || lower.endsWith('.lim.machine');
+}
+
 function isLiminalSyntaxQuick(source, options = {}) {
-  if (options.filename && String(options.filename).endsWith('.lim')) return true;
+  if (isLiminalFilename(options.filename)) return true;
   return /^\s*covenant\s*\{/im.test(source) || /^\s*belief\s+/im.test(source);
 }
 
@@ -96,6 +102,7 @@ module.exports = {
   isGeneralSyntax,
   isNextSyntax,
   isLiminalSyntaxQuick,
+  isLiminalFilename,
   detectSurface,
   hasAgentSyntax,
   hasGeneralBlockSyntax
