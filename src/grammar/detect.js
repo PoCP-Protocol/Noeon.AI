@@ -85,7 +85,7 @@ function isLiminalSyntaxQuick(source, options = {}) {
 function detectSurface(source, options = {}) {
   if (!source || typeof source !== 'string') return SURFACES.AEL;
   if (options.filename) assertFrozenFilename(options.filename, options);
-  if (options.filename && String(options.filename).endsWith('.lim')) return SURFACES.LIMINAL;
+  if (isLiminalFilename(options.filename)) return SURFACES.LIMINAL;
   if (options.filename && String(options.filename).endsWith('.next')) return SURFACES.NEXT;
   if (isLiminalSyntaxQuick(source, options)) return SURFACES.LIMINAL;
   if (isNextSyntax(source, options)) return SURFACES.NEXT;
