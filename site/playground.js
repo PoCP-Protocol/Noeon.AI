@@ -234,7 +234,8 @@ function regionForKeyword(kw) {
 
 function updateRouteBar(data) {
   if (!sourceRouteBar) return;
-  if (!data?.routeLabel && !data?.runtime?.phases?.length) {
+  const hasExec = data?.executionSummary?.strategy || data?.executionStrategy;
+  if (!data?.routeLabel && !data?.runtime?.phases?.length && !hasExec) {
     sourceRouteBar.classList.add("hidden");
     sourceRouteBar.textContent = "";
     return;
@@ -514,20 +515,26 @@ function applyExampleCanonicalPreference(ex) {
 
 function renderBrainTraceCompact(data) {
   const arch = data?.architecture;
-  if (!arch?.active_regions?.length) {
+  const archDetails = architectureDetailLines(data);
+  const execTag = data?.executionSummary?.strategy
+    ? `exec: ${data.executionSummary.path || data.executionSummary.strategy}`
+    : null;
+
+  if (!arch?.active_regions?.length && !execTag && !archDetails.length) {
     brainPanel.classList.add("hidden");
     return;
   }
 
   brainPanel.classList.remove("hidden");
   brainSummary.textContent = [
+    execTag,
     data.routeLabel ? `route: ${data.routeLabel}` : null,
-    `${arch.active_regions.length} regions`,
+    arch?.active_regions?.length ? `${arch.active_regions.length} regions` : null,
     data.runtime?.phases?.length ? `ran: ${data.runtime.phases.join("→")}` : "live sync"
   ].filter(Boolean).join(" · ");
 
   brainRegions.innerHTML = "";
-  for (const id of arch.active_regions) {
+  for (const id of arch?.active_regions || []) {
     const chip = document.createElement("span");
     chip.className = "brain-region-chip";
     chip.title = id;
@@ -535,13 +542,18 @@ function renderBrainTraceCompact(data) {
     brainRegions.appendChild(chip);
   }
 
+  const flowLines = [];
   if (data.agent_flows?.length) {
-    const flowLines = data.agent_flows.map((agent) => {
+    for (const agent of data.agent_flows) {
       const steps = (agent.steps || []).map((s) => `${(s.kind || "?").toUpperCase()}→${REGION_LABELS[s.region] || s.region || "?"}`);
-      return `${agent.name}: ${steps.join(" · ")}`;
-    });
-    brainFlow.textContent = flowLines.join("\n");
+      flowLines.push(`${agent.name}: ${steps.join(" · ")}`);
+    }
   }
+  if (archDetails.length) {
+    if (flowLines.length) flowLines.push("");
+    flowLines.push("--- architecture ---", ...archDetails);
+  }
+  brainFlow.textContent = flowLines.join("\n");
 
   if (data.architectureMermaid) renderBrainMermaid(data.architectureMermaid);
   renderActionTrace(data);
@@ -556,6 +568,7 @@ async function syncBrainFromApi({ silent = true } = {}) {
     if (gen !== brainSyncGen) return;
     updateRouteBar(data);
     updateSourceBrainGutter(data);
+    updateRunExecutionBar(data);
     renderBrainTraceCompact(data);
   } catch {
     if (gen === brainSyncGen) {
@@ -601,6 +614,9 @@ function renderBrainTrace(data) {
   brainPanel.classList.remove("hidden");
   const executive = arch.governance_regions?.[0] || "prefrontal_cortex";
   brainSummary.textContent = [
+    data.executionSummary?.strategy
+      ? `exec: ${data.executionSummary.path || data.executionSummary.strategy}`
+      : null,
     `executive: ${REGION_LABELS[executive] || executive}`,
     `core: ${REGION_LABELS[arch.core_field] || arch.core_field || "field"}`,
     data.routeLabel ? `route: ${data.routeLabel}` : null,
@@ -639,6 +655,7 @@ function renderBrainTrace(data) {
     routeLabel: data.routeLabel,
     active_regions: arch.active_regions,
     code_lenses: data.code_lenses,
+    executionSummary: data.executionSummary,
     runtime: {
       phases: (arch.pipeline_phases || []).map((p) => p.phase)
     }

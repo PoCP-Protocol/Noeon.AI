@@ -25,6 +25,7 @@ const releaseEraCheck = report.checks.find((c) => c.name === 'release_era');
 const snapshotExecCheck = report.checks.find((c) => c.name === 'snapshot_execution');
 const toolCanonicalCheck = report.checks.find((c) => c.name === 'tool_demos_canonical');
 const agentHybridCheck = report.checks.find((c) => c.name === 'agent_canonical_hybrid');
+const executionPathCheck = report.checks.find((c) => c.name === 'execution_path_probes');
 const goldenGateCheck = report.checks.find((c) => c.name === 'golden_gate');
 const toolDemosCheck = report.checks.find((c) => c.name === 'tool_demos');
 
@@ -43,6 +44,8 @@ assert(toolCanonicalCheck?.ok === true, 'tool_demos_canonical check passes');
 assert(toolCanonicalCheck?.detail?.includes('tool demos'), 'tool_demos_canonical detail');
 assert(agentHybridCheck?.ok === true, 'agent_canonical_hybrid check passes');
 assert(agentHybridCheck?.detail?.includes('agent'), 'agent_canonical_hybrid detail');
+assert(executionPathCheck?.ok === true, 'execution_path_probes check passes');
+assert(executionPathCheck?.detail?.includes('execution path probe'), 'execution_path_probes detail');
 assert(goldenGateCheck?.ok === true, 'golden_gate check passes (optional artifact)');
 assert(goldenGateCheck?.detail?.includes('Golden gate') || goldenGateCheck?.detail?.includes('golden-gate'), 'golden_gate detail');
 assert(toolDemosCheck?.ok === true, 'tool_demos check passes');

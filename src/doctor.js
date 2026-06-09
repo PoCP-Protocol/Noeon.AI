@@ -343,6 +343,59 @@ function checkAgentCanonicalHybrid() {
   };
 }
 
+function checkExecutionPathProbes() {
+  const { loadProjectConfig } = require('./core/config');
+  const { resolveExecutionStrategy } = require('./core/general-canonical-mode');
+  const { buildExecutionSummary } = require('./core/action-trace');
+  const { config } = loadProjectConfig({ cwd: process.cwd() });
+  const probes = [
+    { file: 'examples/agent_research.noeon', strategy: 'hybrid-canonical-acts', path: 'hybrid' },
+    { file: 'examples/web_fetch.noeon', strategy: 'tool-snapshot-primary', path: 'snapshot-act' },
+    { file: 'examples/http_demo.noeon', strategy: 'tool-snapshot-primary', path: 'snapshot-act' },
+    { file: 'examples/hello.noeon', strategy: 'cognitive-primary', path: 'cognitive' }
+  ];
+  const failures = [];
+
+  for (const probe of probes) {
+    const resolved = path.join(process.cwd(), probe.file);
+    if (!fs.existsSync(resolved)) {
+      failures.push(`${probe.file} missing`);
+      continue;
+    }
+    try {
+      const { ast } = parseProgram(resolved);
+      const strategy = resolveExecutionStrategy(ast, { projectConfig: config, general_canonical: true });
+      const summary = buildExecutionSummary({
+        executionStrategy: strategy,
+        hybridActExecution: strategy === 'hybrid-canonical-acts',
+        snapshotActExecution: strategy === 'tool-snapshot-primary'
+      });
+      if (summary.schema !== 'noeon.execution.summary/v1') {
+        failures.push(`${probe.file} schema=${summary.schema}`);
+      }
+      if (strategy !== probe.strategy) {
+        failures.push(`${probe.file} strategy=${strategy} expected=${probe.strategy}`);
+      }
+      if (summary.path !== probe.path) {
+        failures.push(`${probe.file} path=${summary.path} expected=${probe.path}`);
+      }
+    } catch (error) {
+      failures.push(`${probe.file}: ${error.message}`);
+    }
+  }
+
+  return {
+    name: 'execution_path_probes',
+    ok: failures.length === 0,
+    detail: failures.length === 0
+      ? `${probes.length} execution path probe(s) match noeon.execution.summary/v1`
+      : failures.join('; '),
+    recommendation: failures.length
+      ? 'Check general-canonical-mode, project config flags, and action-trace buildExecutionSummary'
+      : null
+  };
+}
+
 function checkGoldenGateArtifact() {
   const { buildGoldenGateStatusSummary } = require('./core/golden-gate-status');
   const summary = buildGoldenGateStatusSummary();
@@ -413,6 +466,7 @@ function runDoctor(options = {}) {
     checkSnapshotExecution(),
     checkToolDemosCanonicalActs(),
     checkAgentCanonicalHybrid(),
+    checkExecutionPathProbes(),
     checkGoldenGateArtifact(),
     checkToolDemos(),
     checkCanonicalRoute(),
