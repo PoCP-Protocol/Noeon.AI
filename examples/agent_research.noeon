@@ -9,6 +9,8 @@ AGENT "ResearchAnalyst"
   FLOW
     PERCEIVE source=market_data modality=text
     REASON strategy=comparative depth=3
+    # production (NOEON_ENV=production): append to plugin ACT below:
+    #   version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910
     ACT action=fetch_sources url="https://example.com/research" channel=web plugin=http_call extract=text mock=true
     DECIDE action=write_report threshold=0.75 fallback=escalate
     ACT action=write_report channel=document

@@ -68,5 +68,16 @@ assert(summaryText.includes('execution: hybrid'), 'executionSummary compact line
 assert(!summaryText.includes('driver: snapshot-primary'), 'skips legacy driver when executionSummary present');
 assert(!summaryText.includes('act: canonical.execution.acts · direct'), 'skips legacy act line when executionSummary present');
 
+const pluginActLines = formatArchitectureLines({
+  routeLabel: 'general → cognitive',
+  pluginActs: {
+    total: 1,
+    signed: 0,
+    unsigned: 1,
+    acts: [{ plugin: 'http_call', signed: false, action: 'fetch' }]
+  }
+});
+assert(pluginActLines.join('\n').includes('plugin acts (1): http_call (unsigned)'), 'architecture plugin acts line');
+
 console.log(`\n\x1b[${failed ? '31' : '32'}m${passed} passed, ${failed} failed\x1b[0m\n`);
 process.exit(failed ? 1 : 0);

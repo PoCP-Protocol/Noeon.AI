@@ -48,6 +48,8 @@ const agentView = buildArchitectureViewModel(agentSource, agentFile);
 assert(agentView.canonical?.surface === 'general', 'agent view model canonical surface');
 assert(agentView.canonical?.routeLabel, 'agent view model route label');
 assert(agentView.executionSummary?.path === 'hybrid', 'view model includes static executionSummary');
+assert(agentView.pluginActs?.total === 1, 'view model includes plugin act summary');
+assert(agentView.pluginActs?.unsigned === 1, 'agent_research http_call marked unsigned');
 
 const brain = buildBrainApiPayload(agentSource, agentFile);
 assert(brain.canonical?.surface === 'general', 'brain API payload includes canonical');
@@ -70,6 +72,16 @@ const actHover = getHover(agentSource, agentActLine, actCol, agentFile);
 assert(actHover?.keyword === 'ACT', 'getHover ACT on plugin line');
 assert(actHover?.doc?.includes('Execution path'), 'ACT hover includes execution path');
 assert(actHover?.doc?.includes('hybrid-canonical-acts'), 'ACT hover includes hybrid strategy');
+assert(actHover?.doc?.includes('Production signing'), 'ACT hover includes production signing hint');
+assert(actHover?.doc?.includes('version=0.9.0'), 'ACT hover includes http_call version template');
+
+const signedDemoPath = path.join(__dirname, '../examples/signed_act_demo.noeon');
+const signedSource = fs.readFileSync(signedDemoPath, 'utf8');
+const signedView = buildArchitectureViewModel(signedSource, signedDemoPath);
+assert(signedView.pluginActs?.signed === 1, 'signed_act_demo plugin act marked signed');
+const signedActLine = signedSource.split('\n').findIndex((l) => l.includes('plugin=http_call'));
+const signedActHover = getHover(signedSource, signedActLine, signedSource.split('\n')[signedActLine].indexOf('ACT') + 3, signedDemoPath);
+assert(signedActHover?.doc?.includes('Signed ACT'), 'signed_act_demo ACT hover marks signed');
 
 const agentLine = agentSource.split('\n').findIndex((l) => l.trimStart().startsWith('AGENT'));
 const agentHover = getHover(agentSource, agentLine, 6, agentFile);
@@ -86,9 +98,14 @@ assert(fileExec?.strategy === 'hybrid-canonical-acts', 'getFileExecutionSummary 
 const symbols = getDocumentSymbols(agentSource, agentFile);
 assert(symbols[0]?.kind === 'execution', 'document symbols lead with execution path');
 assert(symbols[0]?.name.includes('hybrid'), 'execution symbol names hybrid path');
+assert(symbols.some((s) => s.kind === 'plugin-act' && s.name.includes('unsigned')), 'document symbol for unsigned plugin act');
 
 const lenses = getCodeLenses(agentSource, agentFile);
 assert(lenses.some((l) => l.title.includes('exec: hybrid')), 'code lens shows file execution path');
+assert(lenses.some((l) => l.title.includes('unsigned ACT')), 'code lens marks unsigned plugin ACT');
+
+const signedLenses = getCodeLenses(signedSource, signedDemoPath);
+assert(signedLenses.some((l) => l.title.includes('signed ACT')), 'code lens marks signed plugin ACT');
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
 process.exit(failed > 0 ? 1 : 0);

@@ -127,7 +127,7 @@ function buildGoldenGateStudioStatus(options = {}) {
     remediatePrograms,
     diffIndex: listGoldenGateDiffs({ root }),
     prCommentPreview: prComment ? prComment.slice(0, 500) : null,
-    hints: buildStudioHints(gate, remediate)
+    hints: buildStudioHints(gate, remediate, { root })
   };
 }
 
@@ -151,7 +151,7 @@ function summarizeCanonicalPath(gate, probes) {
   };
 }
 
-function buildStudioHints(gate, remediate) {
+function buildStudioHints(gate, remediate, options = {}) {
   const hints = [];
   if (!gate) {
     hints.push('Run `npm run gate:golden` to generate golden gate status.');
@@ -181,6 +181,17 @@ function buildStudioHints(gate, remediate) {
   }
   if (gate?.canonicalProbes && gate.canonicalProbes.ok === false) {
     hints.push('Canonical probes failed — run `npm run gate:alpha` or refresh golden gate with live probes.');
+  }
+  const { buildProductionGateStatusSummary } = require('./production-gate-status');
+  const productionGate = buildProductionGateStatusSummary({ root: options.root });
+  if (!productionGate.available) {
+    hints.push('Run `npm run gate:production` to record signed ACT + plugin policy gate.');
+  } else if (!productionGate.ok) {
+    hints.push(
+      `Production gate FAIL · checks ${productionGate.checks?.passed}/${productionGate.checks?.total} — run npm run gate:production`
+    );
+  } else if (productionGate.checks?.total) {
+    hints.push(`Production gate PASS · checks ${productionGate.checks.passed}/${productionGate.checks.total}`);
   }
   return hints;
 }

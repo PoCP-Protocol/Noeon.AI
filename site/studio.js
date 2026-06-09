@@ -157,14 +157,10 @@ function renderGoldenGate(payload) {
   const probes = payload.canonicalProbes;
   const pathSummary = payload.canonicalPath;
   if (probesEl) {
-    if (probes) {
-      const passed = probes.summary?.passed ?? 0;
-      const total = probes.summary?.total ?? probes.programs?.length ?? 0;
-      probesEl.textContent = `${passed}/${total}`;
-      probesEl.className = `value ${probes.ok ? "status-pass" : "status-fail"}`;
-    } else if (pathSummary?.probes?.total != null) {
-      probesEl.textContent = `${pathSummary.probes.passed ?? 0}/${pathSummary.probes.total}`;
-      probesEl.className = `value ${pathSummary.probes.ok ? "status-pass" : "status-fail"}`;
+    const probeLabel = window.NoeonExecutionSummary?.formatCanonicalProbesLabel(probes, pathSummary);
+    if (probeLabel) {
+      probesEl.textContent = probeLabel.text;
+      probesEl.className = `value ${probeLabel.ok ? "status-pass" : probeLabel.ok === false ? "status-fail" : ""}`;
     } else {
       probesEl.textContent = "—";
       probesEl.className = "value";
@@ -172,15 +168,9 @@ function renderGoldenGate(payload) {
   }
 
   if (probeRowsEl) {
-    const probePrograms = probes?.programs || [];
-    probeRowsEl.innerHTML = probePrograms.map((p) => `
-    <tr>
-      <td><code>${p.file}</code></td>
-      <td>${window.NoeonExecutionSummary?.formatExecutionSummary(p.execution) || p.strategy || p.execution?.strategy || "—"}</td>
-      <td>${p.execution?.hybrid || p.hybridCandidate ? "✓" : "—"}</td>
-      <td>${p.execution?.snapshotAct || p.toolCandidate ? "✓" : "—"}</td>
-      <td class="${p.ok ? "status-pass" : "status-fail"}">${p.ok ? "PASS" : "FAIL"}</td>
-    </tr>`).join("") || "<tr><td colspan=\"5\">No probe data — refresh golden gate.</td></tr>";
+    probeRowsEl.innerHTML = window.NoeonExecutionSummary?.renderCanonicalProbeRows(
+      probes?.programs
+    ) || "<tr><td colspan=\"6\">No probe data — refresh golden gate.</td></tr>";
   }
 
   const diffIndex = new Map((payload.diffIndex || []).map((d) => [d.file, d]));
@@ -283,25 +273,24 @@ async function refresh() {
   const status = document.getElementById("studio-status");
   status.textContent = "Loading…";
   try {
-    const [conform, audit, mcp, ecosystem, goldenGate, universalStatus, runtimeStatus] = await Promise.all([
+    const [conform, audit, mcp, ecosystem, goldenGate, universalStatus, runtimeStatus, auditExport] = await Promise.all([
       fetchJson("/api/conform/parity"),
       fetchJson("/api/report/history?limit=20"),
       fetchJson("/api/mcp/status"),
       fetchJson("/api/ecosystem/status"),
       fetchGoldenGate(false),
       fetchJson("/api/universal/status"),
-      fetchJson("/api/status")
+      fetchJson("/api/status"),
+      fetchJson("/api/audit/export?limit=5")
     ]);
     renderParity(conform);
     renderAudit(audit);
+    window.NoeonRuntimePolicy?.renderRuntimePolicy(runtimeStatus, auditExport);
     renderMcp(mcp);
     renderEcosystem(ecosystem);
     renderGoldenGate(goldenGate);
     renderUniversalRadar(universalStatus);
-    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
-      document.getElementById("golden-gate-badge"),
-      runtimeStatus.goldenGate
-    );
+    window.NoeonGoldenGateBadge?.renderEngineeringBadges(runtimeStatus);
     status.textContent = `Updated ${new Date().toLocaleTimeString()}`;
   } catch (e) {
     status.textContent = `Error: ${e.message}`;
@@ -309,16 +298,16 @@ async function refresh() {
 }
 
 document.getElementById("btn-refresh")?.addEventListener("click", refresh);
+document.getElementById("btn-audit-export")?.addEventListener("click", () => {
+  window.NoeonRuntimePolicy?.downloadAuditExport();
+});
 document.getElementById("btn-gg-live")?.addEventListener("click", async () => {
   const ggStatus = document.getElementById("gg-status");
   ggStatus.textContent = "Running gate…";
   try {
     renderGoldenGate(await fetchGoldenGate(true));
     const runtimeStatus = await fetchJson("/api/status");
-    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
-      document.getElementById("golden-gate-badge"),
-      runtimeStatus.goldenGate
-    );
+    window.NoeonGoldenGateBadge?.renderEngineeringBadges(runtimeStatus);
     ggStatus.textContent = `Gate updated ${new Date().toLocaleTimeString()}`;
   } catch (e) {
     ggStatus.textContent = `Error: ${e.message}`;

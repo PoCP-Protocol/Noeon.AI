@@ -162,7 +162,14 @@ async function executeCanonicalProgram(ctx) {
         result.cognitive = conscious.cognitive;
         result.phases.push(PHASE.CONSCIOUSNESS);
       } else {
-        result.cognitive = await kernel.execute(ast, { verbose: options.verbose });
+        result.cognitive = await kernel.execute(ast, {
+          verbose: options.verbose,
+          memory_dir: options.memory_dir,
+          persistMemory: options.persistMemory ?? options.persist_memory,
+          agent_id: options.agent_id || options.agentId,
+          filename: options.filename,
+          checkpoint_resume: options.checkpoint_resume || null
+        });
       }
 
       if (ast.cognition?.context && Object.keys(ast.cognition.context).length) {
@@ -175,6 +182,7 @@ async function executeCanonicalProgram(ctx) {
       result.decisions = result.cognitive.decisions;
       result.beliefs = result.cognitive.beliefs;
       result.stats = result.cognitive.stats;
+      result.worldModel = result.cognitive.worldModel || null;
       if (!result.cognitive.success) result.success = false;
     }
 
@@ -272,8 +280,8 @@ async function executeCanonicalProgram(ctx) {
     );
   }
 
-  const { enforceEpistemicGate, agentRequiresCitation } = require('../runtime/epistemic-gate');
-  if (agentRequiresCitation(ast)) {
+  const { enforceEpistemicGate, agentRequiresCitation, agentRequiresHumanApproval } = require('../runtime/epistemic-gate');
+  if (agentRequiresCitation(ast) || agentRequiresHumanApproval(ast)) {
     const epistemicOutcome = enforceEpistemicGate(result, ast, options);
     if (epistemicOutcome.blocked) {
       result.success = false;

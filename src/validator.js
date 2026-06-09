@@ -744,6 +744,9 @@ function validateComputeBlock(ast, errors, warnings) {
 
   const callNames = new Set();
   for (const call of calls) {
+    if (call?.fn && !call?.step) {
+      continue;
+    }
     if (!call?.step) {
       errors.push('CALL requires step name');
       continue;

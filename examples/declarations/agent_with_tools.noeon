@@ -1,5 +1,5 @@
 profile "general"
-version "1.0.0-alpha"
+version "1.0.0-alpha.1"
 module agent_with_tools
 
 import std.ai

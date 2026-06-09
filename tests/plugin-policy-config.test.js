@@ -82,6 +82,44 @@ assert(envPolicy.allowedPlugins === 'echo', 'NOEON_ALLOWED_PLUGINS env overrides
 if (prevEnv === undefined) delete process.env.NOEON_ALLOWED_PLUGINS;
 else process.env.NOEON_ALLOWED_PLUGINS = prevEnv;
 
+const prodConfig = {
+  ...DEFAULT_CONFIG,
+  environment: 'production',
+  plugins: { ...DEFAULT_CONFIG.plugins }
+};
+const prodPolicy = resolvePluginPolicyFromConfig({}, prodConfig);
+assert(prodPolicy.requireVersion === true, 'production environment defaults requireVersion=true');
+assert(prodPolicy.requireSignature === true, 'production environment defaults requireSignature=true');
+assert(prodPolicy.profile === 'production', 'production profile label');
+
+const devPolicy = resolvePluginPolicyFromConfig({}, { ...DEFAULT_CONFIG, environment: 'development' });
+assert(devPolicy.requireVersion === false, 'development defaults requireVersion=false');
+
+const { buildPluginPolicyStatusSummary } = require('../src/core/config');
+const statusSummary = buildPluginPolicyStatusSummary(prodConfig);
+assert(statusSummary.schema === 'noeon.plugin.policy.status/v1', 'plugin policy status schema');
+assert(statusSummary.requireVersion === true, 'status summary reflects production requireVersion');
+assert(statusSummary.requireSignature === true, 'status summary reflects production requireSignature');
+
+const { verifyPluginBinding, expectedSignature } = require('../src/runtime/plugins/integrity');
+const echoPlugin = { name: 'echo', version: '1.0.0' };
+const signed = verifyPluginBinding({
+  binding: {
+    plugin: 'echo',
+    version: '1.0.0',
+    signature: expectedSignature('echo', '1.0.0', 'noeon-dev-key')
+  },
+  plugin: echoPlugin,
+  context: { pluginPolicy: prodPolicy }
+});
+const unsigned = verifyPluginBinding({
+  binding: { plugin: 'echo', version: '1.0.0' },
+  plugin: echoPlugin,
+  context: { pluginPolicy: prodPolicy }
+});
+assert(signed.ok === true, 'signed echo passes under production policy');
+assert(unsigned.ok === false, 'unsigned echo rejected under production policy');
+
 fs.rmSync(tmpDir, { recursive: true, force: true });
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);

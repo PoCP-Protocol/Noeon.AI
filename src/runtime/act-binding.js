@@ -14,16 +14,18 @@ function buildActBinding(params = {}) {
   if (plugin === 'fs_call') {
     const op = params.op || params.operation ||
       (params.action === 'write' ? 'write' : params.action === 'list' ? 'list' : 'read');
-    return {
-      plugin: 'fs_call',
-      op,
-      path: params.path || params.file || params.target,
-      content: params.content ?? params.body ?? null,
-      mock: params.mock === true || String(params.mock).toLowerCase() === 'true',
-      allow_paths: params.allow_paths,
-      allow_write: params.allow_write,
-      root: params.root
-    };
+  return {
+    plugin: 'fs_call',
+    op,
+    path: params.path || params.file || params.target,
+    content: params.content ?? params.body ?? null,
+    mock: params.mock === true || String(params.mock).toLowerCase() === 'true',
+    allow_paths: params.allow_paths,
+    allow_write: params.allow_write,
+    root: params.root,
+    version: params.version || null,
+    signature: params.signature || null
+  };
   }
 
   const method = params.method ||
@@ -39,7 +41,9 @@ function buildActBinding(params = {}) {
     mock: params.mock === true || String(params.mock).toLowerCase() === 'true',
     timeout_ms: params.timeout_ms != null ? Number(params.timeout_ms) : 5000,
     allow_hosts: params.allow_hosts,
-    allow_private: params.allow_private
+    allow_private: params.allow_private,
+    version: params.version || null,
+    signature: params.signature || null
   };
 }
 
@@ -66,6 +70,8 @@ function actCollaborateParams(act, extra = {}) {
     allow_paths: act.allow_paths,
     allow_write: act.allow_write,
     root: act.root,
+    version: act.version,
+    signature: act.signature,
     safety: act.safety || 'standard',
     ...extra
   };

@@ -23,9 +23,12 @@ function fractionToQuorum(value) {
 }
 
 function applyLearning(compiled, feedback) {
-  const verify = compiled.contract.verify;
-  const slash = compiled.contract.settlement.slash;
-  const learn = compiled.contract.cognition.learn;
+  const verify = compiled.contract?.verify || {
+    quorum: { numerator: 2, denominator: 3 },
+    challengeSeconds: 600
+  };
+  const slash = compiled.contract?.settlement?.slash || { malicious: 90 };
+  const learn = compiled.contract?.cognition?.learn || { signal: 'reward', rate: 0.1 };
 
   const successRate = typeof feedback.successRate === "number" ? feedback.successRate : 0.8;
   const disputeRate = typeof feedback.disputeRate === "number" ? feedback.disputeRate : 0.1;
@@ -35,13 +38,13 @@ function applyLearning(compiled, feedback) {
 
   const currentQuorum = toFraction(verify.quorum);
   const tension = disputeRate + maliciousRate - successRate * 0.2;
-  const delta = clamp(tension * learn.rate, -0.08, 0.1);
+  const delta = clamp(tension * (learn.rate || 0.1), -0.08, 0.1);
   const updatedQuorum = clamp(currentQuorum + delta, 0.5, 0.8);
 
   const latencyPressure = observedLatencyMs > 7000 ? 1.15 : 1;
-  const riskBoost = compiled.contract.cognition.risk.level === "high" ? 1.1 : 1;
+  const riskBoost = compiled.contract?.cognition?.risk?.level === "high" ? 1.1 : 1;
   const challengeSeconds = clamp(
-    Math.round(verify.challengeSeconds * (1 + delta) * latencyPressure * riskBoost),
+    Math.round((verify.challengeSeconds || 600) * (1 + delta) * latencyPressure * riskBoost),
     120,
     3600
   );

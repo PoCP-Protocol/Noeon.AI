@@ -9,6 +9,14 @@ const { mergeExecutionIntoCanonical } = require('./noeon-unified');
 const { hydrateAstFromCanonical, setGovernanceWinnerOnContext } = require('./canonical-hydrate');
 const { attachCognitiveBridge, enrichBridgeWithFlowPreview } = require('./canonical-cognitive-bridge');
 const { buildCanonicalReport, appendCanonicalAudit } = require('./canonical-report');
+const {
+  buildExecutionTranscript,
+  saveExecutionTranscript
+} = require('./execution-transcript');
+const {
+  buildExecutionCheckpoint,
+  saveExecutionCheckpoint
+} = require('./execution-checkpoint');
 const { attachSelfIntrospection, refreshSelfIntrospection } = require('./self-introspection');
 const { runPostRunSelfImprove } = require('./self-improve');
 const { runUniversalMeshRuntime } = require('../runtime/universal-mesh-runtime');
@@ -100,7 +108,19 @@ function finalizeCanonicalResult(result, ast, prepared, options = {}) {
 
   if (options.canonical_audit !== false) {
     try {
-      result.canonicalAuditPath = appendCanonicalAudit(report, options);
+      const transcript = buildExecutionTranscript(report, result, ast, options);
+      const saved = saveExecutionTranscript(transcript, options);
+      result.executionTranscript = saved;
+      report.transcriptMeta = saved;
+      try {
+        const checkpoint = buildExecutionCheckpoint(report, result, ast, options, saved);
+        const savedCp = saveExecutionCheckpoint(checkpoint, options);
+        result.executionCheckpoint = savedCp;
+        report.checkpointMeta = savedCp;
+      } catch {
+        // non-fatal
+      }
+      result.canonicalAuditPath = appendCanonicalAudit(report, { ...options, transcript: saved });
     } catch {
       // non-fatal
     }

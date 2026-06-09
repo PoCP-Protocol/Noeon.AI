@@ -559,6 +559,8 @@ function getRuntimeStatus() {
   const { isGeneralCanonicalEnabled } = require('../core/general-canonical-mode');
   const { buildGoldenGateStatusSummary } = require('../core/golden-gate-status');
   const { buildExecutionPathStatusSummary } = require('../core/execution-path-status');
+  const { buildProductionGateStatusSummary } = require('../core/production-gate-status');
+  const { buildPluginPolicyStatusSummary } = require('../core/config');
   return {
     ...engineering,
     version: RUNTIME_VERSION,
@@ -568,7 +570,9 @@ function getRuntimeStatus() {
     generalCanonicalAgentsAuto: config.cognition?.general_canonical_agents === true,
     generalCanonicalToolsEnv: process.env.NOEON_GENERAL_CANONICAL_TOOLS != null,
     goldenGate: buildGoldenGateStatusSummary(),
+    productionGate: buildProductionGateStatusSummary(),
     executionPath: buildExecutionPathStatusSummary(),
+    pluginPolicy: buildPluginPolicyStatusSummary(config),
     kernel: kernel.getStatus(),
     config: { path: configPath, environment: config.environment },
     llm: {
@@ -592,8 +596,20 @@ function formatRuntimeStatusText(status = getRuntimeStatus()) {
   } else {
     lines.push('Golden Gate: — (run npm run gate:golden)');
   }
+  const { formatProductionGateStatusLine } = require('../core/production-gate-status');
+  lines.push(formatProductionGateStatusLine(status.productionGate));
   const { formatExecutionPathStatusLine } = require('../core/execution-path-status');
   lines.push(formatExecutionPathStatusLine(status.executionPath));
+  const pp = status.pluginPolicy;
+  if (pp?.schema) {
+    const flags = [
+      pp.requireVersion ? 'version=required' : null,
+      pp.requireSignature ? 'signature=required' : null
+    ].filter(Boolean);
+    lines.push(
+      `Plugin policy: ${pp.allowedCount} allowed · ${pp.profile}${flags.length ? ` · ${flags.join(' · ')}` : ''}`
+    );
+  }
   lines.push(`LLM: ${status.llm?.mode || 'auto'} · configured=${status.llm?.configured ? 'yes' : 'no'}`);
   return lines.join('\n');
 }

@@ -20,17 +20,31 @@ const ALPHA_GATE_TESTS = [
   'tests/compile-presentation.test.js',
   'tests/cli-compile-canonical.test.js',
   'tests/cli-run-trace.test.js',
+  'tests/cli-pipeline-json.test.js',
   'tests/architecture-view.test.js',
+  'tests/act-binding-status.test.js',
   'tests/doctor-canonical.test.js',
   'tests/plugin-policy-config.test.js',
   'tests/audit-export.test.js',
+  'tests/audit-rotation.test.js',
+  'tests/production-gate.test.js',
+  'tests/production-gate-status.test.js',
+  'tests/signed-act-general.test.js',
   'tests/doctor-gate-script.test.js',
   'tests/lsp-canonical.test.js',
   'tests/lsp-stdlib-hover.test.js',
   'tests/playground-examples.test.js',
   'tests/examples-p0.test.js',
   'tests/surface-freeze.test.js',
-  'tests/unified-vm.test.js'
+  'tests/unified-vm.test.js',
+  'tests/cognitive-evidence.test.js',
+  'tests/world-model-runtime.test.js',
+  'tests/cognitive-integration.test.js',
+  'tests/canonical-replay.test.js',
+  'tests/cognitive-effect.test.js',
+  'tests/dual-view.test.js',
+  'tests/agent-surface.test.js',
+  'tests/execution-checkpoint.test.js'
 ];
 
 const TEST_SUITES = Object.freeze({
@@ -44,6 +58,7 @@ const TEST_SUITES = Object.freeze({
 const GATE_COMMANDS = Object.freeze([
   'gate:alpha',
   'gate:doctor',
+  'gate:production',
   'gate:strict',
   'gate:golden'
 ]);

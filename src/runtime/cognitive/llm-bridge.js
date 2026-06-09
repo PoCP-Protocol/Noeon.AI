@@ -14,12 +14,54 @@
 const https = require("https");
 const http = require("http");
 
+// Per-provider default endpoint + model. The Anthropic base intentionally has
+// no path suffix — _buildAnthropicRequest appends /v1/messages.
+const PROVIDER_DEFAULTS = {
+  openai: { apiBase: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+  anthropic: { apiBase: "https://api.anthropic.com", model: "claude-opus-4-8" },
+  ollama: { apiBase: "http://localhost:11434/v1", model: "llama3" }
+};
+
+// Infer the provider from an explicit base URL or model name when not set.
+function detectProvider(apiBase, model) {
+  const b = String(apiBase || "").toLowerCase();
+  if (b.includes("anthropic")) return "anthropic";
+  if (b.includes("11434") || b.includes("ollama")) return "ollama";
+  const m = String(model || "").toLowerCase();
+  if (m.startsWith("claude")) return "anthropic";
+  if (m.startsWith("llama") || m.startsWith("qwen") || m.startsWith("mistral")) return "ollama";
+  return "openai";
+}
+
 class LLMBridge {
   constructor(config = {}) {
-    this.apiBase = config.apiBase || process.env.OPENAI_API_BASE || "https://api.openai.com/v1";
-    this.apiKey = config.apiKey || process.env.NOEON_API_KEY || process.env.OPENAI_API_KEY || "";
-    this.defaultModel = config.model || process.env.NOEON_LLM_MODEL || "gpt-4o-mini";
+    this.apiKey = config.apiKey || process.env.NOEON_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || "";
+    // Bearer auth-token credential. cc-switch / the IBM proxy authenticate with
+    // ANTHROPIC_AUTH_TOKEN sent as `Authorization: Bearer`, not `x-api-key`.
+    this.authToken = config.authToken || process.env.NOEON_AUTH_TOKEN || process.env.ANTHROPIC_AUTH_TOKEN || "";
+    const configuredModel = config.model || process.env.NOEON_LLM_MODEL || "";
     this.mode = config.mode || process.env.NOEON_LLM_MODE || "auto";
+
+    // Provider selection: explicit > detected from base URL / model name >
+    // inferred from which provider's env vars are present.
+    //   openai    → OpenAI-compatible /chat/completions (also DeepSeek/Zhipu/Moonshot/…)
+    //   anthropic → Claude Messages API /v1/messages (incl. cc-switch / IBM proxy)
+    //   ollama    → local OpenAI-compatible server (no API key required)
+    const baseHint = config.apiBase || process.env.OPENAI_API_BASE || process.env.ANTHROPIC_BASE_URL;
+    let provider = config.provider || process.env.NOEON_LLM_PROVIDER || detectProvider(baseHint, configuredModel);
+    if (provider === "openai" && !process.env.OPENAI_API_BASE && !process.env.OPENAI_API_KEY &&
+        (process.env.ANTHROPIC_BASE_URL || process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_API_KEY)) {
+      provider = "anthropic"; // only Anthropic-style env is configured
+    }
+    this.provider = String(provider).toLowerCase();
+
+    const defaults = PROVIDER_DEFAULTS[this.provider] || PROVIDER_DEFAULTS.openai;
+    this.apiBase = config.apiBase || (this.provider === "anthropic"
+      ? (process.env.ANTHROPIC_BASE_URL || defaults.apiBase)
+      : (process.env.OPENAI_API_BASE || defaults.apiBase));
+    this.defaultModel = configuredModel ||
+      (this.provider === "anthropic" && process.env.ANTHROPIC_MODEL) || defaults.model;
+    this.anthropicVersion = config.anthropicVersion || process.env.ANTHROPIC_VERSION || "2023-06-01";
     this.temperature = config.temperature ?? 0.7;
     this.maxTokens = config.maxTokens || 2048;
     this.timeout = config.timeout || 30000;
@@ -40,8 +82,10 @@ class LLMBridge {
 
   isConfigured() {
     if (this.mode === "off" || this.mode === "mock") return false;
-    if (this.mode === "live") return Boolean(this.apiKey);
-    return Boolean(this.apiKey);
+    // Local servers (Ollama et al.) expose an OpenAI-compatible endpoint with
+    // no authentication — they are "configured" as soon as they're selected.
+    if (this.provider === "ollama" || this.provider === "local") return true;
+    return Boolean(this.apiKey || this.authToken);
   }
 
   /**
@@ -231,33 +275,33 @@ class LLMBridge {
     const temperature = options.temperature ?? this.temperature;
     const maxTokens = options.maxTokens || this.maxTokens;
 
-    const body = JSON.stringify({
-      model,
-      messages,
-      temperature,
-      max_tokens: maxTokens
-    });
-
     try {
-      const url = new URL(`${this.apiBase}/chat/completions`);
-      const result = await this._httpRequest(url, body);
+      // Build a provider-specific request; each builder returns a parse()
+      // that normalizes the response into a common { content, model, usage,
+      // finishReason } shape so the rest of the bridge is provider-agnostic.
+      const req = this.provider === "anthropic"
+        ? this._buildAnthropicRequest(messages, { model, maxTokens })
+        : this._buildOpenAIRequest(messages, { model, temperature, maxTokens });
+
+      const result = await this._httpRequest(req.url, req.body, req.headers);
       const parsed = JSON.parse(result.body);
 
       if (parsed.error) {
-        throw new Error(parsed.error.message || "API error");
+        throw new Error(parsed.error.message || parsed.error.type || "API error");
       }
 
       const latency = Date.now() - start;
       this.stats.successCalls++;
-      this.stats.totalTokens += (parsed.usage?.total_tokens || 0);
+      const norm = req.parse(parsed);
+      this.stats.totalTokens += (norm.usage?.total_tokens || 0);
       this.stats.avgLatency = (this.stats.avgLatency * (this.stats.successCalls - 1) + latency) / this.stats.successCalls;
 
       const response = {
-        content: parsed.choices[0]?.message?.content || "",
-        model: parsed.model || model,
-        usage: parsed.usage,
+        content: norm.content,
+        model: norm.model || model,
+        usage: norm.usage,
         latency,
-        finishReason: parsed.choices[0]?.finish_reason
+        finishReason: norm.finishReason
       };
 
       this.history.push({
@@ -286,37 +330,91 @@ class LLMBridge {
     }
   }
 
-  _httpRequest(url, body) {
-    return new Promise((resolve, reject) => {
-      const protocol = url.protocol === "https:" ? https : http;
-      const options = {
-        hostname: url.hostname,
-        port: url.port || (url.protocol === "https:" ? 443 : 80),
-        path: url.pathname + url.search,
+  async _httpRequest(url, body, headers = null) {
+    // Use fetch/undici rather than the legacy http/https modules. Local proxies
+    // (cc-switch / IBM gateway) can emit responses the legacy llhttp parser
+    // rejects (e.g. duplicate Content-Length); undici tolerates them — it's how
+    // Claude Code itself reaches the same proxy.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeout);
+    try {
+      const res = await fetch(typeof url === "string" ? url : url.href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Length": Buffer.byteLength(body)
+          // Default to OpenAI-style bearer auth; provider builders override.
+          ...(headers || { "Authorization": `Bearer ${this.apiKey}` })
         },
-        timeout: this.timeout
-      };
-
-      const req = protocol.request(options, (res) => {
-        let data = "";
-        res.on("data", chunk => data += chunk);
-        res.on("end", () => resolve({ body: data, status: res.statusCode }));
+        body,
+        signal: controller.signal
       });
+      const text = await res.text();
+      return { body: text, status: res.status };
+    } catch (error) {
+      throw new Error(error.name === "AbortError" ? "Request timeout" : (error.message || String(error)));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 
-      req.on("error", reject);
-      req.on("timeout", () => {
-        req.destroy();
-        reject(new Error("Request timeout"));
-      });
+  /** OpenAI-compatible request (also Ollama and domestic OpenAI-style endpoints). */
+  _buildOpenAIRequest(messages, { model, temperature, maxTokens }) {
+    const base = this.apiBase.replace(/\/$/, "");
+    return {
+      url: new URL(`${base}/chat/completions`),
+      headers: { "Authorization": `Bearer ${this.apiKey}` },
+      body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens }),
+      parse: (p) => ({
+        content: p.choices?.[0]?.message?.content || "",
+        model: p.model,
+        usage: p.usage,
+        finishReason: p.choices?.[0]?.finish_reason
+      })
+    };
+  }
 
-      req.write(body);
-      req.end();
-    });
+  /**
+   * Anthropic Claude Messages API (/v1/messages). Differs from OpenAI:
+   * x-api-key + anthropic-version headers, system is a top-level string
+   * (not a message), max_tokens is required, and the response is a content
+   * block array. temperature is omitted — Opus 4.8/4.7 reject it.
+   */
+  _buildAnthropicRequest(messages, { model, maxTokens }) {
+    const base = this.apiBase.replace(/\/$/, "");
+    // Hoist any system-role messages into the top-level `system` field.
+    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+    const convo = messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ role: m.role, content: String(m.content) }));
+    if (convo.length === 0) convo.push({ role: "user", content: system || "Proceed." });
+
+    const payload = { model, max_tokens: maxTokens, messages: convo };
+    if (system) payload.system = system;
+
+    // Prefer Bearer auth when an auth token is configured (cc-switch / IBM
+    // proxy); otherwise use x-api-key for a direct Anthropic API key. Never
+    // send both — the API rejects requests carrying both credentials.
+    const authHeaders = this.authToken
+      ? { "Authorization": `Bearer ${this.authToken}` }
+      : { "x-api-key": this.apiKey };
+
+    return {
+      url: new URL(`${base}/v1/messages`),
+      headers: { ...authHeaders, "anthropic-version": this.anthropicVersion },
+      body: JSON.stringify(payload),
+      parse: (p) => ({
+        content: Array.isArray(p.content)
+          ? p.content.filter((b) => b.type === "text").map((b) => b.text).join("")
+          : "",
+        model: p.model,
+        // Normalize Anthropic usage into the OpenAI-shaped field the stats expect.
+        usage: p.usage
+          ? { total_tokens: (p.usage.input_tokens || 0) + (p.usage.output_tokens || 0),
+              prompt_tokens: p.usage.input_tokens, completion_tokens: p.usage.output_tokens }
+          : null,
+        finishReason: p.stop_reason
+      })
+    };
   }
 
   _buildReasoningPrompt(query, context) {

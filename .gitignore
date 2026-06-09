@@ -2,6 +2,9 @@ node_modules/
 *.log
 .DS_Store
 
+# Local runtime / memory (not source)
+.noeon/
+
 # Test / runtime artifacts (not source)
 artifacts/ai-self-eval/
 artifacts/ai-creator/
@@ -16,6 +19,7 @@ artifacts/canonical-parity-mem/
 artifacts/field-memory/
 artifacts/fusion-graph-mem/
 artifacts/golden-gate/
+artifacts/production-gate/
 artifacts/human-gate-test/
 artifacts/playground-human-gate/
 artifacts/release-gate/
@@ -24,9 +28,6 @@ artifacts/field-memory-test-*/
 
 # Debug scratch
 tmp_debug_*
-
-# Local patch archives
-patches/
 
 # Editor
 .vscode/

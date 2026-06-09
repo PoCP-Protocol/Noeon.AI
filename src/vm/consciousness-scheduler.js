@@ -131,8 +131,13 @@ async function runConsciousnessPhase(ast, kernel, options = {}) {
 
   const cognitive = await kernel.execute(ast, {
     verbose: options.verbose,
-    consciousness_state: stream.getState()
-  });
+    consciousness_state: stream.getState(),
+          memory_dir: options.memory_dir,
+          persistMemory: options.persistMemory ?? options.persist_memory,
+          agent_id: options.agent_id || options.agentId,
+          filename: options.filename,
+          checkpoint_resume: options.checkpoint_resume || null
+        });
 
   return {
     scheduler: 'consciousness',

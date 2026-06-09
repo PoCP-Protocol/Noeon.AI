@@ -35,6 +35,8 @@ function main() {
 
   run(process.execPath, [npmCli, "run", "conformance"], env);
 
+  run(process.execPath, [path.join(__dirname, "production-gate.js")], env);
+
   // Write strict-gate simulation outputs to a temp directory so local runs
   // do not dirty tracked artifacts.
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "noeon-strict-gate-"));

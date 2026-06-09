@@ -61,7 +61,7 @@ console.log('\n\x1b[36m═══ Epoch 6 — Studio Golden Gate ═══\x1b[0m
   const afterRefresh = buildGoldenGateStudioStatus({ root });
   assert(afterRefresh.gate != null, 'gate populated after refresh');
   assert(afterRefresh.goldenGateExecution != null, 'goldenGateExecution on studio status after refresh');
-  assert(afterRefresh.canonicalPath?.probes?.total === 5, 'five canonical probes tracked');
+  assert(afterRefresh.canonicalPath?.probes?.total === 6, 'six canonical probes tracked');
   const withExecution = (afterRefresh.programs || []).filter((p) => p.execution?.strategy);
   assert(withExecution.length > 0, 'AI path programs include execution strategy after refresh');
 
@@ -83,7 +83,7 @@ console.log('\n\x1b[36m═══ Epoch 6 — Studio Golden Gate ═══\x1b[0m
   const statusPayload = statusMock.get().payload;
   assert(statusMock.get().status === 200, 'GET /api/golden-gate/status 200');
   assert(statusPayload.schema === STUDIO_GOLDEN_SCHEMA, 'API status schema');
-  assert(statusPayload.canonicalProbePrograms?.length === 5, 'API exposes five probe programs');
+  assert(statusPayload.canonicalProbePrograms?.length === 6, 'API exposes six probe programs');
   assert(statusPayload.goldenGateExecution != null, 'studio status includes goldenGateExecution');
 
   const remediateMock = mockRes();

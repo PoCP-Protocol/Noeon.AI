@@ -11,6 +11,7 @@ const { parseFromSource, validateProgram, compileProgram, runProgram, explainPro
 const { loadCuratedExamples, loadAllExamples } = require('./core/playground-examples');
 const { resolveCompilePresentation, resolveGeneralCanonical } = require('./core/general-canonical-mode');
 const { loadProjectConfig } = require('./core/config');
+const { buildDualView, extractDeclaredSteps } = require('./core/dual-view');
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -155,7 +156,8 @@ async function handlePlaygroundApi(req, res, pathname) {
         canonicalIr: compiled.canonicalIr || ast.general?.canonicalIr || null,
         compileMode: compiled.compileMode || 'cognitive-primary',
         primaryIr: compiled.primaryIr || 'cognitive',
-        warnings: compiled.warnings || []
+        warnings: compiled.warnings || [],
+        declaredSteps: extractDeclaredSteps(ast)
       });
     } catch (e) {
       sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
@@ -185,11 +187,10 @@ async function handlePlaygroundApi(req, res, pathname) {
         const ast = parseBodyAst(body);
         runOpts.general_canonical = resolveRequestCanonical(ast, body);
         const result = await runProgram(ast, runOpts);
-        const { extractActionTrace, buildExecutionSummary } = require('./core/action-trace');
         sendJson(res, 200, {
           ...result,
-          actionTrace: extractActionTrace(result),
-          executionSummary: buildExecutionSummary(result)
+          actionTrace: require('./core/action-trace').extractActionTrace(result),
+          executionSummary: require('./core/action-trace').buildExecutionSummary(result)
         });
         return true;
       }
@@ -213,32 +214,44 @@ async function handlePlaygroundApi(req, res, pathname) {
       };
       const compiled = out.ast ? compileProgram(out.ast, 'ir', compileOpts) : null;
       const presentation = compiled || resolveCompilePresentation(out.ast, null, compileOpts);
+      const canonicalIr = presentation.canonicalIr || out.ast?.general?.canonicalIr || out.canonical || null;
+      const { buildExecutionSummary } = require('./core/action-trace');
+      const report = out.report || out.result?.report || pipelineJson.report || null;
+      const dualView = report?.dualView || buildDualView(out.ast, out.result || {}, report);
       const payload = attachArchitecturePayload({
+        ...pipelineJson,
         ...(out.result || {}),
-        report: out.report || out.result?.report || null,
+        report,
         unifiedReport: out.report || out.result?.unifiedReport || null,
-        architecture: out.architecture,
-        stack: out.stack,
+        architecture: out.architecture ?? pipelineJson.architecture,
+        stack: out.stack ?? pipelineJson.stack,
         route: out.route,
-        routeLabel: out.routeLabel,
+        routeLabel: out.routeLabel ?? pipelineJson.routeLabel,
         cognitiveCycle: out.cognitiveCycle,
-        actionTrace: out.actionTrace || (out.result ? require('./core/action-trace').extractActionTrace(out.result) : null),
+        actionTrace: out.actionTrace
+          || pipelineJson.actionTrace
+          || (out.result ? require('./core/action-trace').extractActionTrace(out.result) : null),
+        executionSummary: pipelineJson.executionSummary
+          ?? buildExecutionSummary(out.result || {}),
+        pluginActs: pipelineJson.pluginActs,
         cognitiveIr: compiled?.program?.toJSON?.() || null,
-        canonicalIr: presentation.canonicalIr || out.ast?.general?.canonicalIr || out.canonical || null,
+        canonicalIr,
         compileMode: out.result?.compileMode || presentation.compileMode || 'cognitive-primary',
         primaryIr: out.result?.primaryIr || presentation.primaryIr || 'cognitive',
-        canonicalPrimary: out.result?.canonicalPrimary || false,
-        canonicalSource: out.result?.canonicalSource || null,
-        executionDriver: out.result?.executionDriver || out.prep?.executionDriver || null,
-        snapshotActCount: out.result?.snapshotActCount ?? out.prep?.snapshotActCount ?? null,
-        actDriver: out.result?.actDriver || null,
+        canonicalPrimary: out.result?.canonicalPrimary ?? pipelineJson.canonicalPrimary ?? false,
+        canonicalSource: out.result?.canonicalSource || pipelineJson.canonicalSource || null,
+        executionDriver: out.result?.executionDriver || out.prep?.executionDriver || pipelineJson.executionDriver || null,
+        snapshotActCount: out.result?.snapshotActCount ?? out.prep?.snapshotActCount ?? pipelineJson.snapshotActCount ?? null,
+        actDriver: out.result?.actDriver || pipelineJson.actDriver || null,
         snapshotActExecution: out.result?.snapshotActExecution === true,
         hybridActExecution: out.result?.hybridActExecution === true,
-        executionStrategy: out.result?.executionStrategy || null,
-        executionPhases: out.result?.phases || [],
-        executionSummary: require('./core/action-trace').buildExecutionSummary(out.result || {}),
+        executionStrategy: out.result?.executionStrategy || pipelineJson.executionSummary?.strategy || null,
+        executionPhases: out.result?.phases || pipelineJson.phases || [],
         era: require('./core/release-version').NOEON_ERA,
         pipeline: true,
+        dualView,
+        agentSurface: report?.agentSurface || null,
+        checkpointMeta: report?.checkpointMeta || out.result?.executionCheckpoint || null,
         ...(brainView
           ? {
               code_lenses: brainView.code_lenses,
@@ -666,21 +679,6 @@ async function handlePlaygroundApi(req, res, pathname) {
         limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : 30
       });
       sendJson(res, 200, report);
-    } catch (e) {
-      sendJson(res, 400, { error: e.message });
-    }
-    return true;
-  }
-
-  if (pathname === '/api/audit/export' && req.method === 'GET') {
-    try {
-      const { exportCanonicalAudit } = require('./core/canonical-report');
-      const url = new URL(req.url || '/api/audit/export', 'http://localhost');
-      const bundle = exportCanonicalAudit({
-        dir: url.searchParams.get('dir') || undefined,
-        limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : undefined
-      });
-      sendJson(res, 200, bundle);
     } catch (e) {
       sendJson(res, 400, { error: e.message });
     }

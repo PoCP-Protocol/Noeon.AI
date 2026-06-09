@@ -9,6 +9,8 @@ AGENT "RiskReviewer"
   FLOW
     PERCEIVE source=payment_request modality=structured
     REASON strategy=risk_analysis depth=2
+    # production (NOEON_ENV=production): append to plugin ACT below:
+    #   version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910
     ACT action=fetch_fraud_signals url="https://example.com/risk/signals" channel=web plugin=http_call mock=true
     DECIDE action=approve threshold=0.80 fallback=escalate
     ACT action=process_payment channel=ledger

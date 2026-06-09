@@ -1,0 +1,8 @@
+PROFILE "general"
+VERSION "1.0.0-alpha"
+
+AGENT "SignedFetcher"
+  GOAL "Demonstrate signed http_call ACT for production plugin policy"
+  FLOW
+    ACT action=fetch url="https://example.com/signed" channel=web plugin=http_call version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910 mock=true
+    REFLECT

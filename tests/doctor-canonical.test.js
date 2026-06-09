@@ -49,10 +49,20 @@ assert(executionPathCheck?.ok === true, 'execution_path_probes check passes');
 assert(executionPathCheck?.detail?.includes('execution path probe'), 'execution_path_probes detail');
 assert(goldenGateCheck?.ok === true, 'golden_gate check passes (optional artifact)');
 assert(goldenGateCheck?.detail?.includes('Golden gate') || goldenGateCheck?.detail?.includes('golden-gate'), 'golden_gate detail');
+const productionGateCheck = report.checks.find((c) => c.name === 'production_gate');
+assert(productionGateCheck?.ok === true, 'production_gate check passes (optional artifact)');
+assert(
+  productionGateCheck?.detail?.includes('Production gate') || productionGateCheck?.detail?.includes('production-gate'),
+  'production_gate detail'
+);
 assert(toolDemosCheck?.ok === true, 'tool_demos check passes');
 assert(toolDemosCheck?.detail?.includes('tool demos'), 'tool_demos detail mentions tool demos');
 assert(pluginPolicyCheck?.ok === true, 'plugin_policy_defaults check passes');
 assert(pluginPolicyCheck?.detail?.includes('plugin'), 'plugin_policy_defaults detail mentions plugins');
+
+const pluginProdCheck = report.checks.find((c) => c.name === 'plugin_policy_production');
+assert(pluginProdCheck?.ok === true, 'plugin_policy_production passes in development');
+assert(pluginProdCheck?.detail?.includes('development profile'), 'plugin_policy_production development detail');
 
 process.env.NOEON_LEGACY_PROFILE = '1';
 const legacyReport = runDoctor({ file: 'examples/hello.noeon' });

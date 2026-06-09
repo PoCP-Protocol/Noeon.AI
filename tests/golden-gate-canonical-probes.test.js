@@ -20,7 +20,11 @@ console.log('\n\x1b[36m═══ Golden Gate Canonical Probes ═══\x1b[0m\n
 (async () => {
   const root = path.join(__dirname, '..');
 
-  assert(DEFAULT_CANONICAL_PROBE_PROGRAMS.length === 5, 'five default probe programs');
+  assert(DEFAULT_CANONICAL_PROBE_PROGRAMS.length === 6, 'six default probe programs');
+  assert(
+    DEFAULT_CANONICAL_PROBE_PROGRAMS.includes('examples/signed_act_demo.noeon'),
+    'signed_act_demo included in probes'
+  );
   assert(
     DEFAULT_CANONICAL_PROBE_PROGRAMS.includes('examples/agent_research.noeon'),
     'agent_research included in probes'
@@ -29,7 +33,7 @@ console.log('\n\x1b[36m═══ Golden Gate Canonical Probes ═══\x1b[0m\n
   const staticProbes = await runCanonicalProbes({ root, probe_only: true });
   assert(staticProbes.schema === 'noeon.canonical.probes/v1', 'probe schema');
   assert(staticProbes.ok === true, 'static probe_only passes');
-  assert(staticProbes.programs.length === 5, 'static probe program count');
+  assert(staticProbes.programs.length === 6, 'static probe program count');
 
   const agentProbe = staticProbes.programs.find((p) => p.file.endsWith('agent_research.noeon'));
   assert(agentProbe?.hybridCandidate === true, 'agent_research hybrid candidate');
@@ -38,6 +42,12 @@ console.log('\n\x1b[36m═══ Golden Gate Canonical Probes ═══\x1b[0m\n
   const liveProbes = await runCanonicalProbes({ root });
   assert(liveProbes.ok === true, 'live canonical probes pass');
   assert(liveProbes.summary.passed === liveProbes.summary.total, 'all live probes passed');
+
+  const liveAgent = liveProbes.programs.find((p) => p.file.endsWith('agent_research.noeon'));
+  assert(liveAgent?.execution?.pluginActs?.unsigned === 1, 'live agent_research probe includes unsigned pluginActs');
+
+  const signedProbe = liveProbes.programs.find((p) => p.file.endsWith('signed_act_demo.noeon'));
+  assert(signedProbe?.execution?.pluginActs?.signed === 1, 'live signed_act_demo probe includes signed pluginActs');
 
   const status = buildGoldenGateStudioStatus({ root });
   assert(Array.isArray(status.canonicalProbePrograms), 'studio status lists probe programs');

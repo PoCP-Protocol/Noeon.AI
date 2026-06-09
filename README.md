@@ -62,6 +62,10 @@ node src/cli.js playground
 node src/cli.js doctor
 npm run gate:alpha
 npm run gate:doctor   # explicit execution_path_probes validation
+npm run gate:production  # NOEON_ENV=production plugin policy simulation
+
+# Signed ACT demo (production plugin policy)
+node src/cli.js run examples/signed_act_demo.noeon --trace
 ```
 
 Published package (when available):
@@ -343,7 +347,10 @@ Mock mode (default in demos): `mock=true` or `NOEON_HTTP_MOCK=1`. Run output inc
 ## Test Results
 
 ```
-Alpha gate (CI):       npm run gate:alpha     # 25 checks — hybrid + golden gate + LSP execution
+Alpha gate (CI):       npm run gate:alpha     # 31 checks — hybrid + golden gate + LSP execution
+Doctor gate:           npm run gate:doctor    # execution_path_probes + plugin policy
+Production gate:       npm run gate:production # NOEON_ENV=production profile simulation
+Strict gate:           npm run gate:strict    # conformance + production + signed plugin simulate
 Doctor gate (CI):      npm run gate:doctor    # noeon doctor + execution_path_probes
 Product suite:         npm run test:product
 Core runtime:          npm run test:core

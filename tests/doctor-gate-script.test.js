@@ -37,6 +37,11 @@ assert(
   parsed?.checks?.some((check) => check.name === 'execution_path_probes' && check.ok === true),
   'JSON report includes passing execution_path_probes'
 );
+assert(
+  parsed?.checks?.some((check) => check.name === 'production_gate' && check.ok === true),
+  'JSON report includes passing production_gate'
+);
+assert(parsed?.productionGateArtifact != null, 'JSON report includes productionGateArtifact summary');
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}Doctor gate script: ${passed}/${passed + failed} passed\x1b[0m\n`);
 process.exit(failed > 0 ? 1 : 0);

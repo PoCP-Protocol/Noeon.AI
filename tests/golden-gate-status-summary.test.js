@@ -50,16 +50,26 @@ assert(statusText.includes('Execution path:'), 'formatRuntimeStatusText includes
 
 const execPath = buildExecutionPathStatusSummary({ root: path.join(__dirname, '..') });
 assert(execPath.schema === 'noeon.execution.path.status/v1', 'execution path schema');
-assert(execPath.tracked === 4, 'execution path tracks 4 probes');
-assert(execPath.hybrid === 1, 'execution path counts hybrid');
+assert(execPath.tracked === 5, 'execution path tracks 5 probes');
+assert(execPath.hybrid === 2, 'execution path counts hybrid');
 assert(execPath.snapshotAct === 2, 'execution path counts snapshot-act');
 assert(execPath.cognitive === 1, 'execution path counts cognitive');
-assert(execPath.probes.length === 4, 'execution path includes probe list');
+assert(execPath.pluginActs?.total === 2, 'execution path aggregates plugin acts');
+assert(execPath.pluginActs?.signed === 1, 'execution path counts signed acts');
+assert(execPath.probes.length === 5, 'execution path includes probe list');
 assert(execPath.probes.every((p) => p.ok), 'all execution path probes ok');
-assert(status.executionPath?.schema === 'noeon.execution.path.status/v1', 'getRuntimeStatus includes executionPath');
 assert(
-  formatExecutionPathStatusLine(execPath) === 'Execution path: hybrid=1 snapshot=2 cognitive=1 (4 tracked)',
-  'formatExecutionPathStatusLine compact'
+  execPath.probes.find((p) => p.file.endsWith('signed_act_demo.noeon'))?.pluginActs?.signed === 1,
+  'signed_act_demo probe includes signed pluginActs'
+);
+assert(status.executionPath?.schema === 'noeon.execution.path.status/v1', 'getRuntimeStatus includes executionPath');
+assert(status.pluginPolicy?.schema === 'noeon.plugin.policy.status/v1', 'getRuntimeStatus includes pluginPolicy');
+assert(statusText.includes('Plugin policy:'), 'formatRuntimeStatusText includes plugin policy line');
+assert(status.productionGate?.schema === 'noeon.production.gate.status/v1' || status.productionGate?.available === false, 'getRuntimeStatus includes productionGate');
+assert(statusText.includes('Production gate:'), 'formatRuntimeStatusText includes production gate line');
+assert(
+  formatExecutionPathStatusLine(execPath).startsWith('Execution path: hybrid=2 snapshot=2 cognitive=1 (5 tracked) · acts 1/2 signed'),
+  'formatExecutionPathStatusLine compact with plugin acts'
 );
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);

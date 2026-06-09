@@ -1,11 +1,12 @@
 function resolveAdaptiveProfile(compiled, feedback = {}) {
   const riskLevel = compiled.contract?.cognition?.risk?.level || "medium";
+  const verifyMode = compiled.contract?.verify?.mode || "auto";
 
   const base = {
     riskLevel,
     profileName: "balanced",
     maxPlanSteps: null,
-    verificationMode: compiled.contract.verify.mode,
+    verificationMode: verifyMode,
     latencyScale: 1
   };
 
@@ -17,7 +18,7 @@ function resolveAdaptiveProfile(compiled, feedback = {}) {
   } else if (riskLevel === "medium") {
     base.profileName = "balanced";
     base.maxPlanSteps = 5;
-    base.verificationMode = compiled.contract.verify.mode;
+    base.verificationMode = verifyMode;
     base.latencyScale = 1;
   } else if (riskLevel === "high") {
     base.profileName = "careful";

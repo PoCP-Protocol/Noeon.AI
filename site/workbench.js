@@ -38,9 +38,20 @@ function updateExamplePathHint(ex) {
     return;
   }
   el.className = `example-path-hint path-${ex.executionPath}`;
-  el.textContent = ex.autoCanonical
-    ? `path: ${ex.executionPath} (auto canonical)`
-    : `path: ${ex.executionPath}`;
+  const signedTag = ex.signedAct ? " · 已签名" : "";
+  el.textContent = `执行方式：${ex.executionPath}${signedTag}`;
+}
+
+function applyExampleByName(name) {
+  const ex = cachedExamples.find((e) => e.name === name);
+  if (!ex?.source) return false;
+  sourceEl.value = ex.source;
+  exampleSelect.value = name;
+  applyExampleCanonicalPreference(ex);
+  updateExamplePathHint(ex);
+  statusEl.textContent = `已加载 ${ex.title || name}`;
+  scheduleArchitecturePreview();
+  return true;
 }
 
 function applyExampleCanonicalPreference(ex) {
@@ -55,7 +66,7 @@ function applyExampleCanonicalPreference(ex) {
     canonicalModeEl.checked = false;
     return;
   }
-  canonicalModeEl.checked = ex?.autoCanonical === true || ex?.category === "tools";
+  canonicalModeEl.checked = ex?.autoCanonical === true || ex?.category === "tools" || ex?.category === "production";
 }
 
 if (canonicalModeEl) {
@@ -70,6 +81,7 @@ if (canonicalModeEl) {
 function compileExtras() {
   if (canonicalModeEl?.checked) return { general_canonical: true };
   if (activeExampleCategory === "tools") return { general_canonical: true };
+  if (activeExampleCategory === "production") return { general_canonical: true };
   const ex = cachedExamples.find((e) => e.name === exampleSelect?.value);
   if (ex?.autoCanonical) return { general_canonical: true };
   return {};
@@ -78,8 +90,8 @@ function compileExtras() {
 function formatExampleLabel(ex) {
   const title = ex.title || ex.name;
   const pathTag = ex.executionPath && ex.executionPath !== "cognitive"
-    ? ` · ${ex.executionPath}`
-    : "";
+    ? ` · ${ex.executionPath}${ex.signedAct ? " · 已签名" : ""}`
+    : ex.signedAct ? " · 已签名" : "";
   return pathTag ? `${title}${pathTag}` : title;
 }
 
@@ -90,15 +102,15 @@ function renderIrPanel(data) {
   const canonicalIr = data.canonicalIr || data.canonical || null;
   const primary = primaryIr === "canonical" ? canonicalIr : cognitiveIr;
   const secondary = primaryIr === "canonical" ? cognitiveIr : canonicalIr;
-  const secondaryLabel = primaryIr === "canonical" ? "cognitive (secondary)" : "canonical (secondary)";
+  const secondaryLabel = primaryIr === "canonical" ? "认知表示（详细）" : "标准语义（详细）";
 
   if (irMetaEl) {
-    irMetaEl.textContent = `compileMode: ${compileMode} · primary: ${primaryIr}`;
-    irMetaEl.className = `ir-meta primary-${primaryIr}`;
+    irMetaEl.textContent = `模式：${compileMode === "canonical-primary" ? "标准语义" : "认知流"}`;
+    irMetaEl.className = "ir-meta";
   }
 
   if (irPrimaryEl) {
-    irPrimaryEl.textContent = primary != null ? JSON.stringify(primary, null, 2) : "No IR payload";
+    irPrimaryEl.textContent = primary != null ? JSON.stringify(primary, null, 2) : "暂无数据";
   }
 
   if (irSecondaryWrap && irSecondaryEl && irSecondaryLabel) {
@@ -125,14 +137,45 @@ async function api(path, extra = {}) {
   return data;
 }
 
+function renderDualView(data) {
+  const dual = data?.dualView;
+  if (dual?.rows?.length) {
+    const lines = [`对齐 ${dual.matched}/${dual.declaredCount} · ${Math.round((dual.alignment || 0) * 100)}%`, ""];
+    for (const row of dual.rows) {
+      const left = (row.declared?.label || "—").padEnd(26).slice(0, 26);
+      const right = row.runtime?.label || "—";
+      const mark = row.status === "matched" ? "✓" : row.status === "missing" ? "✗" : "+";
+      const conf = row.runtime?.confidence != null ? ` · ${Math.round(row.runtime.confidence * 100)}%` : "";
+      lines.push(`${mark}  ${left}  →  ${right}${conf}`);
+    }
+    if (dual.effects?.runtime?.length) {
+      lines.push("", `效应：${dual.effects.runtime.join(" · ")}`);
+    }
+    if (dual.replay?.fingerprint) {
+      lines.push(`重放：${dual.replay.fingerprint.slice(0, 16)}…`);
+    }
+    if (data.agentSurface?.cards?.[0]) {
+      const agent = data.agentSurface.cards[0];
+      lines.push("", `智能体 ${agent.name} · FLOW ${agent.flow.filter((s) => s.status === "executed").length}/${agent.flow.length}`);
+    }
+    tracePane.textContent = lines.join("\n");
+    return;
+  }
+  renderTrace(data);
+}
+
 function renderTrace(data) {
   const lines = [];
   if (data.actionTrace) {
     const t = data.actionTrace;
-    lines.push(`ACT · ${t.count} total · ${t.succeeded} ok · ${t.failed} fail`);
+    lines.push(`行动 · 共 ${t.count} 次 · ${t.succeeded} 成功 · ${t.failed} 失败`);
+    if (data.pluginActs?.total) {
+      lines.push(`插件调用：${data.pluginActs.signed ?? 0}/${data.pluginActs.total} 已签名`);
+    }
     for (const item of t.actions || []) {
+      const sig = item.plugin ? (item.signed ? " 已签名" : " 未签名") : "";
       const preview = item.content ? ` · ${String(item.content).slice(0, 80)}` : "";
-      lines.push(`  ${item.action} [${item.plugin || "sim"}] ${item.status}${item.mocked ? " mock" : ""}${preview}`);
+      lines.push(`  ${item.action} [${item.plugin || "sim"}] ${item.status}${sig}${item.mocked ? " mock" : ""}${preview}`);
     }
     if (t.lastAction) {
       lines.push(`last: ${t.lastAction.action} · ${t.lastAction.status} · ${t.lastAction.plugin || "sim"}`);
@@ -143,12 +186,12 @@ function renderTrace(data) {
     lines.push("");
   }
   if (data.trace?.length) {
-    lines.push("cognitive trace:");
+    lines.push("执行追踪：");
     for (const entry of data.trace.slice(0, 24)) {
       lines.push(`  ${entry.phase}/${entry.operation} · ${JSON.stringify(entry.result)?.slice(0, 120)}`);
     }
   } else if (data.cognitive?.trace?.length) {
-    lines.push("cognitive trace:");
+    lines.push("执行追踪：");
     for (const entry of data.cognitive.trace.slice(0, 24)) {
       lines.push(`  ${entry.phase}/${entry.operation}`);
     }
@@ -177,7 +220,7 @@ function updateExecPathBar(summary) {
 
 function renderArchitecture(data) {
   const lines = window.NoeonArchitecturePanel?.formatArchitectureLines(data) || [];
-  archPane.textContent = lines.length ? lines.join("\n") : "No architecture payload";
+  archPane.textContent = lines.length ? lines.join("\n") : "暂无架构数据";
   updateExecPathBar(data?.executionSummary);
 }
 
@@ -215,6 +258,8 @@ async function loadExamples() {
       opt.textContent = formatExampleLabel(ex);
       exampleSelect.appendChild(opt);
     }
+    const requested = new URLSearchParams(window.location.search).get("example");
+    if (requested) applyExampleByName(requested);
   } catch {
     /* optional */
   }
@@ -227,42 +272,47 @@ exampleSelect?.addEventListener("change", () => {
     sourceEl.value = ex.source;
     applyExampleCanonicalPreference(ex);
     updateExamplePathHint(ex);
-    statusEl.textContent = `Loaded ${exampleSelect.value}`;
+    statusEl.textContent = `已加载 ${exampleSelect.value}`;
     scheduleArchitecturePreview();
     return;
   }
-  statusEl.textContent = `Example not found: ${exampleSelect.value}`;
+  statusEl.textContent = `未找到示例：${exampleSelect.value}`;
 });
 
 document.getElementById("btn-compile").addEventListener("click", async () => {
-  statusEl.textContent = "Compiling…";
+  statusEl.textContent = "编译中…";
   try {
     const data = await api("/api/compile", { format: "ir", ...compileExtras() });
     renderIrPanel(data);
-    statusEl.textContent = `IR ready · ${data.compileMode || "cognitive-primary"}`;
+    if (data.declaredSteps?.length) {
+      tracePane.textContent = [
+        `已解析 ${data.declaredSteps.length} 个声明步骤（运行后对齐运行时）`,
+        "",
+        ...data.declaredSteps.map((s) => `· ${s.label}`)
+      ].join("\n");
+    }
+    statusEl.textContent = "编译完成";
   } catch (e) {
     if (irPrimaryEl) irPrimaryEl.textContent = e.message;
-    statusEl.textContent = "Compile failed";
+    statusEl.textContent = "编译失败";
   }
 });
 
 function formatRunStatus(data) {
   const summary = data?.executionSummary;
   const parts = [
-    data.success ? "Run OK" : "Run finished with issues",
-    summary?.strategy || data.executionStrategy,
-    summary?.hybrid || data.hybridActExecution ? "hybrid" : null,
-    summary?.snapshotAct || data.snapshotActExecution ? "snapshot-act" : null,
+    data.success ? "运行成功" : "运行完成（有问题）",
+    summary?.path || summary?.strategy || data.executionStrategy,
     (summary?.phases || data.executionPhases || data.phases || []).join("→") || null
   ].filter(Boolean);
   return parts.join(" · ");
 }
 
 document.getElementById("btn-run").addEventListener("click", async () => {
-  statusEl.textContent = "Running…";
+  statusEl.textContent = "运行中…";
   try {
     const data = await api("/api/run", compileExtras());
-    renderTrace(data);
+    renderDualView(data);
     renderArchitecture(data);
     if (data.cognitiveIr || data.canonicalIr || data.canonical) {
       renderIrPanel({
@@ -275,7 +325,7 @@ document.getElementById("btn-run").addEventListener("click", async () => {
     statusEl.textContent = formatRunStatus(data);
   } catch (e) {
     tracePane.textContent = e.message;
-    statusEl.textContent = "Run failed";
+    statusEl.textContent = "运行失败";
   }
 });
 
@@ -289,12 +339,3 @@ sourceEl.addEventListener("keydown", (e) => {
 sourceEl.addEventListener("input", scheduleArchitecturePreview);
 
 loadExamples().then(() => scheduleArchitecturePreview());
-fetch("/api/status")
-  .then((r) => r.json())
-  .then((s) => {
-    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
-      document.getElementById("golden-gate-badge"),
-      s.goldenGate
-    );
-  })
-  .catch(() => {});

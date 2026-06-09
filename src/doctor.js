@@ -113,6 +113,24 @@ function checkPluginPolicyDefaults(cwd = process.cwd()) {
   };
 }
 
+function checkPluginPolicyProduction(cwd = process.cwd()) {
+  const { config } = loadProjectConfig({ cwd });
+  const { buildPluginPolicyStatusSummary, isProductionEnvironment } = require('./core/config');
+  const production = isProductionEnvironment(config);
+  const summary = buildPluginPolicyStatusSummary(config);
+  const ok = !production || (summary.requireVersion === true && summary.requireSignature === true);
+  return {
+    name: 'plugin_policy_production',
+    ok,
+    detail: production
+      ? (ok
+        ? `production profile: ${summary.allowedCount} plugins · requireVersion+requireSignature`
+        : 'production requires requireVersion and requireSignature defaults')
+      : `development profile: ${summary.allowedCount} plugins · requireVersion=${summary.requireVersion}`,
+    recommendation: ok ? null : 'Set environment=production with plugins.requireVersion and requireSignature in .noeonrc.json'
+  };
+}
+
 function checkMcpConfig(cwd = process.cwd()) {
   const { config } = loadProjectConfig({ cwd });
   const { getMcpStatus } = require('./runtime/mcp-bridge');
@@ -405,6 +423,30 @@ function checkGoldenGateArtifact() {
   };
 }
 
+function checkProductionGateArtifact() {
+  const { buildProductionGateStatusSummary } = require('./core/production-gate-status');
+  const summary = buildProductionGateStatusSummary();
+  if (!summary.available) {
+    return {
+      name: 'production_gate',
+      ok: true,
+      detail: 'No production-gate.latest.json (optional CI artifact)',
+      recommendation: 'Run npm run gate:production to validate signed ACT + plugin policy'
+    };
+  }
+  const checkTxt = summary.checks?.total != null
+    ? ` · checks ${summary.checks.passed}/${summary.checks.total}`
+    : '';
+  return {
+    name: 'production_gate',
+    ok: summary.ok === true,
+    detail: summary.ok
+      ? `Production gate PASS${checkTxt}`
+      : `Production gate FAIL${checkTxt}${summary.checks?.failed?.length ? ` · failed ${summary.checks.failed.join(', ')}` : ''}`,
+    recommendation: summary.ok ? null : 'Run npm run gate:production and fix signed ACT / plugin policy checks'
+  };
+}
+
 function checkToolDemos() {
   const demos = ['http_demo.noeon', 'fs_demo.noeon', 'github_demo.noeon', 'web_fetch.noeon'];
   const failures = [];
@@ -451,9 +493,11 @@ function runDoctor(options = {}) {
     checkAgentCanonicalHybrid(),
     checkExecutionPathProbes(),
     checkGoldenGateArtifact(),
+    checkProductionGateArtifact(),
     checkToolDemos(),
     checkCanonicalRoute(),
     checkPluginPolicyDefaults(options.cwd),
+    checkPluginPolicyProduction(options.cwd),
     checkMcpConfig(options.cwd),
     checkExample(options.file)
   ];

@@ -65,6 +65,15 @@ function buildGateExecutionEntry(payload, filePath, root, spec) {
     canonicalPrimary: execution.canonicalPrimary,
     phases: execution.phases
   }));
+  try {
+    const { parseNoeonInput } = require('../src/core/pipeline');
+    const { summarizePluginActsFromCanonical } = require('../src/core/act-binding-status');
+    const { ast } = parseNoeonInput(filePath, { filename: filePath });
+    const pluginActs = summarizePluginActsFromCanonical(ast?.general?.canonicalIr);
+    if (pluginActs.total) execution.pluginActs = pluginActs;
+  } catch {
+    /* optional plugin act metadata */
+  }
   execution.lensOnly = spec.lensOnly === true;
 
   return execution;

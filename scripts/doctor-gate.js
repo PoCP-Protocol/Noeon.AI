@@ -1,6 +1,7 @@
 'use strict';
 
 const { runDoctor, formatDoctorReport } = require('../src/doctor');
+const { buildProductionGateStatusSummary } = require('../src/core/production-gate-status');
 
 const jsonMode = process.argv.includes('--json');
 const fileFlagIdx = process.argv.indexOf('--file');
@@ -12,12 +13,15 @@ function findCheck(report, name) {
 
 function evaluateReport(report) {
   const probes = findCheck(report, 'execution_path_probes');
+  const productionGateCheck = findCheck(report, 'production_gate');
+  const artifact = buildProductionGateStatusSummary();
   const probesOk = probes?.ok === true;
-  const ok = report.ok === true && probesOk;
-  return { ok, probes, probesOk };
+  const productionArtifactOk = !artifact.available || artifact.ok === true;
+  const ok = report.ok === true && probesOk && productionArtifactOk;
+  return { ok, probes, probesOk, productionGateCheck, productionArtifact: artifact };
 }
 
-function printFailureDetails(report, probes, probesOk) {
+function printFailureDetails(report, probes, probesOk, productionArtifact) {
   if (report.ok !== true) {
     console.error('Doctor gate FAILED: report.ok !== true');
   }
@@ -30,6 +34,12 @@ function printFailureDetails(report, probes, probesOk) {
       console.error(`  recommendation: ${probes.recommendation}`);
     }
   }
+  if (productionArtifact.available && productionArtifact.ok !== true) {
+    console.error('Doctor gate FAILED: production gate artifact reports FAIL');
+    if (productionArtifact.checks?.failed?.length) {
+      console.error(`  failed checks: ${productionArtifact.checks.failed.join(', ')}`);
+    }
+  }
   for (const check of report.checks.filter((entry) => !entry.ok)) {
     console.error(`  FAIL ${check.name}: ${check.detail}`);
     if (check.recommendation) {
@@ -40,10 +50,13 @@ function printFailureDetails(report, probes, probesOk) {
 
 function main() {
   const report = runDoctor({ file });
-  const { ok, probes, probesOk } = evaluateReport(report);
+  const { ok, probes, probesOk, productionGateCheck, productionArtifact } = evaluateReport(report);
 
   if (jsonMode) {
-    console.log(JSON.stringify(report, null, 2));
+    console.log(JSON.stringify({
+      ...report,
+      productionGateArtifact: productionArtifact
+    }, null, 2));
   } else {
     console.log('\n\x1b[36m═══ Noeon Doctor Gate ═══\x1b[0m\n');
     console.log(formatDoctorReport(report));
@@ -56,10 +69,28 @@ function main() {
         console.log(`  → ${probes.recommendation}`);
       }
     }
+    if (productionGateCheck) {
+      const color = productionGateCheck.ok ? '\x1b[32m' : '\x1b[31m';
+      const status = productionGateCheck.ok ? 'PASS' : 'FAIL';
+      console.log(`\n${color}▸ production_gate (doctor check): ${status}\x1b[0m`);
+      console.log(`  ${productionGateCheck.detail}`);
+      if (productionGateCheck.recommendation) {
+        console.log(`  → ${productionGateCheck.recommendation}`);
+      }
+    }
+    if (productionArtifact.available) {
+      const color = productionArtifact.ok ? '\x1b[32m' : '\x1b[31m';
+      const status = productionArtifact.ok ? 'PASS' : 'FAIL';
+      console.log(`\n${color}▸ production gate artifact: ${status}\x1b[0m`);
+      console.log(`  checks ${productionArtifact.checks?.passed}/${productionArtifact.checks?.total}`);
+    } else {
+      console.log('\n\x1b[33m▸ production gate artifact: —\x1b[0m');
+      console.log('  Run npm run gate:production to record signed ACT + plugin policy gate');
+    }
   }
 
   if (!ok) {
-    printFailureDetails(report, probes, probesOk);
+    printFailureDetails(report, probes, probesOk, productionArtifact);
     process.exit(1);
   }
 

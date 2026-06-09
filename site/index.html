@@ -15,7 +15,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./playground.css" />
   </head>
   <body>
     <div class="bg-grid" aria-hidden="true"></div>
@@ -25,12 +24,9 @@
         <nav>
           <a href="#thesis">主张</a>
           <a href="#mechanism">机制</a>
-          <a href="#developers">开发者</a>
+          <a href="#start">开始</a>
+          <a href="./playground.html">体验</a>
           <a href="#roadmap">路线图</a>
-          <a href="./studio.html">Studio</a>
-          <a href="./convergence.html">收敛看板</a>
-          <a href="./playground.html">Playground</a>
-          <a href="./fusion.html">Fusion</a>
           <a href="#faq">FAQ</a>
         </nav>
       </div>
@@ -38,24 +34,14 @@
 
     <main>
       <section class="hero container" id="hero">
-        <p class="eyebrow">v1.0.0-alpha · Cognitive Workflow Language</p>
-        <h1>AI 原生编程语言<br />认知工作流语言</h1>
+        <h1>AI 时代的<br />分布式智能经济网络</h1>
         <p class="lead">
-          Noeon 用声明式 AGENT 块描述智能体目标、策略与认知流程——PERCEIVE、REASON、DECIDE、ACT、REFLECT——
-          让 AI 行为可编写、可验证、可运行。
+          让智能自由竞争，让价值自动结算，让秩序自发形成。
+          用可验证的规则与证据链，把人与 AI 的协作变成透明、可审计、可结算的经济活动。
         </p>
         <div class="hero-cta">
-          <a class="btn primary" href="./playground.html">打开 Playground</a>
-          <a class="btn ghost" href="#developers">快速开始</a>
-        </div>
-        <p id="home-runtime-status" class="stats" style="margin-top:1rem;opacity:0.85;">
-          Start <code>npm run playground</code> to load live runtime status.
-        </p>
-        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
-        <div class="hero-strip">
-          <span>PERCEIVE → REASON → DECIDE → ACT → REFLECT</span>
-          <span>AGENT blocks with GOAL, POLICY, and FLOW</span>
-          <span>Run locally with <code>noeon run</code></span>
+          <a class="btn primary" href="./playground.html">立即体验</a>
+          <a class="btn ghost" href="#mechanism">了解机制</a>
         </div>
       </section>
 
@@ -82,59 +68,55 @@
         <p class="section-lead">Noeon 通过六阶段任务状态机，把协作行为转化为可验证经济事件。</p>
         <ol class="timeline">
           <li><span>1</span>发布任务：定义预算、SLA、验收策略</li>
-          <li><span>2</span>报价竞拍：Solver 竞价并锁定保证金</li>
+          <li><span>2</span>报价竞拍：执行节点竞价并锁定保证金</li>
           <li><span>3</span>执行证明：提交结果与可重放证据摘要</li>
-          <li><span>4</span>独立验证：Verifier 输出裁决与理由</li>
+          <li><span>4</span>独立验证：验证节点输出裁决与理由</li>
           <li><span>5</span>自动结算：按规则分账并更新信誉</li>
           <li><span>6</span>挑战仲裁：争议进入挑战窗口并执行罚没</li>
         </ol>
       </section>
 
-      <section class="container" id="developers">
-        <h2>开发者入口</h2>
-        <p class="section-lead">三步启动你的第一个 Noeon 智能体项目。</p>
+      <section class="container" id="start">
+        <h2>开始编写智能体</h2>
+        <p class="section-lead">用声明式智能体描述目标、策略与认知流程，在浏览器中直接运行与调试。</p>
         <div class="cards two">
           <article class="card">
-            <h3>快速开始</h3>
-            <p>安装依赖后，初始化 General Profile 项目并运行带追踪的执行。</p>
-            <pre><code>npm install
-noeon init my-agent --profile general
-noeon run main.noeon --trace</code></pre>
+            <h3>在线体验</h3>
+            <p>打开体验页，选择示例或编写自己的智能体程序，无需配置即可运行。</p>
+            <p><a class="btn primary" href="./playground.html">进入体验页</a></p>
           </article>
           <article class="card">
-            <h3>AGENT 模板</h3>
-            <p><code>noeon init</code> 生成带 GOAL、POLICY 与 FLOW 的 AGENT 块，开箱即用。</p>
+            <h3>程序示例</h3>
+            <p>一个最小智能体：设定目标，按感知、推理、决策、行动、反思的流程完成任务。</p>
             <pre><code>AGENT "my-agent"
-  GOAL "Solve the primary user goal"
-  POLICY audit=true
+  GOAL "完成用户提出的主要目标"
   FLOW
     PERCEIVE source=user_input modality=text
     REASON strategy=deductive depth=2
-    DECIDE action=proceed threshold=0.7
+    DECIDE action=respond threshold=0.7
     ACT action=respond channel=runtime
-    REFLECT "execution quality"</code></pre>
-            <p><a class="btn ghost" href="./playground.html">在 Playground 中试用 →</a></p>
+    REFLECT "执行质量"</code></pre>
           </article>
         </div>
       </section>
 
       <section class="container" id="roadmap">
-        <h2>12个月路线图</h2>
+        <h2>路线图</h2>
         <div class="cards three">
           <article class="card phase">
-            <p class="phase-tag">0-3 个月</p>
-            <h3>跑通闭环</h3>
-            <p>完成任务发布、执行证明、验证结算全流程，验证真实付费需求。</p>
+            <p class="phase-tag">近期</p>
+            <h3>完整协作链</h3>
+            <p>贯通任务发布、执行证明、验证与结算，服务真实协作场景。</p>
           </article>
           <article class="card phase">
-            <p class="phase-tag">3-6 个月</p>
-            <h3>开放节点</h3>
-            <p>引入第三方 Solver 与 Verifier，建立信誉分层与挑战仲裁机制。</p>
+            <p class="phase-tag">中期</p>
+            <h3>开放参与</h3>
+            <p>引入第三方执行与验证能力，建立信誉分层与争议仲裁机制。</p>
           </article>
           <article class="card phase">
-            <p class="phase-tag">6-12 个月</p>
+            <p class="phase-tag">长期</p>
             <h3>生态扩展</h3>
-            <p>发布行业模板和开发者市场，形成可复制增长飞轮。</p>
+            <p>发布行业模板与开发者市场，形成可复制的协作与增长网络。</p>
           </article>
         </div>
       </section>
@@ -145,7 +127,7 @@ noeon run main.noeon --trace</code></pre>
           <details>
             <summary>为什么不是直接造一门通用语言？</summary>
             <p>
-              因为当前最大瓶颈是协作契约不统一，而不是语法表达力不足。Noeon 先用 AEL 统一任务、验证、结算规则，再按真实需求演进运行时。
+              当前最大的瓶颈是协作契约不统一，而不是语法表达力不足。Noeon 优先统一任务、验证与结算规则，再随场景逐步扩展能力。
             </p>
           </details>
           <details>
@@ -167,22 +149,6 @@ noeon run main.noeon --trace</code></pre>
       </div>
     </footer>
 
-    <script src="./golden-gate-badge.js"></script>
     <script src="./main.js"></script>
-    <script>
-      fetch("/api/status")
-        .then((r) => r.json())
-        .then((s) => {
-          const el = document.getElementById("home-runtime-status");
-          if (el) {
-            el.textContent = `Noeon ${s.version} · ${s.era} · alpha gate ${s.engineering?.alphaGateTests?.length ?? "—"} tests`;
-          }
-          window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
-            document.getElementById("golden-gate-badge"),
-            s.goldenGate
-          );
-        })
-        .catch(() => {});
-    </script>
   </body>
 </html>

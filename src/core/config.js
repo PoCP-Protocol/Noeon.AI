@@ -22,7 +22,13 @@ const DEFAULT_CONFIG = {
     general_canonical_agents: true
   },
   observability: {
-    log_level: 'info'
+    log_level: 'info',
+    audit: {
+      dir: null,
+      maxLines: 5000,
+      maxBytes: 2 * 1024 * 1024,
+      rotateKeep: 3
+    }
   },
   llm: {
     mode: 'auto',
@@ -79,18 +85,62 @@ function deepMerge(base, override) {
   return out;
 }
 
+function resolveEnvironment(projectConfig = DEFAULT_CONFIG) {
+  return process.env.NOEON_ENV || projectConfig.environment || 'development';
+}
+
+function isProductionEnvironment(projectConfig = DEFAULT_CONFIG) {
+  return resolveEnvironment(projectConfig) === 'production';
+}
+
 function resolvePluginPolicyFromConfig(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
   const plugins = projectConfig.plugins || {};
   const override = userOptions.pluginPolicy || {};
   const envPlugins = process.env.NOEON_ALLOWED_PLUGINS;
   const envActionTypes = process.env.NOEON_ALLOWED_ACTION_TYPES;
+  const production = isProductionEnvironment(projectConfig);
+
+  const requireVersion = override.requireVersion ??
+    plugins.requireVersion ??
+    (production ? true : false);
+  const requireSignature = override.requireSignature ??
+    plugins.requireSignature ??
+    (production ? true : false);
 
   return {
     allowedPlugins: override.allowedPlugins ?? (envPlugins || plugins.allowedPlugins),
     allowedActionTypes: override.allowedActionTypes ?? (envActionTypes || plugins.allowedActionTypes),
-    requireVersion: override.requireVersion ?? plugins.requireVersion,
-    requireSignature: override.requireSignature ?? plugins.requireSignature,
-    signingKey: override.signingKey ?? plugins.signingKey
+    requireVersion,
+    requireSignature,
+    signingKey: override.signingKey ?? plugins.signingKey,
+    profile: production ? 'production' : 'development'
+  };
+}
+
+function resolveAuditOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
+  const obs = projectConfig.observability || {};
+  const audit = obs.audit || {};
+  const override = userOptions.audit || {};
+  return {
+    dir: override.dir ?? userOptions.canonical_audit_dir ?? audit.dir ?? null,
+    maxLines: override.maxLines ?? audit.maxLines ?? DEFAULT_CONFIG.observability.audit.maxLines,
+    maxBytes: override.maxBytes ?? audit.maxBytes ?? DEFAULT_CONFIG.observability.audit.maxBytes,
+    rotateKeep: override.rotateKeep ?? audit.rotateKeep ?? DEFAULT_CONFIG.observability.audit.rotateKeep
+  };
+}
+
+function buildPluginPolicyStatusSummary(projectConfig = DEFAULT_CONFIG) {
+  const policy = resolvePluginPolicyFromConfig({}, projectConfig);
+  const allowed = Array.isArray(policy.allowedPlugins)
+    ? policy.allowedPlugins
+    : String(policy.allowedPlugins || '').split(',').filter(Boolean);
+  return {
+    schema: 'noeon.plugin.policy.status/v1',
+    environment: resolveEnvironment(projectConfig),
+    profile: policy.profile,
+    allowedCount: allowed.length,
+    requireVersion: policy.requireVersion === true,
+    requireSignature: policy.requireSignature === true
   };
 }
 
@@ -127,7 +177,8 @@ function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
       mode: userOptions.llm?.mode || llm.mode || process.env.NOEON_LLM_MODE || 'auto',
       model: userOptions.llm?.model || llm.model || process.env.NOEON_LLM_MODEL
     },
-    pluginPolicy: resolvePluginPolicyFromConfig(userOptions, projectConfig)
+    pluginPolicy: resolvePluginPolicyFromConfig(userOptions, projectConfig),
+    audit: resolveAuditOptions(userOptions, projectConfig)
   };
 }
 
@@ -135,6 +186,10 @@ module.exports = {
   DEFAULT_CONFIG,
   findConfigFile,
   loadProjectConfig,
+  resolveEnvironment,
+  isProductionEnvironment,
   resolvePluginPolicyFromConfig,
+  resolveAuditOptions,
+  buildPluginPolicyStatusSummary,
   resolveRunOptions
 };

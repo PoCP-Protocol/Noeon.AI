@@ -70,6 +70,24 @@ const agentRun = spawnSync(process.execPath, [cli, 'run', agentSample], {
 assert(agentRun.status === 0, 'noeon run agent_research exits 0');
 assert(agentRun.stdout.includes('hybrid-canonical-acts'), 'agent run prints hybrid strategy');
 assert(agentRun.stdout.includes('hybrid:'), 'agent run prints hybrid path note');
+assert(agentRun.stdout.includes('Plugin ACTs:'), 'agent run prints plugin act status');
+assert(agentRun.stdout.includes('unsigned'), 'agent run notes unsigned plugin act');
+
+const signedSample = path.join(__dirname, '..', 'examples', 'signed_act_demo.noeon');
+const signedRun = spawnSync(process.execPath, [cli, 'run', signedSample], {
+  encoding: 'utf8',
+  env: { ...process.env, NOEON_LLM_MODE: 'off' }
+});
+assert(signedRun.status === 0, 'noeon run signed_act_demo exits 0');
+assert(signedRun.stdout.includes('signed'), 'signed_act_demo run notes signed plugin act');
+
+const agentJsonRun = spawnSync(process.execPath, [cli, 'run', agentSample, '--json', '--canonical'], {
+  encoding: 'utf8',
+  env: { ...process.env, NOEON_LLM_MODE: 'off' }
+});
+assert(agentJsonRun.status === 0, 'noeon run agent_research --json --canonical exits 0');
+const agentPayload = parseJson(agentJsonRun.stdout);
+assert(agentPayload?.pluginActs?.unsigned === 1, 'agent_research run json includes unsigned pluginActs');
 
 console.log(`\n\x1b[${failed ? '31' : '32'}m${passed} passed, ${failed} failed\x1b[0m\n`);
 process.exit(failed ? 1 : 0);

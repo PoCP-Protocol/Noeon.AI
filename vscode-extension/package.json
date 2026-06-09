@@ -14,7 +14,8 @@
     "onCommand:noeon.compileFile",
     "onCommand:noeon.toggleBrainHighlight",
     "onCommand:noeon.showArchitecturePanel",
-    "onCommand:noeon.refreshGoldenGateStatus"
+    "onCommand:noeon.refreshGoldenGateStatus",
+    "onCommand:noeon.refreshEngineeringStatus"
   ],
   "engines": {
     "vscode": "^1.75.0"
@@ -77,6 +78,10 @@
       {
         "command": "noeon.showArchitecturePanel",
         "title": "Noeon: Open Architecture Panel"
+      },
+      {
+        "command": "noeon.refreshEngineeringStatus",
+        "title": "Noeon: Refresh Engineering Status (Golden + Production Gate)"
       },
       {
         "command": "noeon.refreshGoldenGateStatus",
@@ -143,6 +148,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show Golden Gate PASS/FAIL badge in the status bar (from noeon status --json)."
+        },
+        "noeon.showProductionGateStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Production gate / plugin policy badge in the status bar (from noeon status --json)."
         },
         "noeon.showExecutionStatus": {
           "type": "boolean",

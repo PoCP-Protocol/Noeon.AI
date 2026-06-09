@@ -18,3 +18,5 @@ jobs:
         run: npm run gate:alpha
       - name: Doctor gate (execution_path_probes)
         run: npm run gate:doctor -- --json
+      - name: Production gate (plugin policy)
+        run: npm run gate:production -- --json

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Noeon Workbench — Code · IR · Trace · Architecture</title>
+    <title>Noeon 工作台</title>
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./playground.css" />
     <style>
@@ -11,82 +11,74 @@
       .workbench-toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; align-items: center; }
       .workbench-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(220px, 1fr) minmax(220px, 1fr); gap: 0.75rem; min-height: 70vh; }
       .wb-panel { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.28); overflow: hidden; }
-      .wb-panel h2 { font-size: 0.85rem; margin: 0; padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.04); color: #9fd4ff; text-transform: uppercase; letter-spacing: 0.04em; }
+      .wb-panel h2 { font-size: 0.85rem; margin: 0; padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.04); color: #9fd4ff; letter-spacing: 0.04em; }
       .wb-panel textarea, .wb-panel pre { flex: 1; margin: 0; border: none; border-radius: 0; min-height: 180px; }
       .wb-panel textarea { resize: none; font-family: "IBM Plex Mono", monospace; font-size: 12px; padding: 0.75rem; background: rgba(0,0,0,0.35); color: #d8e8ff; }
       .wb-panel pre { padding: 0.75rem; overflow: auto; font-size: 11px; color: #c8daf0; background: rgba(0,0,0,0.35); }
-      .ir-meta { font-size: 11px; padding: 0.35rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); font-family: "IBM Plex Mono", monospace; }
-      .ir-meta.primary-canonical { color: #ffd699; background: rgba(255, 214, 153, 0.06); }
-      .ir-meta.primary-cognitive { color: #9fd4ff; background: rgba(159, 212, 255, 0.06); }
+      .ir-meta { font-size: 11px; padding: 0.35rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); font-family: "IBM Plex Mono", monospace; color: #9fd4ff; }
       .ir-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
       .ir-body pre { flex: 1; min-height: 120px; }
       .ir-secondary-wrap { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2); }
-      .ir-secondary-wrap summary { cursor: pointer; padding: 0.35rem 0.75rem; font-size: 10px; color: #7a9bb8; letter-spacing: 0.06em; text-transform: uppercase; user-select: none; }
+      .ir-secondary-wrap summary { cursor: pointer; padding: 0.35rem 0.75rem; font-size: 10px; color: #7a9bb8; user-select: none; }
       .ir-secondary-wrap pre { max-height: 180px; color: #8aa4bf; font-size: 10px; }
-      .ir-secondary-wrap[open] summary { color: #9fd4ff; }
       @media (max-width: 900px) { .workbench-grid { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; } }
     </style>
   </head>
   <body class="playground-body">
     <header class="topbar">
       <div class="container nav-wrap">
-        <div class="brand"><a href="./index.html">Noeon</a> / Workbench</div>
+        <div class="brand"><a href="./index.html">Noeon</a> / 工作台</div>
         <nav>
-          <a href="./playground.html">Playground</a>
-          <a href="./studio.html">Studio</a>
-          <a href="./workbench.html" aria-current="page">Workbench</a>
+          <a href="./index.html">首页</a>
+          <a href="./playground.html">体验</a>
+          <a href="./workbench.html" aria-current="page">工作台</a>
         </nav>
       </div>
     </header>
 
     <main class="workbench container">
-      <h1>Noeon Workbench</h1>
-      <p>Four-panel developer loop: edit source, inspect IR, read execution trace, view architecture.</p>
+      <h1>智能体工作台</h1>
+      <p>编辑源代码、查看中间表示、执行追踪与架构概览。</p>
 
       <div class="workbench-toolbar">
-        <select id="example-select" aria-label="Load example">
-          <option value="">Load example…</option>
+        <select id="example-select" aria-label="加载示例">
+          <option value="">选择示例…</option>
         </select>
         <span id="example-path-hint" class="example-path-hint hidden" aria-live="polite"></span>
         <span id="exec-path-bar" class="run-execution-bar hidden" aria-live="polite"></span>
-        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
-        <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
-          <input type="checkbox" id="canonical-mode" />
-          Canonical IR primary
-        </label>
-        <button id="btn-run" class="btn primary">Run</button>
-        <button id="btn-compile" class="btn ghost">Compile IR</button>
-        <span id="status-bar" class="stats">Ready</span>
+        <input type="checkbox" id="canonical-mode" hidden aria-hidden="true" />
+        <button id="btn-run" class="btn primary">运行</button>
+        <button id="btn-compile" class="btn ghost">编译</button>
+        <span id="status-bar" class="stats">就绪</span>
       </div>
 
       <div class="workbench-grid">
         <section class="wb-panel">
-          <h2>Code</h2>
-          <textarea id="source" spellcheck="false" aria-label="Noeon source"></textarea>
+          <h2>源代码</h2>
+          <textarea id="source" spellcheck="false" aria-label="源代码"></textarea>
         </section>
         <section class="wb-panel">
-          <h2>Cognitive / Canonical IR</h2>
-          <div id="ir-meta" class="ir-meta primary-cognitive">Run Compile IR or Run.</div>
+          <h2>中间表示</h2>
+          <div id="ir-meta" class="ir-meta">运行或编译后显示。</div>
           <div class="ir-body">
             <pre id="ir-primary">—</pre>
             <details id="ir-secondary-wrap" class="ir-secondary-wrap" hidden>
-              <summary id="ir-secondary-label">Secondary IR</summary>
+              <summary id="ir-secondary-label">详细表示</summary>
               <pre id="ir-secondary">—</pre>
             </details>
           </div>
         </section>
         <section class="wb-panel">
-          <h2>Execution Trace</h2>
+          <h2>声明 ↔ 运行</h2>
           <pre id="trace-pane">—</pre>
         </section>
         <section class="wb-panel">
-          <h2>Architecture</h2>
+          <h2>架构概览</h2>
           <pre id="arch-pane">—</pre>
         </section>
       </div>
     </main>
     <script src="./architecture-panel.js"></script>
-    <script src="./golden-gate-badge.js"></script>
     <script src="./execution-summary.js"></script>
     <script src="./workbench.js"></script>
   </body>

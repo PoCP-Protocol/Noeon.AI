@@ -16,6 +16,16 @@ function agentRequiresCitation(ast) {
   });
 }
 
+// Opt-in mandatory human sign-off: POLICY require_human_approval=true forces an
+// irreversible ACT through a human approval gate regardless of the model's own
+// confidence — the runtime will not act until a one-time token is consumed.
+function agentRequiresHumanApproval(ast) {
+  return (ast?.agents || []).some((a) => {
+    const v = a.policy?.require_human_approval;
+    return v === true || v === 'true';
+  });
+}
+
 function countEvidence(result, ast) {
   let count = 0;
 
@@ -55,7 +65,9 @@ function averageConfidence(result) {
 }
 
 function enforceEpistemicGate(result, ast, options = {}) {
-  if (!agentRequiresCitation(ast)) {
+  const needsCitation = agentRequiresCitation(ast);
+  const needsHumanApproval = agentRequiresHumanApproval(ast);
+  if (!needsCitation && !needsHumanApproval) {
     return { blocked: false, schema: EPISTEMIC_SCHEMA, enforced: false };
   }
 
@@ -65,7 +77,7 @@ function enforceEpistemicGate(result, ast, options = {}) {
 
   if (options.approval_token && !options._epistemicGateApproved) {
     const gate = findGateByToken(options.approval_token, options);
-    if (gate?.action === 'uncited_claim' || gate?.kind === 'epistemic') {
+    if (gate?.action === 'uncited_claim' || gate?.action === 'human_approval' || gate?.kind === 'epistemic') {
       const approved = consumeApprovalToken(options.approval_token, options);
       if (approved) {
         options._epistemicGateApproved = true;
@@ -73,6 +85,39 @@ function enforceEpistemicGate(result, ast, options = {}) {
         return { blocked: false, schema: EPISTEMIC_SCHEMA, enforced: true, approved: true };
       }
     }
+  }
+
+  // Mandatory human sign-off: block unconditionally until a token is consumed.
+  // This does not rely on the confidence/evidence heuristic below (which can be
+  // satisfied by ordinary trace content) — it is an explicit, auditable gate.
+  if (needsHumanApproval) {
+    const goal = ast?.agents?.find((a) => agentRequiresHumanApproval({ agents: [a] }))?.goal;
+    const pending = createPendingGate({
+      action: 'human_approval',
+      kind: 'epistemic',
+      goal: goal || ast?.cognition?.goal,
+      file: options.filename || options.source_path,
+      surface: result.profile,
+      message: 'require_human_approval policy: irreversible action requires human sign-off before ACT'
+    }, options);
+    result.epistemicGate = true;
+    result.humanGate = true;
+    result.pendingApproval = result.pendingApproval || {
+      id: pending.id,
+      token: pending.token,
+      action: pending.action,
+      kind: 'human_approval',
+      message: pending.message,
+      approve_hint: `noeon gate approve ${pending.id}  or re-run with --approval-token ${pending.token}`
+    };
+    return {
+      blocked: true,
+      awaitingHuman: true,
+      schema: EPISTEMIC_SCHEMA,
+      enforced: true,
+      pending,
+      blockReason: 'human_approval_required'
+    };
   }
 
   const evidence = countEvidence(result, ast);
@@ -133,6 +178,7 @@ function enforceEpistemicGate(result, ast, options = {}) {
 module.exports = {
   EPISTEMIC_SCHEMA,
   agentRequiresCitation,
+  agentRequiresHumanApproval,
   countEvidence,
   enforceEpistemicGate
 };

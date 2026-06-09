@@ -15,7 +15,8 @@ const DEFAULT_CANONICAL_PROBE_PROGRAMS = [
   'examples/hybrid_tool_agent.noeon',
   'examples/agent_research.noeon',
   'examples/agent_risk_review.noeon',
-  'examples/agent_customer_service.noeon'
+  'examples/agent_customer_service.noeon',
+  'examples/signed_act_demo.noeon'
 ];
 
 const { buildExecutionSummary } = require('./action-trace');
@@ -71,6 +72,9 @@ async function runCanonicalProbes(options = {}) {
       });
 
       entry.execution = buildExecutionSummary(run);
+      const { summarizePluginActsFromCanonical } = require('./act-binding-status');
+      const pluginActs = summarizePluginActsFromCanonical(ast?.general?.canonicalIr);
+      if (pluginActs.total) entry.execution.pluginActs = pluginActs;
       entry.ok = run.success === true && Boolean(strategy);
       if (strategy === 'tool-snapshot-primary' && !run.snapshotActExecution) {
         entry.ok = false;

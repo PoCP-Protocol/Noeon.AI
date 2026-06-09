@@ -28,6 +28,17 @@
  */
 
 const { IRNodeType, ProcessMode, MemoryOp, CollabMode, AELtoIRCompiler } = require('./cognitive-ir');
+const {
+  enrichUnderstandResult,
+  enrichAnalyticalResult,
+  enrichIntuitiveResult,
+  enrichDecideResult,
+  enrichValidationResult,
+  enrichPerceiveResult
+} = require('./cognitive-evidence');
+const { WorldModelRuntime } = require('./world-model-runtime');
+const { runDualCognition } = require('./dual-process-bridge');
+const { GroundedMemory } = require('../runtime/cognitive/grounded-memory');
 const { buildActBinding } = require('../runtime/act-binding');
 const { runActionStep } = require('../runtime/action-runner');
 
@@ -69,6 +80,8 @@ class ExecutionContext {
     this.start_time = Date.now();
     this.results = {};               // Final outputs
     this.errors = [];                // Errors encountered
+    this.worldModel = null;          // Structured world representation
+    this.memory = new GroundedMemory(); // Deterministic store: perception writes, reasoning recalls
   }
 
   broadcast(key, value, salience = 0.5) {
@@ -196,6 +209,7 @@ class CognitiveKernel {
     const ctx = new ExecutionContext(program);
     if (input && typeof input === 'object' && !input.intents) {
       ctx.noeonAst = input;
+      ctx.worldModel = WorldModelRuntime.fromAst(input, options);
     }
 
     // Step 3: Run the cognitive cycle
@@ -285,6 +299,7 @@ class CognitiveKernel {
         workspace: Object.fromEntries(ctx.workspace),
         confidence: ctx.confidence,
         trace: ctx.trace,
+        worldModel: ctx.worldModel?.snapshot() || null,
         stats: {
           cycles: ctx.cycle_count,
           nodes_processed: ctx.trace.length,
@@ -319,6 +334,7 @@ class CognitiveKernel {
         try {
           const result = await handler(node, ctx, this);
           ctx.recordTrace(phaseName, node.type, result);
+          ctx.worldModel?.ingestPhase(phaseName, node.type, result);
           this.stats.total_nodes_processed++;
         } catch (e) {
           ctx.errors.push({ node_id: node.id, type: node.type, error: e.message });
@@ -377,6 +393,17 @@ class CognitiveKernel {
 
     // PROCESS handler
     this.handlers.set(IRNodeType.PROCESS, async (node, ctx, kernel) => {
+      if (node.params.operation === 'understand') {
+        const result = enrichUnderstandResult(node, ctx);
+        ctx.confidence = Math.min(1, ctx.confidence * 0.5 + result.confidence * 0.5);
+        // Promote the understood hypothesis into semantic memory so native
+        // reasoning can recall it as a premise.
+        const semantic = result.hypothesis || result.conclusion || result.result;
+        if (semantic) ctx.memory.store(semantic, { type: 'semantic', strength: result.confidence ?? 0.7, source: 'understand' });
+        ctx.broadcast('understanding', result, result.confidence);
+        return result;
+      }
+
       const mode = node.params.mode || ProcessMode.ANALYTICAL;
       const query = node.params.pattern || node.params.strategy || node.params.name || 'general cognition';
       const llmContext = {
@@ -389,43 +416,65 @@ class CognitiveKernel {
         let result;
         if (kernel.llm) {
           const llmOut = await kernel.llm.intuit(query, llmContext);
-          result = {
+          result = enrichIntuitiveResult({
             mode: 'intuitive',
             pattern: node.params.pattern,
             confidence: llmOut.confidence || node.params.confidence_floor || 0.5,
             result: llmOut.judgment,
+            judgment: llmOut.judgment,
             llm: llmOut.model === 'noeon-mock' ? 'mock' : 'live'
-          };
+          }, node);
         } else {
-          result = {
+          result = enrichIntuitiveResult({
             mode: 'intuitive',
             pattern: node.params.pattern,
             confidence: node.params.confidence_floor || 0.5,
             result: `intuition:${node.params.pattern || 'general'}`
-          };
+          }, node);
         }
         ctx.broadcast('intuition', result, 0.6);
         return result;
       } else if (mode === ProcessMode.ANALYTICAL) {
         let result;
-        if (kernel.llm) {
+        // Use the external LLM ONLY when it is actually configured (live key).
+        // Otherwise engage Noeon's own native cognition over grounded memory,
+        // instead of deferring to a placeholder mock LLM response.
+        const llmLive = kernel.llm && kernel.llm.isConfigured && kernel.llm.isConfigured();
+        if (llmLive) {
           const llmOut = await kernel.llm.reason(query, llmContext);
-          result = {
+          result = enrichAnalyticalResult({
             mode: 'analytical',
             strategy: node.params.strategy || 'deductive',
             model: llmOut.model,
             confidence: llmOut.confidence,
             result: llmOut.conclusion,
+            conclusion: llmOut.conclusion,
             llm: llmOut.model === 'noeon-mock' ? 'mock' : 'live'
-          };
+          }, node, ctx);
           ctx.confidence = Math.max(ctx.confidence * 0.5, llmOut.confidence || ctx.confidence);
         } else {
-          result = {
+          let dual = null;
+          if (node.params.dual !== false && kernel.options.dual_process !== false) {
+            try {
+              // Analytical mode = deliberate reasoning → engage System 2,
+              // which recalls premises from the program's grounded memory.
+              dual = await runDualCognition(query, {
+                memory: ctx.memory,
+                using: 'fast_pattern',
+                strategy: node.params.strategy || 'deductive',
+                depth: node.params.depth,
+                forceSystem2: true
+              });
+            } catch {
+              dual = null;
+            }
+          }
+          result = enrichAnalyticalResult(dual || {
             mode: 'analytical',
             strategy: node.params.strategy || 'deductive',
             model: node.params.model || null,
             result: `reasoning:${node.params.strategy || 'general'}`
-          };
+          }, node, ctx);
         }
         ctx.broadcast('reasoning_result', result, 0.8);
         return result;
@@ -501,8 +550,9 @@ class CognitiveKernel {
       }
 
       if (!passed) ctx.confidence *= 0.9;
-      ctx.broadcast('validation', { passed, type, details }, 0.7);
-      return { type, passed, details };
+      const enriched = enrichValidationResult({ type, passed, details });
+      ctx.broadcast('validation', enriched, 0.7);
+      return enriched;
     });
 
     // LEARN handler
@@ -517,20 +567,30 @@ class CognitiveKernel {
         ctx.emotions.valence = Math.max(-1.0, ctx.emotions.valence - amount * 0.1);
       }
 
-      ctx.broadcast('learning_signal', { signal, amount }, 0.5);
-      return { signal, amount, emotional_update: ctx.emotions };
+      // Synaptic plasticity: reinforce/weaken the memory traces most recently
+      // used by reasoning, so experience reshapes what future recall surfaces.
+      const delta = signal === 'punishment' ? -amount : amount;
+      const reinforced = ctx.memory ? ctx.memory.reinforce(delta) : 0;
+
+      ctx.broadcast('learning_signal', { signal, amount, reinforced }, 0.5);
+      return { signal, amount, reinforced, emotional_update: ctx.emotions };
     });
 
     // PERCEIVE handler
     this.handlers.set(IRNodeType.PERCEIVE, async (node, ctx) => {
       const modality = node.params.modality || node.params.type || 'text';
-      const percept = {
+      const source = node.params.source_input || node.params.name;
+      const percept = enrichPerceiveResult({
         modality,
-        source: node.params.source_input || node.params.name,
+        source,
         processed: true,
         timestamp: Date.now()
-      };
-      ctx.broadcast('percept:' + modality, percept, 0.7);
+      });
+      // Ground perception in memory so later reasoning has something to recall.
+      const trace = [source, node.params.pattern, node.params.content, modality]
+        .filter(Boolean).join(' ');
+      if (trace) ctx.memory.store(trace, { type: 'episodic', strength: percept.confidence ?? 0.6, source: 'perceive' });
+      ctx.broadcast('percept:' + modality, percept, percept.confidence);
       return percept;
     });
 
@@ -571,8 +631,9 @@ class CognitiveKernel {
       }
 
       ctx.decisions.push(decision);
-      ctx.broadcast('decision', decision, 0.8);
-      return decision;
+      const enriched = enrichDecideResult(decision, ctx);
+      ctx.broadcast('decision', enriched, 0.8);
+      return enriched;
     });
 
     // COMMIT handler
@@ -700,16 +761,34 @@ class CognitiveKernel {
           assessment: llmPred.assessment || llmPred.reasoning
         };
       } else {
+        // No LLM available: emit a deterministic prior so offline runs honor the
+        // "deterministic mock reasoning" guarantee and produce reproducible traces.
+        // Derive a stable value in [0.5, 0.8) from the target instead of Math.random(),
+        // which would make confidence (and downstream DECIDE outcomes) non-reproducible.
+        let h = 0;
+        const t = String(target);
+        for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0;
+        const derived = 0.5 + (h % 300) / 1000; // [0.5, 0.799]
         prediction = {
           target,
           horizon: node.params.horizon || 1,
           model: node.params.model || 'bayesian',
-          confidence: node.params.confidence ?? (0.5 + Math.random() * 0.3)
+          confidence: node.params.confidence ?? derived,
+          provenance: 'deterministic'
         };
       }
 
       ctx.predictions.set(target, prediction);
       ctx.broadcast('prediction', prediction, 0.6);
+      if (ctx.worldModel) {
+        ctx.worldModel.registerPrediction(prediction);
+        const lastError = ctx.worldModel.predictionErrors.slice(-1)[0];
+        if (lastError) {
+          prediction.prediction_error = lastError.error;
+          prediction.surprise = lastError.surprise;
+          prediction.outcome = lastError.outcome;
+        }
+      }
       return prediction;
     });
 

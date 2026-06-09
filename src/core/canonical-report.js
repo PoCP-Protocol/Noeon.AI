@@ -13,10 +13,33 @@ const { buildSelfExport } = require('./self-introspection');
 const { runPostRunSelfImprove } = require('./self-improve');
 const { buildDeclarationBrief } = require('./declaration-ir');
 const { evaluateCognitiveLoopContract } = require('./cognitive-loop-contract');
+const { buildCognitiveEvidence, validateCognitiveEvidence } = require('./cognitive-evidence');
+const { buildWorldModelReport } = require('./world-model-runtime');
+const { buildEffectReport } = require('./cognitive-effect');
+const { buildDualView } = require('./dual-view');
+const { buildAgentSurfaceReport } = require('./agent-surface');
 
 function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
   const canonical = canonicalPrep?.canonical;
   const ts = new Date().toISOString();
+
+  const cognitiveLoop = evaluateCognitiveLoopContract(ast, {
+    architecture: result.architecture,
+    report: {
+      execution: { phases: result.phases || [] },
+      observability: { runtime_trace: buildRuntimeTraceFromResult(result) }
+    }
+  });
+  const cognitiveEvidence = buildCognitiveEvidence(result, ast);
+  const evidenceCheck = validateCognitiveEvidence(cognitiveEvidence);
+  const effects = buildEffectReport(ast, result);
+  const partialReport = {
+    cognitiveEvidence,
+    effects,
+    cognitiveEvidenceValid: evidenceCheck.valid
+  };
+  const dualView = buildDualView(ast, result, partialReport);
+  const agentSurface = buildAgentSurfaceReport(ast, result, partialReport, dualView);
 
   return {
     schema: REPORT_SCHEMA,
@@ -91,13 +114,14 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
           }
         : canonical?.observability?.architecture || null
     },
-    cognitiveLoop: evaluateCognitiveLoopContract(ast, {
-      architecture: result.architecture,
-      report: {
-        execution: { phases: result.phases || [] },
-        observability: { runtime_trace: buildRuntimeTraceFromResult(result) }
-      }
-    }),
+    cognitiveLoop,
+    cognitiveEvidence,
+    cognitiveEvidenceValid: evidenceCheck.valid,
+    worldModel: buildWorldModelReport(result, ast, options),
+    effects,
+    effectsValid: effects.valid === true,
+    dualView,
+    agentSurface,
     ecosystem: buildEcosystemSnapshot(ast, options, result),
     aiNative: evaluateAiNative(ast, canonicalPrep, result),
     self: buildSelfExport(ast),
@@ -107,7 +131,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
   };
 }
 
-function buildCanonicalAuditEntry(report) {
+function buildCanonicalAuditEntry(report, options = {}) {
   return {
     schema: AUDIT_SCHEMA,
     ts: report.generatedAt,
@@ -123,15 +147,72 @@ function buildCanonicalAuditEntry(report) {
     coherence: report.fusion?.coherence,
     executor: report.ecosystem?.runtime?.executor || null,
     mcp_tools: report.ecosystem?.mcp?.attached_tools?.length || 0,
-    package_imports: report.ecosystem?.packages?.imports?.length || 0
+    package_imports: report.ecosystem?.packages?.imports?.length || 0,
+    checkpoint_id: report.checkpointMeta?.id || null,
+    transcript_id: options.transcript?.id || report.transcriptMeta?.id || null,
+    source_fingerprint: options.transcript?.source_fingerprint || report.transcriptMeta?.source_fingerprint || null,
+    replay_fingerprint: options.transcript?.replay_fingerprint || report.transcriptMeta?.replay_fingerprint || null,
+    cognitive_evidence_valid: report.cognitiveEvidenceValid === true,
+    effects: report.effects?.runtime || null
+  };
+}
+
+function resolveAuditRotationOptions(options = {}) {
+  const audit = options.audit || options.observability?.audit || {};
+  return {
+    maxLines: Number(audit.maxLines ?? options.maxLines ?? 5000),
+    maxBytes: Number(audit.maxBytes ?? options.maxBytes ?? 2 * 1024 * 1024),
+    rotateKeep: Number(audit.rotateKeep ?? options.rotateKeep ?? 3)
+  };
+}
+
+function listAuditArchiveFiles(dir, baseName = 'audit.jsonl') {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
+    .filter((name) => name === baseName || name.startsWith(`${baseName}.`))
+    .sort();
+}
+
+function rotateCanonicalAuditIfNeeded(auditFile, options = {}) {
+  if (!fs.existsSync(auditFile)) {
+    return { rotated: false, lines: 0, bytes: 0 };
+  }
+
+  const rot = resolveAuditRotationOptions(options);
+  const stat = fs.statSync(auditFile);
+  const lineCount = fs.readFileSync(auditFile, 'utf8').split('\n').filter(Boolean).length;
+  if (lineCount <= rot.maxLines && stat.size <= rot.maxBytes) {
+    return { rotated: false, lines: lineCount, bytes: stat.size };
+  }
+
+  const dir = path.dirname(auditFile);
+  const baseName = path.basename(auditFile);
+  const oldest = path.join(dir, `${baseName}.${rot.rotateKeep}`);
+  if (fs.existsSync(oldest)) fs.unlinkSync(oldest);
+
+  for (let i = rot.rotateKeep; i >= 2; i -= 1) {
+    const from = path.join(dir, `${baseName}.${i - 1}`);
+    const to = path.join(dir, `${baseName}.${i}`);
+    if (fs.existsSync(from)) fs.renameSync(from, to);
+  }
+
+  fs.renameSync(auditFile, path.join(dir, `${baseName}.1`));
+  return {
+    rotated: true,
+    previousLines: lineCount,
+    previousBytes: stat.size,
+    rotateKeep: rot.rotateKeep
   };
 }
 
 function appendCanonicalAudit(report, options = {}) {
-  const dir = options.canonical_audit_dir || path.join(process.cwd(), 'artifacts', 'canonical');
+  const dir = options.canonical_audit_dir ||
+    options.audit?.dir ||
+    path.join(process.cwd(), 'artifacts', 'canonical');
   const file = path.join(dir, 'audit.jsonl');
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.appendFileSync(file, `${JSON.stringify(buildCanonicalAuditEntry(report))}\n`, 'utf8');
+  rotateCanonicalAuditIfNeeded(file, options);
+  fs.appendFileSync(file, `${JSON.stringify(buildCanonicalAuditEntry(report, options))}\n`, 'utf8');
   return file;
 }
 
@@ -187,12 +268,14 @@ function exportCanonicalAudit(options = {}) {
 
   const limit = options.limit != null ? Number(options.limit) : null;
   const exported = limit != null && limit > 0 ? entries.slice(-limit) : entries;
+  const archives = listAuditArchiveFiles(dir).filter((name) => name !== 'audit.jsonl');
 
   return {
     schema: AUDIT_EXPORT_SCHEMA,
     generatedAt: ts,
     source: file,
     exists: true,
+    archives,
     summary: summarizeAuditEntries(entries),
     entries: exported
   };
@@ -205,6 +288,8 @@ module.exports = {
   buildCanonicalReport,
   buildCanonicalAuditEntry,
   appendCanonicalAudit,
+  rotateCanonicalAuditIfNeeded,
   exportCanonicalAudit,
-  summarizeAuditEntries
+  summarizeAuditEntries,
+  listAuditArchiveFiles
 };

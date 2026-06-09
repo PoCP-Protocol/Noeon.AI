@@ -1,0 +1,296 @@
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "noeon-ael",
+-  "version": "0.7.0-unified",
+-  "description": "Noeon AI - The world's first cognitive programming language with a Unified Cognitive Kernel. All programs (AEL contracts + cognitive flows) compile to a single Cognitive IR and execute through one brain-inspired kernel. Features: formal type system, standard library, module system, REPL, observability, CLI toolchain, and 550+ passing tests.",
++  "version": "1.0.0-alpha",
++  "description": "Noeon AI - An AI-native general programming language for cognitive programming. Programs compile to Cognitive IR and execute through a Unified Cognitive Kernel with language-level goals, cognition, evidence, decisions, actions, feedback, learning, observability, and governance.",
+   "type": "commonjs",
+   "main": "src/cli.js",
+   "bin": {
+@@ -30,6 +30,7 @@
+     "test:v06": "node tests/cognitive-v06.test.js",
+     "test:pkg": "node tests/pkg-phase5.test.js && node tests/cli-init.test.js",
+     "test:vm": "node tests/unified-vm.test.js && node tests/consciousness-scheduler.test.js && node tests/grammar-phase3.test.js",
++    "test:golden": "node tests/conformance/run.js",
+     "conformance": "node tests/conformance/run.js",
+     "conformance:init": "npm run conformance > artifacts/conformance.last.txt 2>&1 && npm run conformance:summary -- --init",
+     "conformance:summary": "node scripts/conformance-diff-summary.js",
+@@ -40,6 +41,7 @@
+   "keywords": [
+     "cognitive-programming",
+     "ai-language",
++    "ai-native-language",
+     "unified-kernel",
+     "cognitive-ir",
+     "type-system",
+@@ -47,9 +49,7 @@
+     "reasoning",
+     "metacognition",
+     "observability",
+-    "repl",
+-    "brain-inspired",
+-    "new-species"
++    "repl"
+   ],
+   "license": "MIT"
+ }
+
+--- /dev/null
++++ b/docs/spec/COGNITIVE_IR_SCHEMA_v1.0.md
+@@ -0,0 +1,79 @@
++# Cognitive IR Schema v1.0
++
++**Status:** Draft  
++**Version:** 1.0.0-alpha  
++**Scope:** This document freezes the minimum Cognitive Intermediate Representation required for Noeon v1.0-alpha convergence.
++
++---
++
++## 1. Purpose
++
++Cognitive IR is the shared execution representation for Noeon programs. Surface syntaxes such as `.noeon`, `.ael`, `.next`, and `.lim` may differ, but they must lower into a common cognitive program shape before execution.
++
++The goal of Cognitive IR is to make AI-native programs executable, inspectable, testable, auditable, governable, and model-neutral.
++
++---
++
++## 2. Core Principle
++
++```text
++Program = Goal + Context + Cognition + Action + Feedback + Evolution
++```
++
++Cognitive IR represents this formula as a typed node graph.
++
++---
++
++## 3. Required Node Types
++
++The v1.0-alpha IR node set is frozen to 14 canonical types:
++
++| Type | Meaning | Typical source |
++|---|---|---|
++| `intent` | What the program wants to achieve | `GOAL`, `OBJECTIVE`, `TASK`, `DRIVE` |
++| `constraint` | Resource, policy, or behavior limits | `CONSTRAINT`, `BUDGET`, `RISK`, `ATTEND` |
++| `process` | Reasoning, understanding, computation | `UNDERSTAND`, `REASON`, `INTUIT`, `COMPUTE` |
++| `validate` | Verification and reflection | `VERIFY`, `CHECK`, `REFLECT`, `SELF_CHECK` |
++| `learn` | Feedback and reinforcement | `FEEDBACK`, `LEARN`, `REWARD` |
++| `perceive` | Sensing and input | `PERCEIVE`, `OBSERVE`, `PLUGIN` |
++| `decide` | Choice, branch, threshold, or state transition | `DECIDE`, `FLOW` |
++| `commit` | Commitment, stake, or durable action intent | `COMMIT`, `COLLATERAL` |
++| `collaborate` | Delegation, action boundary, or multi-agent work | `ACT`, `DELEGATE`, `DEBATE`, `VOTE` |
++| `evolve` | Controlled adaptation or self-modification | `EVOLVE`, `MUTATE`, `UPDATE_POLICY` |
++| `remember` | Memory operations | `MEMORY`, `RECALL`, `REMEMBER`, `CONSOLIDATE` |
++| `attend` | Attention and focus | `ATTEND`, `FOCUS`, `WORKSPACE` |
++| `predict` | Anticipation and forecasting | `PREDICT` |
++| `meta` | Governance, policy, or metacognition | `META`, `META_RULE`, `POLICY` |
++
++---
++
++## 4. IR Node Shape
++
++Every node must conform to this minimum shape:
++
++```json
++{
++  "id": "ir_...",
++  "type": "process",
++  "params": {},
++  "children": [],
++  "dependencies": [],
++  "priority": 0.5,
++  "confidence": 1.0,
++  "source": "general"
++}
++```
++
++## 5. Execution Semantics
++
++A conforming v1.0-alpha runtime must preserve the normative phase order within one execution cycle:
++
++```text
++Perceive → Attend → Predict → Process → Decide → Validate → Learn → Remember → Evolve → Meta
++```
++
++Runtimes may skip empty phases. Runtimes may interleave or repeat phases in future schedulers, but the baseline deterministic kernel must preserve this order.
++
++## 6. Next Work
++
++The next patch should add JSON Schema conformance tests, stable deterministic node ids, IR snapshot tests for golden examples, explicit input/output schemas per node type, and effect/permission metadata for `collaborate` / `ACT` nodes.
+
+--- /dev/null
++++ b/schema/cognitive-ir.schema.json
+@@ -0,0 +1,116 @@
++{
++  "$schema": "https://json-schema.org/draft/2020-12/schema",
++  "$id": "https://noeon.ai/schemas/cognitive-ir.schema.json",
++  "title": "Noeon Cognitive IR v1.0-alpha",
++  "type": "object",
++  "required": [
++    "name",
++    "version",
++    "nodes",
++    "execution_order"
++  ],
++  "additionalProperties": true,
++  "properties": {
++    "name": {
++      "type": "string",
++      "minLength": 1
++    },
++    "version": {
++      "type": "string"
++    },
++    "created_at": {
++      "type": [
++        "number",
++        "integer",
++        "string"
++      ]
++    },
++    "stats": {
++      "type": "object"
++    },
++    "nodes": {
++      "type": "array",
++      "items": {
++        "$ref": "#/$defs/node"
++      }
++    },
++    "execution_order": {
++      "type": "array",
++      "items": {
++        "type": "string"
++      }
++    }
++  },
++  "$defs": {
++    "nodeType": {
++      "enum": [
++        "intent",
++        "constraint",
++        "process",
++        "validate",
++        "learn",
++        "perceive",
++        "decide",
++        "commit",
++        "collaborate",
++        "evolve",
++        "remember",
++        "attend",
++        "predict",
++        "meta"
++      ]
++    },
++    "node": {
++      "type": "object",
++      "required": [
++        "id",
++        "type",
++        "params",
++        "children",
++        "dependencies",
++        "priority",
++        "confidence",
++        "source"
++      ],
++      "additionalProperties": true,
++      "properties": {
++        "id": {
++          "type": "string",
++          "minLength": 1
++        },
++        "type": {
++          "$ref": "#/$defs/nodeType"
++        },
++        "params": {
++          "type": "object"
++        },
++        "children": {
++          "type": "array"
++        },
++        "dependencies": {
++          "type": "array",
++          "items": {
++            "type": "string"
++          }
++        },
++        "priority": {
++          "type": "number",
++          "minimum": 0,
++          "maximum": 1
++        },
++        "confidence": {
++          "type": "number",
++          "minimum": 0,
++          "maximum": 1
++        },
++        "source": {
++          "type": "string",
++          "minLength": 1
++        },
++        "metadata": {
++          "type": "object"
++        }
++      }
++    }
++  }
++}
+
+--- /dev/null
++++ b/examples/code_review_agent.noeon
+@@ -0,0 +1,16 @@
++PROFILE "general"
++VERSION "1.0.0-alpha"
++
++AGENT "CodeReviewer"
++  GOAL "Review a GitHub pull request and produce actionable comments"
++  MEMORY type=episodic+semantic
++  TOOLS ["github", "file_reader", "test_runner"]
++  POLICY require_evidence=true human_approval=false trace_required=true
++  FLOW
++    PERCEIVE source=github_pr modality=diff
++    UNDERSTAND context=code_change method=semantic_summary confidence=0.72
++    REASON strategy=bug_risk_analysis depth=3
++    DECIDE action=approve_or_request_changes threshold=0.75
++    ACT action=emit_review channel=markdown safety=medium
++    FEEDBACK source=reviewer signal=quality window=1
++    REFLECT "review quality" depth=standard
+
+--- /dev/null
++++ b/docs/patches/NOEON_V1_ALPHA_CONVERGENCE_PATCH.md
+@@ -0,0 +1,30 @@
++# Noeon v1.0-alpha Convergence Patch
++
++This patch moves Noeon from a broad cognitive-language prototype toward a developer-readable v1.0-alpha baseline.
++
++## Changes
++
++1. Align `package.json` metadata with v1.0-alpha positioning.
++2. Add Cognitive IR schema documentation.
++3. Add a practical Code Review Agent example.
++
++## Commands to verify
++
++```bash
++npm test
++npm run test:golden
++node src/cli.js compile examples/code_review_agent.noeon --format ir
++node src/cli.js run examples/code_review_agent.noeon --trace
++```
++
++## Recommended next patch
++
++Implement real tool bindings for:
++
++```text
++file.read
++http.request
++github.fetch_pr
++```
++
++Then `ACT` and `PERCEIVE` can move from symbolic execution toward real task execution.

@@ -1,0 +1,23 @@
+PROFILE "general"
+VERSION "1.0.0-alpha.1"
+
+# High-stakes payment approval with an enforced human-in-the-loop gate.
+#
+# The point: `require_citation=true` is a LANGUAGE-LEVEL hard constraint. When
+# the run reaches an irreversible ACT (releasing funds) with no attached
+# evidence, the runtime REFUSES to act, blocks, and mints a one-time human
+# approval token — an auditable record. A raw LLM prompt cannot guarantee this:
+# it would just emit text, and you'd have to trust it didn't act.
+
+AGENT "PaymentApprover"
+  GOAL "Release a 480000 USD vendor payment only when risk is acceptable"
+  MEMORY type=episodic+semantic
+  TOOLS ["transaction_lookup", "fraud_signals", "ledger"]
+  POLICY require_citation=true require_human_approval=true confidence_floor=0.85
+  FLOW
+    PERCEIVE channel=payment_request modality=structured
+    UNDERSTAND context=vendor_payment method=risk_analysis
+    REASON strategy=risk_analysis depth=2
+    DECIDE action=release_funds threshold=0.85 fallback=escalate
+    ACT action=release_funds channel=ledger
+    REFLECT "Was the release justified?" depth=deep

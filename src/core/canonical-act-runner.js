@@ -48,7 +48,8 @@ async function executeSnapshotCanonicalActs(canonical, ast, options = {}) {
     network: ast?.network || 'noeon-local',
     task: ast?.task || canonical?.task || 'canonical-act',
     feedback: options.feedback || {},
-    actionBindings
+    actionBindings,
+    pluginPolicy: options.pluginPolicy || null
   };
 
   const executed = [];

@@ -70,39 +70,36 @@ function buildExecutionSummary(result = {}) {
   };
 }
 
-function formatExecutionSummaryCompact(summary) {
-  if (!summary?.strategy) return null;
-  return [
-    summary.path || summary.strategy,
-    summary.strategy !== summary.path ? summary.strategy : null,
-    summary.hybrid ? 'hybrid' : null,
-    summary.snapshotAct ? 'snapshot-act' : null,
-    summary.actDriver ? `act: ${summary.actDriver}` : null,
-    summary.phases?.length ? summary.phases.join('→') : null
-  ].filter(Boolean).join(' · ');
-}
-
 function formatExecutionSummaryLines(result = {}) {
-  const summary = result.schema ? result : buildExecutionSummary(result);
+  const summary = buildExecutionSummary(result);
   const hasPath = Boolean(
     summary.strategy ||
     summary.driver ||
     summary.actDriver ||
     summary.hybrid ||
     summary.snapshotAct ||
-    summary.phases?.length
+    summary.phases.length
   );
   if (!hasPath) return [];
 
   const lines = ['Path:'];
-  if (summary.path) lines.push(`  path: ${summary.path}`);
   if (summary.strategy) lines.push(`  strategy: ${summary.strategy}`);
   if (summary.driver) lines.push(`  driver: ${summary.driver}`);
   if (summary.actDriver) lines.push(`  act: ${summary.actDriver}`);
   if (summary.hybrid) lines.push('  hybrid: canonical acts then cognitive kernel');
   if (summary.snapshotAct) lines.push('  snapshot-act: plugin acts via canonical snapshot');
-  if (summary.phases?.length) lines.push(`  phases: ${summary.phases.join(' → ')}`);
+  if (summary.phases.length) lines.push(`  phases: ${summary.phases.join(' → ')}`);
   return lines;
+}
+
+function formatExecutionSummaryCompact(summary = {}) {
+  if (!summary?.strategy && !summary?.path) return null;
+  const parts = [];
+  if (summary.path) parts.push(summary.path);
+  if (summary.strategy && summary.strategy !== summary.path) parts.push(summary.strategy);
+  if (summary.actDriver) parts.push(summary.actDriver);
+  if (summary.phases?.length) parts.push(summary.phases.join('→'));
+  return parts.join(' · ');
 }
 
 function formatActionTraceLines(trace = {}) {
@@ -127,8 +124,8 @@ function formatActionTraceLines(trace = {}) {
 
 module.exports = {
   extractActionTrace,
-  formatActionTraceLines,
   buildExecutionSummary,
+  formatExecutionSummaryLines,
   formatExecutionSummaryCompact,
-  formatExecutionSummaryLines
+  formatActionTraceLines
 };

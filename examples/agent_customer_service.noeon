@@ -9,6 +9,8 @@ AGENT "SupportAgent"
   FLOW
     PERCEIVE source=customer_inquiry modality=text
     REASON strategy=empathetic_resolution depth=2
+    # production (NOEON_ENV=production): append to plugin ACT below:
+    #   version=0.9.0 signature=hmac-sha256:377670b64676673cc64f512e9a40a9500e8220a312d7ec3c2d77dfa9dfd4a910
     ACT action=lookup_order url="https://example.com/orders/lookup" channel=web plugin=http_call mock=true
     DECIDE action=resolve threshold=0.75 fallback=escalate
     ACT action=respond_customer channel=chat

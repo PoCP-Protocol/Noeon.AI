@@ -93,6 +93,14 @@ function renderArchitectureHtml(model, filename) {
     ? `<div class="route exec">⚡ ${escapeHtml(exec.path || exec.strategy)} · ${escapeHtml(exec.strategy)}${exec.hybrid ? ' · hybrid' : ''}${exec.snapshotAct ? ' · snapshot-act' : ''}${exec.phases?.length ? ` · ${escapeHtml(exec.phases.join(' → '))}` : ''}</div>`
     : '';
 
+  const pluginActsHtml = model.pluginActs?.total
+    ? `<div class="meta plugin-acts">plugin acts (${model.pluginActs.total}): ${escapeHtml(
+      (model.pluginActs.acts || []).map((entry) =>
+        `${entry.plugin} (${entry.signed ? 'signed' : 'unsigned'}${entry.version ? ` · v${entry.version}` : ''})`
+      ).join(', ')
+    )}</div>`
+    : '';
+
   const csp = model.architectureMermaid
     ? "default-src 'none'; img-src data:; style-src 'unsafe-inline' https://cdn.jsdelivr.net; script-src https://cdn.jsdelivr.net 'unsafe-inline';"
     : "default-src 'none'; style-src 'unsafe-inline';";
@@ -134,6 +142,7 @@ function renderArchitectureHtml(model, filename) {
   <div class="file">${escapeHtml(filename || 'untitled')}</div>
   <div class="route">▸ ${escapeHtml(model.routeLabel || 'plan')}</div>
   ${execHtml}
+  ${pluginActsHtml}
   <div class="meta">core: ${escapeHtml(REGION_LABELS[model.core_field] || model.core_field || 'field')} · executive: ${escapeHtml(REGION_LABELS[model.executive] || 'Executive')} · ${(model.active_regions || []).length} regions${model.runtime ? ' · runtime attached' : ''}${model.compileMode ? ` · compile: ${escapeHtml(model.compileMode)} (${escapeHtml(model.primaryIr || 'cognitive')})` : ''}</div>
   ${model.actionTrace?.lastFetch ? `<div class="meta">last_fetch: ${escapeHtml(String(model.actionTrace.lastFetch).slice(0, 160))}</div>` : ''}
 

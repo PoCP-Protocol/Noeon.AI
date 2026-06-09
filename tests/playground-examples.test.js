@@ -36,6 +36,10 @@ assert(agentResearch?.autoCanonical === true, 'agent_research auto canonical');
 const hello = examples.find((e) => e.name === 'hello.noeon');
 assert(hello?.executionPath === 'cognitive', 'hello cognitive path');
 
+const signedDemo = examples.find((e) => e.name === 'signed_act_demo.noeon');
+assert(signedDemo?.executionPath === 'hybrid', 'signed_act_demo tagged hybrid');
+assert(signedDemo?.signedAct === true, 'signed_act_demo flagged signedAct');
+
 const curatedNames = new Set(CURATED_EXAMPLES.map((e) => e.name));
 for (const ex of examples) {
   assert(curatedNames.has(ex.name), `${ex.name} is in CURATED_EXAMPLES`);

@@ -16,10 +16,14 @@ function activate(context) {
   context.subscriptions.push(output);
 
   const goldenGateBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  goldenGateBar.command = 'noeon.refreshGoldenGateStatus';
+  goldenGateBar.command = 'noeon.refreshEngineeringStatus';
   context.subscriptions.push(goldenGateBar);
 
-  const executionBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  const productionGateBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  productionGateBar.command = 'noeon.refreshEngineeringStatus';
+  context.subscriptions.push(productionGateBar);
+
+  const executionBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 98);
   executionBar.name = 'Noeon Execution Path';
   context.subscriptions.push(executionBar);
 
@@ -68,8 +72,9 @@ function activate(context) {
       if (e.affectsConfiguration('noeon.brainHighlight')) {
         refreshActiveEditorChrome();
       }
-      if (e.affectsConfiguration('noeon.showGoldenGateStatus')) {
-        refreshGoldenGateStatusBar();
+      if (e.affectsConfiguration('noeon.showGoldenGateStatus') ||
+          e.affectsConfiguration('noeon.showProductionGateStatus')) {
+        refreshEngineeringStatusBars();
       }
       if (e.affectsConfiguration('noeon.showExecutionStatus')) {
         refreshFileExecutionStatusBar(vscode.window.activeTextEditor);
@@ -96,31 +101,66 @@ function activate(context) {
     });
   }
 
-  async function refreshGoldenGateStatusBar() {
-    if (!vscode.workspace.getConfiguration('noeon').get('showGoldenGateStatus', true)) {
-      goldenGateBar.hide();
-      return;
-    }
+  async function refreshEngineeringStatusBars() {
+    const showGolden = vscode.workspace.getConfiguration('noeon').get('showGoldenGateStatus', true);
+    const showProduction = vscode.workspace.getConfiguration('noeon').get('showProductionGateStatus', true);
+    if (!showGolden) goldenGateBar.hide();
+    if (!showProduction) productionGateBar.hide();
+    if (!showGolden && !showProduction) return;
+
     try {
       const stdout = await runCli(['status', '--json'], '', { showOutput: false });
       const status = JSON.parse(stdout);
-      const gg = status.goldenGate;
-      if (!gg?.available) {
-        goldenGateBar.text = '$(circle-outline) Golden Gate —';
-        goldenGateBar.tooltip = 'Run npm run gate:golden to generate artifacts/golden-gate/';
-      } else if (gg.ok) {
-        const probes = gg.probes?.total != null ? ` · probes ${gg.probes.passed}/${gg.probes.total}` : '';
-        goldenGateBar.text = `$(pass) Golden Gate${probes}`;
-        goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total} · hybrid ${gg.aiPath?.hybrid ?? 0}`;
-      } else {
-        goldenGateBar.text = '$(error) Golden Gate FAIL';
-        goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total}`;
+
+      if (showGolden) {
+        const gg = status.goldenGate;
+        if (!gg?.available) {
+          goldenGateBar.text = '$(circle-outline) Golden Gate —';
+          goldenGateBar.tooltip = 'Run npm run gate:golden to generate artifacts/golden-gate/';
+        } else if (gg.ok) {
+          const probes = gg.probes?.total != null ? ` · probes ${gg.probes.passed}/${gg.probes.total}` : '';
+          goldenGateBar.text = `$(pass) Golden Gate${probes}`;
+          goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total} · hybrid ${gg.aiPath?.hybrid ?? 0}`;
+        } else {
+          goldenGateBar.text = '$(error) Golden Gate FAIL';
+          goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total}`;
+        }
+        goldenGateBar.show();
       }
-      goldenGateBar.show();
+
+      if (showProduction) {
+        const pg = status.productionGate;
+        if (pg?.available) {
+          const checkTxt = pg.checks?.total != null ? ` · ${pg.checks.passed}/${pg.checks.total}` : '';
+          productionGateBar.text = pg.ok ? `$(pass) Production${checkTxt}` : '$(error) Production FAIL';
+          productionGateBar.tooltip = [
+            pg.generatedAt ? `last run ${pg.generatedAt}` : null,
+            pg.checks?.failed?.length ? `failed: ${pg.checks.failed.join(', ')}` : null,
+            'npm run gate:production'
+          ].filter(Boolean).join(' · ');
+        } else {
+          const pp = status.pluginPolicy;
+          productionGateBar.text = '$(circle-outline) Production —';
+          productionGateBar.tooltip = pp?.requireSignature
+            ? `Policy ${pp.profile} · signature required · npm run gate:production`
+            : 'Dev profile — npm run gate:production · signed ACT: examples/signed_act_demo.noeon';
+        }
+        productionGateBar.show();
+      }
     } catch {
-      goldenGateBar.text = '$(circle-outline) Noeon';
-      goldenGateBar.show();
+      if (showGolden) {
+        goldenGateBar.text = '$(circle-outline) Noeon';
+        goldenGateBar.show();
+      }
+      if (showProduction) {
+        productionGateBar.text = '$(circle-outline) Production —';
+        productionGateBar.show();
+      }
     }
+  }
+
+  async function refreshGoldenGateStatusBar() {
+    return refreshEngineeringStatusBars();
   }
 
   function updateExecutionStatusBar(result) {
@@ -385,14 +425,15 @@ function activate(context) {
       }
       vscode.window.showInformationMessage(`Noeon brain highlight: ${next ? 'on' : 'off'}`);
     }),
-    vscode.commands.registerCommand('noeon.refreshGoldenGateStatus', () => refreshGoldenGateStatusBar()),
+    vscode.commands.registerCommand('noeon.refreshGoldenGateStatus', () => refreshEngineeringStatusBars()),
+    vscode.commands.registerCommand('noeon.refreshEngineeringStatus', () => refreshEngineeringStatusBars()),
     vscode.commands.registerCommand('noeon.showArchitecturePanel', async () => {
       await vscode.commands.executeCommand('noeon.architecture.focus');
       const editor = vscode.window.activeTextEditor;
       if (architecturePanel && editor) architecturePanel.refresh(editor);
     })
   );
-  refreshGoldenGateStatusBar();
+  refreshEngineeringStatusBars();
 }
 
 function deactivate() {}

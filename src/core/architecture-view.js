@@ -1,16 +1,19 @@
 'use strict';
 
 const { formatExecutionSummaryCompact } = require('./action-trace');
+const { formatPluginActsLine } = require('./act-binding-status');
 
 function formatArchitectureLines(data = {}) {
   const arch = data.architecture;
   const lines = [];
   const execLine = formatExecutionSummaryCompact(data.executionSummary);
+  const pluginActsLine = formatPluginActsLine(data.pluginActs);
 
   if (data.routeLabel) lines.push(`route: ${data.routeLabel}`);
   if (execLine) {
     lines.push(`execution: ${execLine}`);
   }
+  if (pluginActsLine) lines.push(pluginActsLine);
   if (data.compileMode) {
     lines.push(`compile: ${data.compileMode} · primary ${data.primaryIr || 'cognitive'}`);
   }

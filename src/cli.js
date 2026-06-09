@@ -29,7 +29,17 @@ const {
 const { runDoctor, formatDoctorReport } = require('./doctor');
 const { buildReleaseManifest, NOEON_VERSION } = require('./core/release-version');
 const { buildCognitiveGraph, formatMermaidGraph } = require('./graph');
-const { extractActionTrace, formatActionTraceLines, formatExecutionSummaryLines, buildExecutionSummary } = require('./core/action-trace');
+const {
+  extractActionTrace,
+  formatActionTraceLines,
+  formatExecutionSummaryLines,
+  buildExecutionSummary
+} = require('./core/action-trace');
+const {
+  attachPluginActsToPayload,
+  formatPluginActsStatusLines,
+  summarizePluginActsFromCanonical
+} = require('./core/act-binding-status');
 
 const VERSION = NOEON_VERSION;
 
@@ -87,6 +97,7 @@ async function cmdRun(filePath) {
     with_protocol: flags['with-protocol'] || flags.with_protocol || 'auto',
     strict_protocol: Boolean(flags['strict-protocol'] || flags.strict_protocol),
     approval_token: flags['approval-token'] || flags.approval_token || undefined,
+    human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir,
     feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
   };
   if (flags.canonical) runOptions.general_canonical = true;
@@ -107,6 +118,7 @@ async function cmdRun(filePath) {
   }
 
   if (flags.json) {
+    const canonicalIr = compilePresentation?.canonicalIr || ast.general?.canonicalIr || result.canonical || null;
     const payload = {
       ...result,
       actionTrace,
@@ -117,14 +129,15 @@ async function cmdRun(filePath) {
             compileMode: result.compileMode || compilePresentation.compileMode,
             primaryIr: result.primaryIr || compilePresentation.primaryIr,
             cognitiveIr: compilePresentation.program?.toJSON?.() || null,
-            canonicalIr: compilePresentation.canonicalIr || ast.general?.canonicalIr || null
+            canonicalIr
           }
         : {
             compileMode: result.compileMode,
             primaryIr: result.primaryIr,
-            canonicalIr: ast.general?.canonicalIr || result.canonical || null
+            canonicalIr
           })
     };
+    attachPluginActsToPayload(payload, canonicalIr);
     console.log(JSON.stringify(payload, null, 2));
     if (writtenNextMemory) {
       console.error(`next memory -> ${writtenNextMemory}`);
@@ -138,6 +151,10 @@ async function cmdRun(filePath) {
       for (const d of result.resonance.dialogues || []) {
         console.error(`  ↳ dialogue: ${d.prompt}`);
       }
+    } else if (result.awaitingHuman && result.pendingApproval) {
+      console.error('\x1b[33m⏸ Blocked — awaiting human approval\x1b[0m');
+      console.error(`  ${result.pendingApproval.message}`);
+      console.error(`  ${result.pendingApproval.approve_hint}`);
     } else {
       console.error('\x1b[31m✗ Blocked by governance preflight\x1b[0m');
       (result.validation?.errors || result.governance?.errors || []).forEach((e) => console.error(`  • ${e}`));
@@ -161,6 +178,13 @@ async function cmdRun(filePath) {
     if (pathLines.length) {
       console.log('');
       pathLines.forEach((line) => console.log(line));
+    }
+    const pluginLines = formatPluginActsStatusLines(
+      summarizePluginActsFromCanonical(ast.general?.canonicalIr || result.canonicalIr)
+    );
+    if (pluginLines.length) {
+      console.log('');
+      pluginLines.forEach((line) => console.log(line));
     }
     if (result.llm) console.log(`LLM:     ${result.llm.totalCalls} call(s), mode ${process.env.NOEON_LLM_MODE || 'auto'}`);
     if (result.protocol?.enriched) {
@@ -407,27 +431,31 @@ function cmdConverge(targetPath) {
   process.exit(matrix.aligned ? 0 : 1);
 }
 
-function cmdReport(sub) {
-  if (sub === 'export') {
-    const { exportCanonicalAudit } = require('./core/canonical-report');
-    const bundle = exportCanonicalAudit({
-      dir: flags.dir,
-      limit: flags.limit ? Number(flags.limit) : undefined
-    });
-    if (flags.out) {
-      fs.writeFileSync(resolveFile(flags.out), JSON.stringify(bundle, null, 2), 'utf8');
-      console.log(`Written: ${resolveFile(flags.out)}`);
-    } else if (flags.json) {
-      console.log(JSON.stringify(bundle, null, 2));
-    } else {
-      console.log(`Canonical audit export (${bundle.summary.total} entries)`);
-      console.log(`  source: ${bundle.source}`);
-      console.log(`  success: ${bundle.summary.success} | blocked: ${bundle.summary.blocked} | failed: ${bundle.summary.failed}`);
-    }
-    process.exit(0);
+function cmdReportExport() {
+  const { exportCanonicalAudit } = require('./core/canonical-report');
+  const bundle = exportCanonicalAudit({
+    dir: flags.dir,
+    limit: flags.limit ? Number(flags.limit) : undefined
+  });
+  const outPath = flags.out ? resolveFile(flags.out) : null;
+  if (outPath) {
+    fs.writeFileSync(outPath, JSON.stringify(bundle, null, 2), 'utf8');
+  }
+  if (flags.json) {
+    console.log(JSON.stringify(bundle, null, 2));
+  } else if (outPath) {
+    console.log(`Audit export → ${outPath}`);
+  } else {
+    console.log(JSON.stringify(bundle, null, 2));
+  }
+  process.exit(0);
+}
+
+function cmdReport() {
+  if (target === 'export') {
+    cmdReportExport();
     return;
   }
-
   const { readCanonicalAudit, formatAuditReport } = require('./core/canonical-audit-read');
   const report = readCanonicalAudit({
     dir: flags.dir,
@@ -441,13 +469,99 @@ function cmdReport(sub) {
   process.exit(0);
 }
 
-function cmdAudit(sub) {
-  if (sub === 'export') {
-    cmdReport('export');
+function cmdAudit() {
+  if (target === 'export') {
+    cmdReportExport();
     return;
   }
-  console.error('Usage: noeon audit export [--json] [--out file] [--dir path] [--limit N]');
+  console.error('Usage: noeon audit export [--json] [--dir dir] [--out file] [--limit N]');
   process.exit(1);
+}
+
+async function cmdReplay() {
+  const {
+    replayLastForFile,
+    replayById,
+    listExecutionTranscripts,
+    formatReplayReport
+  } = require('./core/canonical-replay');
+
+  if (flags.list) {
+    const list = listExecutionTranscripts({ dir: flags.dir });
+    if (flags.json) console.log(JSON.stringify(list, null, 2));
+    else {
+      for (const t of list.slice(0, 30)) {
+        console.log(`${t.generatedAt?.slice(0, 19) || '—'}  ${t.id}  ${t.success ? 'ok' : 'fail'}  ${t.source || '—'}`);
+      }
+    }
+    process.exit(0);
+  }
+
+  const idFlag = flags.id || flags.transcript;
+  if (idFlag) {
+    const payload = await replayById(String(idFlag), { dir: flags.dir, save_replay: flags.save !== false });
+    if (flags.json) console.log(JSON.stringify(payload, null, 2));
+    else console.log(formatReplayReport(payload));
+    process.exit(payload.match ? 0 : 1);
+  }
+
+  const filePath = target || positional[0];
+  if (!filePath) {
+    console.error('Usage: noeon replay <file.noeon> [--last] [--id transcript-id] [--list] [--json] [--dir audit-dir]');
+    process.exit(1);
+  }
+
+  const payload = await replayLastForFile(path.resolve(process.cwd(), filePath), { dir: flags.dir });
+  if (flags.json) console.log(JSON.stringify(payload, null, 2));
+  else console.log(formatReplayReport(payload));
+  process.exit(payload.match ? 0 : 1);
+}
+
+async function cmdCheckpoint() {
+  const { listExecutionCheckpoints } = require('./core/execution-checkpoint');
+  const list = listExecutionCheckpoints({ dir: flags.dir });
+  if (flags.json) console.log(JSON.stringify(list, null, 2));
+  else {
+    for (const cp of list.slice(0, 30)) {
+      const tag = cp.awaiting_human ? ' human' : '';
+      console.log(`${cp.generatedAt?.slice(0, 19) || '—'}  ${cp.id}  ${cp.agent || '—'}${tag}  ${cp.source || '—'}`);
+    }
+  }
+  process.exit(0);
+}
+
+async function cmdResume() {
+  const {
+    resumeFromCheckpoint,
+    resumeLastForFile,
+    formatResumeReport
+  } = require('./core/canonical-checkpoint');
+
+  const idFlag = flags.id || flags.checkpoint;
+  if (idFlag) {
+    const payload = await resumeFromCheckpoint(String(idFlag), {
+      dir: flags.dir,
+      approval_token: flags['approval-token'] || flags.approval_token,
+      json: flags.json
+    });
+    if (flags.json) console.log(JSON.stringify(payload, null, 2));
+    else console.log(formatResumeReport(payload));
+    process.exit(payload.success ? 0 : 1);
+  }
+
+  const filePath = target || positional[0];
+  if (!filePath) {
+    console.error('Usage: noeon resume <file.noeon> [--id checkpoint-id] [--list via checkpoint] [--json] [--dir audit-dir] [--approval-token TOKEN]');
+    process.exit(1);
+  }
+
+  const payload = await resumeLastForFile(path.resolve(process.cwd(), filePath), {
+    dir: flags.dir,
+    approval_token: flags['approval-token'] || flags.approval_token
+  });
+  if (flags.json) console.log(JSON.stringify(payload, null, 2));
+  else console.log(formatResumeReport(payload));
+  process.exit(payload.success ? 0 : 1);
 }
 
 async function cmdConform(targetPath) {
@@ -1211,19 +1325,8 @@ async function cmdPipeline(filePath) {
     trace: flags.trace === true
   });
   if (flags.json) {
-    console.log(JSON.stringify({
-      success: out.result?.success,
-      blocked: out.result?.blocked,
-      profile: out.profile,
-      coreSurface: out.coreSurface,
-      routeLabel: out.routeLabel,
-      stack: out.stack,
-      plan: out.plan,
-      architecture: out.architecture,
-      phases: out.result?.phases,
-      scheduler: out.result?.scheduler,
-      report: out.report
-    }, null, 2));
+    const { formatPipelineJson } = require('../language-server/noeon-service');
+    console.log(JSON.stringify(formatPipelineJson(out), null, 2));
   } else {
     console.log(`\x1b[36mPipeline\x1b[0m ${filePath}`);
     console.log(`  core: ${out.coreSurface} | profile: ${out.profile} | route: ${out.routeLabel}`);
@@ -1598,7 +1701,7 @@ function cmdHelp() {
 \x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
 \x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
 \x1b[1mFusion:\x1b[0m     fuse | triad | converge | relay | gate
-\x1b[1mCanonical:\x1b[0m report | report export | audit export | conform
+\x1b[1mCanonical:\x1b[0m report | audit | replay | checkpoint | resume | conform
 \x1b[1mNext:\x1b[0m       epoch | diff | merge | mycelium | field-memory
 \x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | studio | lsp
 
@@ -1631,8 +1734,6 @@ function cmdHelp() {
   noeon converge parity --graph
   noeon converge examples/parity --json --out artifacts/convergence.json
   noeon report --limit 20
-  noeon report export --json --out artifacts/audit-export.json
-  noeon audit export --json
   noeon conform parity --json
   noeon graph examples/genesis.next --memory
   noeon graph examples/hello.noeon --out hello.mmd
@@ -1673,8 +1774,11 @@ async function main() {
     case 'converge': cmdConverge(target); break;
     case 'relay': await cmdRelay(target); break;
     case 'gate': cmdGate(target); break;
-    case 'report': cmdReport(target); break;
-    case 'audit': cmdAudit(target); break;
+    case 'report': cmdReport(); break;
+    case 'audit': cmdAudit(); break;
+    case 'replay': await cmdReplay(); break;
+    case 'checkpoint': await cmdCheckpoint(); break;
+    case 'resume': await cmdResume(); break;
     case 'conform': await cmdConform(target); break;
     case 'parse': cmdParse(target); break;
     case 'compile': cmdCompile(target); break;

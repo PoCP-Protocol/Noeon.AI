@@ -8,8 +8,12 @@ const {
   resolveGeneralCanonical
 } = require('../src/core/general-canonical-mode');
 const { describeExecutionPath } = require('../src/core/playground-examples');
-const { buildExecutionSummary } = require('../src/core/action-trace');
 const { regionForPrimitive, BRAIN_REGIONS, buildArchitectureMermaid } = require('../src/core/cognitive-architecture');
+const { buildExecutionSummary } = require('../src/core/action-trace');
+const {
+  summarizePluginActsFromCanonical,
+  attachPluginActsToPayload
+} = require('../src/core/act-binding-status');
 
 const KEYWORDS = [
   'PROFILE', 'MODULE', 'VERSION', 'NETWORK', 'PROGRAM', 'TASK', 'OBJECTIVE', 'GOAL',
@@ -202,6 +206,39 @@ function resolveGeneralImports(source) {
   return imports;
 }
 
+function buildFileExecutionSummary(source, filename = '') {
+  const execPath = buildExecutionPathDoc(source, filename);
+  if (!execPath?.strategy) return null;
+  return buildExecutionSummary({
+    executionStrategy: execPath.strategy,
+    hybridActExecution: execPath.strategy === 'hybrid-canonical-acts',
+    snapshotActExecution: execPath.strategy === 'tool-snapshot-primary'
+  });
+}
+
+function getFileExecutionSummary(source, filename = '') {
+  return buildFileExecutionSummary(source, filename);
+}
+
+function resolveFilePluginActs(source, filename = '') {
+  try {
+    const { ast } = parseNoeonInput(source, { filename: filename || 'buffer.noeon' });
+    return summarizePluginActsFromCanonical(ast?.general?.canonicalIr);
+  } catch {
+    return null;
+  }
+}
+
+function appendPluginActSigningDoc(baseDoc, currentLine = '') {
+  const signed = /signature\s*=/.test(currentLine);
+  const version = currentLine.match(/version\s*=\s*([\d.]+)/i)?.[1];
+  if (signed) {
+    const versionTxt = version ? ` · version \`${version}\`` : '';
+    return `${baseDoc}\n\n**Signed ACT** — production plugin policy satisfied${versionTxt}.`;
+  }
+  return `${baseDoc}\n\n**Production signing:** append \`version=0.9.0 signature=hmac-sha256:...\` to the ACT line (see \`signed_act_demo.noeon\`).`;
+}
+
 function buildExecutionPathDoc(source, filename = '') {
   try {
     const { ast } = parseNoeonInput(source, { filename: filename || 'buffer.noeon' });
@@ -218,22 +255,6 @@ function buildExecutionPathDoc(source, filename = '') {
   } catch {
     return null;
   }
-}
-
-function getFileExecutionSummary(source, filename = '') {
-  const execPath = buildExecutionPathDoc(source, filename);
-  if (!execPath?.strategy) return null;
-  return {
-    ...buildExecutionSummary({
-      executionStrategy: execPath.strategy,
-      hybridActExecution: execPath.strategy === 'hybrid-canonical-acts',
-      snapshotActExecution: execPath.strategy === 'tool-snapshot-primary',
-      canonicalPrimary: execPath.auto,
-      phases: []
-    }),
-    auto: execPath.auto,
-    acts: execPath.acts
-  };
 }
 
 function appendExecutionPathDoc(baseDoc, execPath) {
@@ -304,6 +325,7 @@ function getHover(source, line, character, filename = '') {
     const plugin = current.match(/plugin\s*=\s*(\w+)/i)?.[1];
     let doc = appendExecutionPathDoc(HOVER_DOCS.ACT, execPath);
     if (plugin) doc += `\n\n**Plugin:** \`${plugin}\` via \`canonical.execution.acts\`.`;
+    doc = appendPluginActSigningDoc(doc, current);
     const region = brainRegionDoc('ACT');
     return { keyword: 'ACT', doc: `${doc}${region}` };
   }
@@ -323,14 +345,23 @@ function getHover(source, line, character, filename = '') {
 
 function getDocumentSymbols(source, filename = '') {
   const symbols = [];
-  const exec = getFileExecutionSummary(source, filename);
-  if (exec?.strategy) {
+  const execPath = buildExecutionPathDoc(source, filename);
+  if (execPath?.path) {
     symbols.push({
-      name: `exec: ${exec.path} · ${exec.strategy}`,
+      name: `exec: ${execPath.path} · ${execPath.strategy}`,
       kind: 'execution',
-      line: 1,
-      executionSummary: exec
+      line: 1
     });
+  }
+  const pluginActs = resolveFilePluginActs(source, filename);
+  if (pluginActs?.acts?.length) {
+    for (const act of pluginActs.acts) {
+      symbols.push({
+        name: `${act.plugin} (${act.signed ? 'signed' : 'unsigned'})`,
+        kind: 'plugin-act',
+        line: 1
+      });
+    }
   }
   const lines = source.split('\n');
   lines.forEach((line, idx) => {
@@ -440,21 +471,27 @@ function getCodeLenses(source, filename = 'buffer.noeon') {
   const lenses = [];
   const lines = source.split('\n');
   const summary = getArchitectureSummary(source, filename);
-  const exec = getFileExecutionSummary(source, filename);
   const decorations = getBrainLineDecorations(source);
+  const execPath = buildExecutionPathDoc(source, filename);
   const skipRegionLens = new Set(['AGENT', 'GOAL', 'OBJECTIVE', 'FLOW', 'FUSE', 'PROFILE', 'VERSION', 'MODULE', 'TASK', 'PROGRAM']);
 
-  if (exec?.strategy && !summary.error) {
-    for (let i = 0; i < lines.length; i += 1) {
-      const trimmed = lines[i].trimStart();
-      if (/^(?:PROFILE|profile)\s+"/i.test(trimmed)) {
-        lenses.push({
-          line: i + 1,
-          title: `⚡ exec: ${exec.path}${exec.auto ? ' (auto)' : ''} · ${exec.strategy}`,
-          command: 'noeon.pipelineFile'
-        });
-        break;
-      }
+  if (execPath?.path) {
+    lenses.push({
+      line: 1,
+      title: `▸ exec: ${execPath.path} · ${execPath.strategy}`,
+      command: null
+    });
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const trimmed = lines[i].trimStart();
+    if (/^ACT\b/i.test(trimmed) && /plugin\s*=/.test(trimmed)) {
+      const signed = /signature\s*=/.test(trimmed);
+      lenses.push({
+        line: i + 1,
+        title: signed ? '🔐 signed ACT' : '⚠ unsigned ACT',
+        command: null
+      });
     }
   }
 
@@ -526,6 +563,9 @@ function buildArchitectureViewModel(source, filename = 'buffer.noeon') {
     active_regions: summary.active_regions || arch.active_regions || [],
     agent_flows: summary.agent_flows || arch.agent_flows || []
   };
+  const executionSummary = buildFileExecutionSummary(source, filename);
+  const pluginActsSummary = resolveFilePluginActs(source, filename);
+  const pluginActs = pluginActsSummary?.total ? pluginActsSummary : null;
 
   return {
     routeLabel: summary.routeLabel,
@@ -533,7 +573,8 @@ function buildArchitectureViewModel(source, filename = 'buffer.noeon') {
     agent_flows: architecture.agent_flows,
     stack: summary.stack,
     canonical: summary.canonical || null,
-    executionSummary: getFileExecutionSummary(source, filename),
+    executionSummary,
+    pluginActs,
     architecture,
     cognitive_cycle: arch.cognitive_cycle || [],
     pipeline_phases: arch.pipeline_phases || null,
@@ -582,10 +623,6 @@ function mergeRuntimeIntoViewModel(model, execution = {}) {
     snapshotActCount: execution.snapshotActCount ?? model.snapshotActCount ?? null,
     actDriver: execution.actDriver || model.actDriver || null,
     snapshotActExecution: execution.snapshotActExecution ?? model.snapshotActExecution ?? null,
-    executionSummary: execution.executionSummary ||
-      (execution.executionStrategy || execution.hybridActExecution != null
-        ? require('../src/core/action-trace').buildExecutionSummary(execution)
-        : model.executionSummary || null),
     era: execution.era || model.era || null,
     actionTrace: execution.actionTrace || model.actionTrace || null,
     architectureMermaid: buildArchitectureMermaid(architecture),
@@ -629,7 +666,8 @@ function buildBrainApiPayload(source, filename = 'buffer.noeon', options = {}) {
 
 function formatPipelineJson(out) {
   const result = out.result || {};
-  return {
+  const executionSummary = buildExecutionSummary(result);
+  const payload = {
     success: result.success,
     blocked: result.blocked,
     profile: out.profile,
@@ -651,19 +689,19 @@ function formatPipelineJson(out) {
     phases: result.phases,
     scheduler: result.scheduler,
     actionTrace: out.actionTrace || null,
+    executionSummary,
     canonicalPrimary: result.canonicalPrimary ?? out.prep?.canonicalPrimary ?? false,
     canonicalSource: result.canonicalSource || out.prep?.canonicalSource || null,
     executionDriver: result.executionDriver || out.prep?.executionDriver || null,
     snapshotActCount: result.snapshotActCount ?? out.prep?.snapshotActCount ?? null,
     actDriver: result.actDriver || null,
     snapshotActExecution: result.snapshotActExecution === true,
-    hybridActExecution: result.hybridActExecution === true,
-    executionStrategy: result.executionStrategy || null,
-    executionSummary: require('../src/core/action-trace').buildExecutionSummary(result),
     era: require('../src/core/release-version').NOEON_ERA,
     report: out.report,
     error: result.error || null
   };
+  attachPluginActsToPayload(payload, out.ast?.general?.canonicalIr);
+  return payload;
 }
 
 async function runPipelineRequest(source, filename = 'buffer.noeon', options = {}) {
@@ -701,9 +739,6 @@ async function runPipelineRequest(source, filename = 'buffer.noeon', options = {
     snapshotActCount: exec.snapshotActCount ?? json.snapshotActCount ?? null,
     actDriver: exec.actDriver || json.actDriver || null,
     snapshotActExecution: exec.snapshotActExecution ?? json.snapshotActExecution ?? false,
-    hybridActExecution: exec.hybridActExecution ?? json.hybridActExecution ?? false,
-    executionStrategy: exec.executionStrategy || json.executionStrategy || null,
-    executionSummary: json.executionSummary || require('../src/core/action-trace').buildExecutionSummary(exec),
     era: json.era,
     cognitiveIr: compiled.program?.toJSON?.() || null,
     canonicalIr: presentation.canonicalIr || out.ast?.general?.canonicalIr || null
@@ -753,8 +788,9 @@ module.exports = {
   mergeRuntimeIntoViewModel,
   buildCanonicalPlanSummary,
   buildExecutionPathDoc,
-  getFileExecutionSummary,
   appendExecutionPathDoc,
+  getFileExecutionSummary,
+  buildFileExecutionSummary,
   BRAIN_REGION_COLORS,
   KEYWORDS,
   HOVER_DOCS,

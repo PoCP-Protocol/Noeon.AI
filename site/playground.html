@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Noeon Playground</title>
+    <title>Noeon 体验 · 执行证明</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <link rel="stylesheet" href="./playground.css" />
@@ -11,151 +17,170 @@
   <body class="playground-body">
     <header class="topbar">
       <div class="container nav-wrap">
-        <div class="brand"><a href="./index.html">Noeon</a> / Playground</div>
+        <div class="brand"><a href="./index.html">Noeon</a> / 体验</div>
         <nav>
-          <a href="./index.html">Home</a>
-          <a href="./convergence.html">Convergence</a>
-          <a href="./studio.html">Studio</a>
-          <a href="./workbench.html">Workbench</a>
-          <a href="./gate.html">Human Gate</a>
-          <a href="./fusion.html">Fusion</a>
+          <a href="./index.html">首页</a>
+          <a href="./index.html#mechanism">机制</a>
+          <a href="./playground.html" aria-current="page">体验</a>
+          <a href="./index.html#faq">FAQ</a>
         </nav>
       </div>
     </header>
 
     <main class="container playground">
-      <section class="playground-header">
-        <h1>Noeon Playground</h1>
-        <p>Write, validate, compile, and run Noeon (.noeon and .ael) programs in the browser.</p>
+      <section class="playground-header pg-hero-minimal">
+        <p class="pg-hero-tag">
+          <a href="./index.html#mechanism">协作链</a> · 第 3 步「执行证明」的语言层演示
+        </p>
+        <h1>声明目标，留下证据</h1>
+        <p class="pg-hero-formula">Program = Goal + Context + Cognition + Action + Feedback + Evolution</p>
+        <p class="pg-hero-lead">
+          用 Noeon 描述<strong>要完成什么</strong>与<strong>如何思考、如何行动</strong>；运行时生成可追踪的执行链。
+          本页 30 秒内证明「可运行、可追溯」——不是聊天 Demo，也不是 IDE 替代品。
+        </p>
+        <div class="pg-cta">
+          <span>深入编写与调试 →</span>
+          <a class="btn ghost btn-sm" href="../vscode-extension/README.md">VS Code / Cursor 扩展</a>
+          <a class="btn ghost btn-sm" href="./workbench.html">工作台（IR · Trace）</a>
+        </div>
       </section>
 
-      <div class="playground-toolbar">
-        <select id="example-select" aria-label="Load example">
-          <option value="">Load example…</option>
+      <section class="pg-start-card" aria-label="选择演示">
+        <h2 class="pg-start-title">两个招牌演示</h2>
+        <p class="pg-start-sub">对应首页「证明优于宣称」——规则写在程序里，证据留在链上。</p>
+        <div id="signature-demos" class="pg-signature-grid pg-signature-duo" aria-label="招牌演示"></div>
+        <div class="pg-start-row pg-start-run">
+          <button id="btn-run" class="btn primary pg-run-btn" type="button">运行</button>
+          <span id="example-desc-hint" class="example-desc-hint inline-hint"></span>
+        </div>
+        <select id="example-select" class="visually-hidden" aria-hidden="true" tabindex="-1">
+          <option value="">选择示例…</option>
         </select>
-        <span id="example-path-hint" class="example-path-hint hidden" aria-live="polite"></span>
-        <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
-          <input type="checkbox" id="canonical-mode" />
-          Canonical IR primary
-        </label>
-        <button id="btn-validate" class="btn ghost">Validate</button>
-        <button id="btn-compile" class="btn ghost">Compile IR</button>
-        <button id="btn-run" class="btn primary">Run</button>
-        <button id="btn-plan" class="btn ghost">Plan</button>
-        <button id="btn-brain" class="btn ghost">Brain</button>
-        <button id="btn-ai-eval" class="btn ghost">AI Lens</button>
-        <button id="btn-golden" class="btn ghost">Golden</button>
-        <button id="btn-dream" class="btn ghost">Dream</button>
-        <button id="btn-reflect" class="btn ghost">Reflect</button>
-        <button id="btn-patch" class="btn ghost">Patch</button>
-        <button id="btn-universal" class="btn ghost">Universal</button>
-        <button id="btn-universal-scaffold" class="btn ghost">+ Universal</button>
-        <button id="btn-fusion" class="btn ghost">Fusion</button>
-        <button id="btn-explain" class="btn ghost">Explain</button>
-        <span id="fusion-badge" class="fusion-badge hidden" aria-live="polite"></span>
-        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
-        <span class="toolbar-hint">Load a .noeon demo or write .ael · Ctrl+Enter to run</span>
-      </div>
+        <input type="search" id="example-filter" class="visually-hidden" tabindex="-1" aria-hidden="true" />
+        <input type="checkbox" id="canonical-mode" hidden aria-hidden="true" />
+      </section>
 
-      <div class="playground-grid">
-        <div class="panel source-panel">
-          <h2>Source (.noeon / .ael)</h2>
-          <div id="source-route-bar" class="source-route-bar hidden" aria-live="polite"></div>
-          <div class="source-editor">
-            <div id="source-gutter" class="source-gutter" aria-hidden="true"></div>
-            <textarea id="source" spellcheck="false" aria-label="Noeon source code"></textarea>
+      <section class="panel pg-evidence-section" aria-label="执行证据">
+        <div class="panel-head">
+          <h2>执行证据</h2>
+          <div class="panel-actions">
+            <button type="button" id="btn-copy-output" class="btn ghost btn-sm">复制摘要</button>
           </div>
         </div>
-        <div class="panel">
-          <h2>Output</h2>
-          <div id="run-execution-bar" class="run-execution-bar hidden" aria-live="polite"></div>
-          <pre id="output" class="output-pane">Ready.</pre>
+        <div id="run-execution-bar" class="run-execution-bar hidden" aria-live="polite"></div>
+        <div id="output" class="output-pane pg-result-pane">
+          <div id="result-empty" class="result-empty">
+            <p class="result-empty-lead">选上面一个演示，点击运行</p>
+            <p class="result-empty-hint">建议先试<strong>人机共治</strong>：程序会在关键步骤暂停，等您确认——这是写在代码里的规则，不是平台弹窗。</p>
+            <button type="button" id="btn-run-empty" class="btn primary">运行</button>
+          </div>
+          <div id="result-cards" class="result-cards hidden" aria-live="polite">
+            <article id="agent-outcome" class="agent-outcome hidden">
+              <h3>智能体输出</h3>
+              <p id="agent-outcome-text" class="agent-outcome-text"></p>
+            </article>
+            <div id="result-status-card" class="result-status result-status-success">
+              <span id="result-status-icon" class="result-status-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong id="result-status-title">运行完成</strong>
+                <p id="result-status-desc" class="result-status-desc"></p>
+              </div>
+            </div>
+            <div id="cognitive-timeline" class="cognitive-timeline hidden" aria-label="认知阶段"></div>
+            <div class="evidence-block">
+              <h3 class="evidence-block-title">证据链</h3>
+              <dl id="evidence-trace" class="evidence-trace"></dl>
+            </div>
+          </div>
+          <pre id="output-summary" class="output-summary visually-hidden" aria-hidden="true"></pre>
+          <details id="output-detail-wrap" class="output-detail-wrap hidden">
+            <summary>原始数据（JSON，供开发者）</summary>
+            <pre id="output-detail" class="output-detail"></pre>
+          </details>
         </div>
-      </div>
+      </section>
 
-      <div id="fusion-panel" class="fusion-panel hidden" aria-label="Fusion preview">
-        <div class="fusion-panel-head">
-          <strong>Fusion layers</strong>
-          <span id="fusion-summary"></span>
+      <section class="playground-insights pg-insights-compact" aria-label="治理与路径">
+        <div id="insights-empty" class="insights-empty">
+          <p>运行后将在此显示<strong>人工门控</strong>（若触发）与<strong>执行路径</strong>摘要。</p>
         </div>
-        <pre id="fusion-detail" class="fusion-detail"></pre>
-        <div id="fusion-mermaid" class="fusion-mermaid"></div>
-      </div>
 
-      <div id="brain-panel" class="brain-panel hidden" aria-label="Cognitive architecture trace">
-        <div class="brain-panel-head">
-          <strong>Cognitive Architecture</strong>
-          <span id="brain-summary"></span>
+        <div id="human-gate-panel" class="fusion-panel insight-panel insight-panel-alert hidden" aria-label="人工确认">
+          <div class="fusion-panel-head">
+            <strong>人机共治 · 程序已暂停</strong>
+            <span id="gate-action-label"></span>
+          </div>
+          <p id="gate-message" class="stats"></p>
+          <div class="fusion-controls">
+            <button id="btn-gate-approve" class="btn primary">确认并继续</button>
+            <button id="btn-gate-dismiss" class="btn ghost">稍后处理</button>
+          </div>
         </div>
-        <div id="brain-regions" class="brain-regions"></div>
-        <pre id="brain-flow" class="brain-flow"></pre>
-        <pre id="action-trace" class="brain-flow hidden" aria-label="ACT plugin trace"></pre>
-        <div id="brain-mermaid" class="brain-mermaid"></div>
-      </div>
 
-      <div id="ai-native-panel" class="brain-panel hidden" aria-label="AI-Native design lens">
-        <div class="brain-panel-head">
-          <strong>AI-Native Lens</strong>
-          <span id="ai-native-grade"></span>
+        <div id="brain-panel" class="brain-panel insight-panel hidden" aria-label="执行路径">
+          <div class="brain-panel-head">
+            <strong>执行路径</strong>
+            <span id="brain-summary"></span>
+          </div>
+          <div id="brain-regions" class="brain-regions"></div>
+          <div id="brain-mermaid" class="brain-mermaid"></div>
+          <details class="insight-details" id="brain-details">
+            <summary>路径详情</summary>
+            <pre id="brain-flow" class="brain-flow"></pre>
+            <pre id="action-trace" class="brain-flow hidden" aria-label="行动追踪"></pre>
+          </details>
         </div>
-        <p id="ai-native-verdict" class="stats"></p>
-        <div id="ai-native-dims" class="brain-regions"></div>
-        <ul id="ai-native-suggestions" class="stats"></ul>
-      </div>
+      </section>
 
-      <div id="universal-panel" class="brain-panel hidden" aria-label="Universal program dimensions">
-        <div class="brain-panel-head">
-          <strong>Universal Formula</strong>
-          <span id="universal-score"></span>
+      <details class="pg-advanced" id="pg-advanced">
+        <summary>开发者：程序代码 · 更多示例 · CLI</summary>
+        <div class="pg-advanced-body">
+          <p class="pg-advanced-note">
+            日常开发请用 <strong>VS Code / Cursor + Noeon 扩展</strong>（<code>node src/cli.js lsp</code>）。
+            此处仅供查看源码与加载完整示例库。
+          </p>
+          <div class="pg-advanced-toolbar">
+            <label class="pg-more-label">更多示例</label>
+            <select id="example-select-advanced" aria-label="更多示例"></select>
+            <button id="btn-validate" class="btn ghost" type="button">校验</button>
+            <button id="btn-compile" class="btn ghost" type="button">编译</button>
+            <button id="btn-explain" class="btn ghost" type="button">说明</button>
+            <button type="button" id="btn-reset-example" class="btn ghost btn-sm">恢复示例</button>
+          </div>
+          <div class="panel source-panel pg-source-panel">
+            <div class="panel-head">
+              <h2>程序代码<span id="source-panel-sub" class="panel-sub"></span></h2>
+            </div>
+            <div id="source-route-bar" class="source-route-bar hidden" aria-live="polite"></div>
+            <div class="source-editor">
+              <div id="source-line-numbers" class="source-line-numbers" aria-hidden="true"></div>
+              <div id="source-gutter" class="source-gutter" aria-hidden="true"></div>
+              <textarea id="source" spellcheck="false" aria-label="Noeon 程序代码"></textarea>
+            </div>
+          </div>
         </div>
-        <p id="universal-formula" class="stats"></p>
-        <div id="universal-dims" class="brain-regions"></div>
-      </div>
-
-      <div id="patch-diff-panel" class="fusion-panel hidden" aria-label="Patch diff preview">
-        <div class="fusion-panel-head">
-          <strong>Patch Diff</strong>
-          <span id="patch-diff-summary"></span>
-        </div>
-        <pre id="patch-diff" class="fusion-detail"></pre>
-      </div>
-
-      <div id="mesh-trace-panel" class="fusion-panel hidden" aria-label="Universal mesh trace">
-        <div class="fusion-panel-head">
-          <strong>Mesh Trace</strong>
-          <span id="mesh-trace-summary"></span>
-        </div>
-        <div id="mesh-trace-nodes" class="brain-regions"></div>
-        <pre id="mesh-trace-mermaid" class="fusion-detail"></pre>
-      </div>
-
-      <div id="human-gate-panel" class="fusion-panel hidden" aria-label="Human gate approval">
-        <div class="fusion-panel-head">
-          <strong>Human Gate</strong>
-          <span id="gate-action-label"></span>
-        </div>
-        <p id="gate-message" class="stats"></p>
-        <div class="fusion-controls">
-          <button id="btn-gate-approve" class="btn primary">Approve &amp; Re-run</button>
-          <button id="btn-gate-dismiss" class="btn ghost">Dismiss</button>
-          <a href="./gate.html" class="btn ghost">Open Gate Dashboard</a>
-        </div>
-      </div>
+      </details>
 
       <p class="playground-note">
-        v1.0.0: General agents support <code>FUSE next</code> + <code>FUSE liminal</code>.
-        Use <strong>Fusion</strong> to preview cross-profile layers without full cognitive run.
-        .ael programs may include automatic protocol enrichment when detected.
-        Set <code>OPENAI_API_KEY</code> for live LLM reasoning.
+        Playground 是漏斗，不是产品本体。完整协作链（发布→验证→结算）见
+        <a href="./index.html#mechanism">首页机制</a>。
       </p>
       <footer class="playground-status">
-        <span id="status-bar">Ready</span>
-        <span id="line-info">Ln 1, Col 1</span>
+        <span class="status-wrap">
+          <span id="status-dot" class="status-dot ready" aria-hidden="true"></span>
+          <span id="status-bar">就绪</span>
+        </span>
+        <span id="line-info" class="pg-line-info">编辑代码时显示光标位置</span>
       </footer>
     </main>
 
+    <div id="fusion-panel" class="hidden" aria-hidden="true"></div>
+    <div id="mesh-trace-panel" class="hidden" aria-hidden="true"></div>
+    <span id="fusion-badge" class="hidden" aria-hidden="true"></span>
+    <span id="example-path-hint" class="hidden" aria-hidden="true"></span>
+    <span id="canonical-hint" class="hidden" aria-hidden="true"></span>
+
     <script src="./architecture-panel.js"></script>
-    <script src="./golden-gate-badge.js"></script>
     <script src="./execution-summary.js"></script>
     <script src="./playground.js"></script>
   </body>
