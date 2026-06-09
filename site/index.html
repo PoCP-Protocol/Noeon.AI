@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./playground.css" />
   </head>
   <body>
     <div class="bg-grid" aria-hidden="true"></div>
@@ -47,6 +48,10 @@
           <a class="btn primary" href="./playground.html">打开 Playground</a>
           <a class="btn ghost" href="#developers">快速开始</a>
         </div>
+        <p id="home-runtime-status" class="stats" style="margin-top:1rem;opacity:0.85;">
+          Start <code>npm run playground</code> to load live runtime status.
+        </p>
+        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
         <div class="hero-strip">
           <span>PERCEIVE → REASON → DECIDE → ACT → REFLECT</span>
           <span>AGENT blocks with GOAL, POLICY, and FLOW</span>
@@ -162,6 +167,22 @@ noeon run main.noeon --trace</code></pre>
       </div>
     </footer>
 
+    <script src="./golden-gate-badge.js"></script>
     <script src="./main.js"></script>
+    <script>
+      fetch("/api/status")
+        .then((r) => r.json())
+        .then((s) => {
+          const el = document.getElementById("home-runtime-status");
+          if (el) {
+            el.textContent = `Noeon ${s.version} · ${s.era} · alpha gate ${s.engineering?.alphaGateTests?.length ?? "—"} tests`;
+          }
+          window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+            document.getElementById("golden-gate-badge"),
+            s.goldenGate
+          );
+        })
+        .catch(() => {});
+    </script>
   </body>
 </html>

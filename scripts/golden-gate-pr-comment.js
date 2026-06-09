@@ -66,6 +66,16 @@ function buildPrCommentMarkdown(payload, options = {}) {
     lines.push(`### ${mark} \`${prog.file}\``);
     if (prog.grade) lines.push(`- Grade: **${prog.grade}** (min: ${prog.minGrade || '—'})`);
     if (prog.verdict) lines.push(`- Verdict: \`${prog.verdict}\``);
+    if (prog.execution?.strategy) {
+      const ex = prog.execution;
+      const tags = [
+        ex.strategy,
+        ex.hybrid ? 'hybrid' : null,
+        ex.snapshotAct ? 'snapshot-act' : null,
+        ex.lensOnly ? 'lens-only' : null
+      ].filter(Boolean).join(' · ');
+      lines.push(`- Execution: \`${tags}\``);
+    }
     for (const err of prog.errors || []) lines.push(`- Error: ${err}`);
 
     if (prog.brief) {

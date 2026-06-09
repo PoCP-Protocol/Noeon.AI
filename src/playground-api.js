@@ -9,7 +9,8 @@ const {
 } = require('../language-server/noeon-service');
 const { parseFromSource, validateProgram, compileProgram, runProgram, explainProgram, getRuntimeStatus } = require('./runtime/unified-runtime');
 const { loadCuratedExamples, loadAllExamples } = require('./core/playground-examples');
-const { resolveCompilePresentation } = require('./core/general-canonical-mode');
+const { resolveCompilePresentation, resolveGeneralCanonical } = require('./core/general-canonical-mode');
+const { loadProjectConfig } = require('./core/config');
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -76,6 +77,14 @@ function attachArchitecturePayload(payload) {
   return payload;
 }
 
+function resolveRequestCanonical(ast, body = {}) {
+  if (body.general_canonical != null || body.generalCanonical != null) {
+    return body.general_canonical ?? body.generalCanonical;
+  }
+  const { config } = loadProjectConfig();
+  return resolveGeneralCanonical(ast, { projectConfig: config });
+}
+
 async function handlePlaygroundApi(req, res, pathname) {
   if (req.method === 'OPTIONS') {
     sendJson(res, 204, {});
@@ -134,7 +143,7 @@ async function handlePlaygroundApi(req, res, pathname) {
       const ast = parseBodyAst(body);
       const format = body.format === 'ael' ? 'ael' : body.format === 'both' ? 'both' : 'ir';
       const compiled = compileProgram(ast, format, {
-        general_canonical: body.general_canonical ?? body.generalCanonical
+        general_canonical: resolveRequestCanonical(ast, body)
       });
       sendJson(res, 200, {
         format,
@@ -174,19 +183,33 @@ async function handlePlaygroundApi(req, res, pathname) {
 
       if (body.pipeline === false) {
         const ast = parseBodyAst(body);
+        runOpts.general_canonical = resolveRequestCanonical(ast, body);
         const result = await runProgram(ast, runOpts);
-        sendJson(res, 200, result);
+        const { extractActionTrace, buildExecutionSummary } = require('./core/action-trace');
+        sendJson(res, 200, {
+          ...result,
+          actionTrace: extractActionTrace(result),
+          executionSummary: buildExecutionSummary(result)
+        });
         return true;
       }
 
       const input = body.ast || body.source;
       if (!input) throw new Error('Request body must include "source" string or "ast" object');
       const sourceText = typeof body.source === 'string' ? body.source : '';
+      const astForCanonical = body.ast || (sourceText
+        ? parseFromSource(sourceText, filename).ast
+        : null);
+      if (astForCanonical) {
+        runOpts.general_canonical = resolveRequestCanonical(astForCanonical, body);
+      }
       const out = await runNoeonPipeline(input, runOpts);
       const pipelineJson = formatPipelineJson(out);
       const brainView = sourceText ? mergePipelineBrainView(sourceText, filename, pipelineJson) : null;
       const compileOpts = {
-        general_canonical: body.general_canonical ?? body.generalCanonical
+        general_canonical: astForCanonical
+          ? resolveRequestCanonical(astForCanonical, body)
+          : (body.general_canonical ?? body.generalCanonical)
       };
       const compiled = out.ast ? compileProgram(out.ast, 'ir', compileOpts) : null;
       const presentation = compiled || resolveCompilePresentation(out.ast, null, compileOpts);
@@ -202,8 +225,19 @@ async function handlePlaygroundApi(req, res, pathname) {
         actionTrace: out.actionTrace || (out.result ? require('./core/action-trace').extractActionTrace(out.result) : null),
         cognitiveIr: compiled?.program?.toJSON?.() || null,
         canonicalIr: presentation.canonicalIr || out.ast?.general?.canonicalIr || out.canonical || null,
-        compileMode: presentation.compileMode || 'cognitive-primary',
-        primaryIr: presentation.primaryIr || 'cognitive',
+        compileMode: out.result?.compileMode || presentation.compileMode || 'cognitive-primary',
+        primaryIr: out.result?.primaryIr || presentation.primaryIr || 'cognitive',
+        canonicalPrimary: out.result?.canonicalPrimary || false,
+        canonicalSource: out.result?.canonicalSource || null,
+        executionDriver: out.result?.executionDriver || out.prep?.executionDriver || null,
+        snapshotActCount: out.result?.snapshotActCount ?? out.prep?.snapshotActCount ?? null,
+        actDriver: out.result?.actDriver || null,
+        snapshotActExecution: out.result?.snapshotActExecution === true,
+        hybridActExecution: out.result?.hybridActExecution === true,
+        executionStrategy: out.result?.executionStrategy || null,
+        executionPhases: out.result?.phases || [],
+        executionSummary: require('./core/action-trace').buildExecutionSummary(out.result || {}),
+        era: require('./core/release-version').NOEON_ERA,
         pipeline: true,
         ...(brainView
           ? {

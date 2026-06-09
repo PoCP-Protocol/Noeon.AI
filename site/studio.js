@@ -125,6 +125,8 @@ function renderGoldenGate(payload) {
   const programsEl = document.getElementById("gg-programs");
   const remediatedEl = document.getElementById("gg-remediated");
   const postEl = document.getElementById("gg-post-verify");
+  const probesEl = document.getElementById("gg-canonical-probes");
+  const probeRowsEl = document.getElementById("gg-probe-rows");
   const tbody = document.getElementById("gg-rows");
   const hintsEl = document.getElementById("gg-hints");
 
@@ -152,7 +154,40 @@ function renderGoldenGate(payload) {
     postEl.className = "value";
   }
 
+  const probes = payload.canonicalProbes;
+  const pathSummary = payload.canonicalPath;
+  if (probesEl) {
+    if (probes) {
+      const passed = probes.summary?.passed ?? 0;
+      const total = probes.summary?.total ?? probes.programs?.length ?? 0;
+      probesEl.textContent = `${passed}/${total}`;
+      probesEl.className = `value ${probes.ok ? "status-pass" : "status-fail"}`;
+    } else if (pathSummary?.probes?.total != null) {
+      probesEl.textContent = `${pathSummary.probes.passed ?? 0}/${pathSummary.probes.total}`;
+      probesEl.className = `value ${pathSummary.probes.ok ? "status-pass" : "status-fail"}`;
+    } else {
+      probesEl.textContent = "—";
+      probesEl.className = "value";
+    }
+  }
+
+  if (probeRowsEl) {
+    const probePrograms = probes?.programs || [];
+    probeRowsEl.innerHTML = probePrograms.map((p) => `
+    <tr>
+      <td><code>${p.file}</code></td>
+      <td>${window.NoeonExecutionSummary?.formatExecutionSummary(p.execution) || p.strategy || p.execution?.strategy || "—"}</td>
+      <td>${p.execution?.hybrid || p.hybridCandidate ? "✓" : "—"}</td>
+      <td>${p.execution?.snapshotAct || p.toolCandidate ? "✓" : "—"}</td>
+      <td class="${p.ok ? "status-pass" : "status-fail"}">${p.ok ? "PASS" : "FAIL"}</td>
+    </tr>`).join("") || "<tr><td colspan=\"5\">No probe data — refresh golden gate.</td></tr>";
+  }
+
   const diffIndex = new Map((payload.diffIndex || []).map((d) => [d.file, d]));
+
+  function formatGateExecution(ex) {
+    return window.NoeonExecutionSummary?.formatExecutionSummary(ex) || "—";
+  }
 
   tbody.innerHTML = (payload.programs || []).map((p) => {
     const remRow = p.remediated;
@@ -168,11 +203,12 @@ function renderGoldenGate(payload) {
       <td><code>${p.file}</code></td>
       <td class="${p.ok ? "status-pass" : "status-fail"}">${p.grade || "—"}</td>
       <td>${p.verdict || "—"}</td>
+      <td>${formatGateExecution(p.execution)}</td>
       <td>${p.patches ?? 0}</td>
       <td>${remTxt}</td>
       <td>${diffBtn}</td>
     </tr>`;
-  }).join("") || "<tr><td colspan=\"6\">No gate data — run gate or refresh live.</td></tr>";
+  }).join("") || "<tr><td colspan=\"7\">No gate data — run gate or refresh live.</td></tr>";
 
   hintsEl.textContent = (payload.hints || []).join("\n") || "—";
 
@@ -247,13 +283,14 @@ async function refresh() {
   const status = document.getElementById("studio-status");
   status.textContent = "Loading…";
   try {
-    const [conform, audit, mcp, ecosystem, goldenGate, universalStatus] = await Promise.all([
+    const [conform, audit, mcp, ecosystem, goldenGate, universalStatus, runtimeStatus] = await Promise.all([
       fetchJson("/api/conform/parity"),
       fetchJson("/api/report/history?limit=20"),
       fetchJson("/api/mcp/status"),
       fetchJson("/api/ecosystem/status"),
       fetchGoldenGate(false),
-      fetchJson("/api/universal/status")
+      fetchJson("/api/universal/status"),
+      fetchJson("/api/status")
     ]);
     renderParity(conform);
     renderAudit(audit);
@@ -261,6 +298,10 @@ async function refresh() {
     renderEcosystem(ecosystem);
     renderGoldenGate(goldenGate);
     renderUniversalRadar(universalStatus);
+    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+      document.getElementById("golden-gate-badge"),
+      runtimeStatus.goldenGate
+    );
     status.textContent = `Updated ${new Date().toLocaleTimeString()}`;
   } catch (e) {
     status.textContent = `Error: ${e.message}`;
@@ -273,6 +314,11 @@ document.getElementById("btn-gg-live")?.addEventListener("click", async () => {
   ggStatus.textContent = "Running gate…";
   try {
     renderGoldenGate(await fetchGoldenGate(true));
+    const runtimeStatus = await fetchJson("/api/status");
+    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+      document.getElementById("golden-gate-badge"),
+      runtimeStatus.goldenGate
+    );
     ggStatus.textContent = `Gate updated ${new Date().toLocaleTimeString()}`;
   } catch (e) {
     ggStatus.textContent = `Error: ${e.message}`;

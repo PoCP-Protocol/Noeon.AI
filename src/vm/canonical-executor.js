@@ -143,30 +143,76 @@ async function executeCanonicalProgram(ctx) {
   }
 
   if (irPhases.cognitive) {
-    const kernel = buildKernel(options);
-    const scheduler = resolveScheduler(options, profile, mode);
-    result.scheduler = scheduler;
+    const { resolveExecutionStrategy } = require('../core/general-canonical-mode');
+    const { executeSnapshotCanonicalActs } = require('../core/canonical-act-runner');
+    const strategy = resolveExecutionStrategy(ast, options);
+    result.executionStrategy = strategy;
 
-    if (scheduler === 'consciousness') {
-      const conscious = await runConsciousnessPhase(ast, kernel, options);
-      result.consciousness = conscious;
-      result.cognitive = conscious.cognitive;
-      result.phases.push(PHASE.CONSCIOUSNESS);
+    const snapshotActs = canonicalPrep?.canonical?.execution?.acts?.length ?? 0;
+    const pluginSteps = irPhases.snapshot_primary === true && snapshotActs > 0;
+
+    async function runKernelCognitive() {
+      const kernel = buildKernel(options);
+      const scheduler = resolveScheduler(options, profile, mode);
+      result.scheduler = scheduler;
+
+      if (scheduler === 'consciousness') {
+        const conscious = await runConsciousnessPhase(ast, kernel, options);
+        result.consciousness = conscious;
+        result.cognitive = conscious.cognitive;
+        result.phases.push(PHASE.CONSCIOUSNESS);
+      } else {
+        result.cognitive = await kernel.execute(ast, { verbose: options.verbose });
+      }
+
+      if (ast.cognition?.context && Object.keys(ast.cognition.context).length) {
+        result.injectedContext = { ...(result.injectedContext || {}), ...ast.cognition.context };
+      }
+      result.llm = kernel.llm ? kernel.llm.getStats() : null;
+      result.phases.push(PHASE.COGNITIVE);
+      result.program = result.cognitive.program;
+      result.trace = result.cognitive.trace;
+      result.decisions = result.cognitive.decisions;
+      result.beliefs = result.cognitive.beliefs;
+      result.stats = result.cognitive.stats;
+      if (!result.cognitive.success) result.success = false;
+    }
+
+    if (strategy === 'tool-snapshot-primary' && pluginSteps) {
+      const actOut = await executeSnapshotCanonicalActs(canonicalPrep.canonical, ast, options);
+      result.snapshotActExecution = true;
+      result.actDriver = actOut.driver || 'canonical.execution.acts';
+      result.canonicalActs = actOut;
+      result.cognitive = actOut.cognitive;
+      result.phases.push(PHASE.CANONICAL_ACT);
+      if (actOut.workspace) {
+        result.injectedContext = {
+          ...(result.injectedContext || {}),
+          ...actOut.workspace
+        };
+      }
+      result.program = actOut.cognitive?.program;
+      result.trace = actOut.cognitive?.trace;
+      result.decisions = actOut.cognitive?.decisions;
+      result.beliefs = actOut.cognitive?.beliefs;
+      result.stats = actOut.cognitive?.stats;
+      if (!actOut.success) result.success = false;
     } else {
-      result.cognitive = await kernel.execute(ast, { verbose: options.verbose });
+      if (strategy === 'hybrid-canonical-acts' && pluginSteps) {
+        const actOut = await executeSnapshotCanonicalActs(canonicalPrep.canonical, ast, options);
+        result.hybridActExecution = true;
+        result.actDriver = 'canonical.execution.acts+kernel';
+        result.canonicalActs = actOut;
+        result.phases.push(PHASE.CANONICAL_ACT);
+        if (actOut.workspace) {
+          ast.cognition = ast.cognition || {};
+          ast.cognition.context = { ...(ast.cognition.context || {}), ...actOut.workspace };
+          result.injectedContext = { ...(result.injectedContext || {}), ...actOut.workspace };
+        }
+        if (!actOut.success) result.success = false;
+      }
+      await runKernelCognitive();
     }
-
-    if (ast.cognition?.context && Object.keys(ast.cognition.context).length) {
-      result.injectedContext = { ...ast.cognition.context };
-    }
-    result.llm = kernel.llm ? kernel.llm.getStats() : null;
-    result.phases.push(PHASE.COGNITIVE);
-    result.program = result.cognitive.program;
-    result.trace = result.cognitive.trace;
-    result.decisions = result.cognitive.decisions;
-    result.beliefs = result.cognitive.beliefs;
-    result.stats = result.cognitive.stats;
-    if (!result.cognitive.success) result.success = false;
   }
 
   if (irPhases.protocol) {

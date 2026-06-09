@@ -8,7 +8,10 @@ const DEFAULT_CONFIG = {
   cognition: {
     exploration_factor: 0.5,
     enable_llm: true,
-    with_protocol: 'auto'
+    with_protocol: 'auto',
+    general_canonical: false,
+    general_canonical_tools: true,
+    general_canonical_agents: true
   },
   observability: {
     log_level: 'info'
@@ -79,6 +82,21 @@ function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
     quiet: userOptions.quiet ?? false,
     enable_llm: userOptions.enable_llm ?? cog.enable_llm !== false,
     with_protocol: userOptions.with_protocol ?? cog.with_protocol ?? 'auto',
+    general_canonical:
+      userOptions.general_canonical ??
+      (process.env.NOEON_GENERAL_CANONICAL != null
+        ? ['1', 'true', 'yes', 'on'].includes(String(process.env.NOEON_GENERAL_CANONICAL).toLowerCase())
+        : (cog.general_canonical === true ? true : undefined)),
+    general_canonical_tools:
+      userOptions.general_canonical_tools ??
+      (process.env.NOEON_GENERAL_CANONICAL_TOOLS != null
+        ? ['1', 'true', 'yes', 'on'].includes(String(process.env.NOEON_GENERAL_CANONICAL_TOOLS).toLowerCase())
+        : cog.general_canonical_tools),
+    general_canonical_agents:
+      userOptions.general_canonical_agents ??
+      (process.env.NOEON_GENERAL_CANONICAL_AGENTS != null
+        ? ['1', 'true', 'yes', 'on'].includes(String(process.env.NOEON_GENERAL_CANONICAL_AGENTS).toLowerCase())
+        : cog.general_canonical_agents),
     legacy_profile: userOptions.legacy_profile ??
       (process.env.NOEON_LEGACY_PROFILE === '1'),
     mcp: userOptions.mcp || projectConfig.mcp || { servers: [] },

@@ -8,6 +8,10 @@ const {
   buildBrainApiPayload,
   buildCanonicalPlanSummary,
   getHover,
+  buildExecutionPathDoc,
+  getFileExecutionSummary,
+  getDocumentSymbols,
+  getCodeLenses,
   HOVER_DOCS
 } = require('../language-server/noeon-service');
 const { planNoeonProgram, parseNoeonInput } = require('../src/core/pipeline');
@@ -43,6 +47,7 @@ const agentSource = fs.readFileSync(agentFile, 'utf8');
 const agentView = buildArchitectureViewModel(agentSource, agentFile);
 assert(agentView.canonical?.surface === 'general', 'agent view model canonical surface');
 assert(agentView.canonical?.routeLabel, 'agent view model route label');
+assert(agentView.executionSummary?.path === 'hybrid', 'view model includes static executionSummary');
 
 const brain = buildBrainApiPayload(agentSource, agentFile);
 assert(brain.canonical?.surface === 'general', 'brain API payload includes canonical');
@@ -57,6 +62,33 @@ assert(built?.governance?.winner_tier === 'constitution', 'next plan governance 
 
 const profileHover = getHover('PROFILE "general"\n', 0, 8, 'test.noeon');
 assert(profileHover?.doc?.includes('Canonical'), 'getHover PROFILE documents canonical lowering');
+
+const agentActLine = agentSource.split('\n').findIndex((l) => l.includes('plugin=http_call'));
+const actLineText = agentSource.split('\n')[agentActLine];
+const actCol = actLineText.indexOf('ACT') + 3;
+const actHover = getHover(agentSource, agentActLine, actCol, agentFile);
+assert(actHover?.keyword === 'ACT', 'getHover ACT on plugin line');
+assert(actHover?.doc?.includes('Execution path'), 'ACT hover includes execution path');
+assert(actHover?.doc?.includes('hybrid-canonical-acts'), 'ACT hover includes hybrid strategy');
+
+const agentLine = agentSource.split('\n').findIndex((l) => l.trimStart().startsWith('AGENT'));
+const agentHover = getHover(agentSource, agentLine, 6, agentFile);
+assert(agentHover?.doc?.includes('Execution path'), 'AGENT hover includes execution path');
+
+const execDoc = buildExecutionPathDoc(agentSource, agentFile);
+assert(execDoc?.strategy === 'hybrid-canonical-acts', 'buildExecutionPathDoc resolves hybrid for agent_research');
+assert(execDoc?.path === 'hybrid', 'buildExecutionPathDoc path label');
+
+const fileExec = getFileExecutionSummary(agentSource, agentFile);
+assert(fileExec?.schema === 'noeon.execution.summary/v1', 'getFileExecutionSummary schema');
+assert(fileExec?.strategy === 'hybrid-canonical-acts', 'getFileExecutionSummary hybrid strategy');
+
+const symbols = getDocumentSymbols(agentSource, agentFile);
+assert(symbols[0]?.kind === 'execution', 'document symbols lead with execution path');
+assert(symbols[0]?.name.includes('hybrid'), 'execution symbol names hybrid path');
+
+const lenses = getCodeLenses(agentSource, agentFile);
+assert(lenses.some((l) => l.title.includes('exec: hybrid')), 'code lens shows file execution path');
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
 process.exit(failed > 0 ? 1 : 0);

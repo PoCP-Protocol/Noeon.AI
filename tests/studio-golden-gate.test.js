@@ -50,6 +50,9 @@ console.log('\n\x1b[36m═══ Epoch 6 — Studio Golden Gate ═══\x1b[0m
 
   const status = buildGoldenGateStudioStatus({ root });
   assert(status.schema === STUDIO_GOLDEN_SCHEMA, 'studio golden schema');
+  assert(status.era === 'canonical-primary-era', 'studio status includes release era');
+  assert(status.canonicalPath != null, 'studio status includes canonicalPath summary');
+  assert(Array.isArray(status.canonicalProbePrograms), 'studio status includes canonicalProbePrograms');
   assert(Array.isArray(status.programs), 'programs array');
   assert(Array.isArray(status.hints), 'hints array');
 
@@ -57,6 +60,10 @@ console.log('\n\x1b[36m═══ Epoch 6 — Studio Golden Gate ═══\x1b[0m
   assert(typeof gate.ok === 'boolean', 'refreshGoldenGateArtifacts returns gate');
   const afterRefresh = buildGoldenGateStudioStatus({ root });
   assert(afterRefresh.gate != null, 'gate populated after refresh');
+  assert(afterRefresh.goldenGateExecution != null, 'goldenGateExecution on studio status after refresh');
+  assert(afterRefresh.canonicalPath?.probes?.total === 5, 'five canonical probes tracked');
+  const withExecution = (afterRefresh.programs || []).filter((p) => p.execution?.strategy);
+  assert(withExecution.length > 0, 'AI path programs include execution strategy after refresh');
 
   const verify = await postRemediateVerify(root);
   assert(typeof verify.ok === 'boolean', 'postRemediateVerify ok boolean');
@@ -76,6 +83,8 @@ console.log('\n\x1b[36m═══ Epoch 6 — Studio Golden Gate ═══\x1b[0m
   const statusPayload = statusMock.get().payload;
   assert(statusMock.get().status === 200, 'GET /api/golden-gate/status 200');
   assert(statusPayload.schema === STUDIO_GOLDEN_SCHEMA, 'API status schema');
+  assert(statusPayload.canonicalProbePrograms?.length === 5, 'API exposes five probe programs');
+  assert(statusPayload.goldenGateExecution != null, 'studio status includes goldenGateExecution');
 
   const remediateMock = mockRes();
   await handlePlaygroundApi(

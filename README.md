@@ -43,14 +43,20 @@ node src/cli.js run examples/hello.noeon --trace
 # Research agent (AGENT block + cognitive cycle)
 node src/cli.js run examples/agent_research.noeon --trace
 
-# Real ACT → HTTP / FS plugins (mock mode, no network)
+# Real ACT → HTTP / FS / GitHub / Web plugins (mock mode, no network)
 node src/cli.js run examples/http_demo.noeon --trace
 node src/cli.js run examples/fs_demo.noeon --trace
 node src/cli.js run examples/github_demo.noeon --trace
+node src/cli.js run examples/web_fetch.noeon --trace
 
-# Workbench — Code · IR · Trace · Architecture
+# Canonical IR primary (General profile dual-IR presentation)
+node src/cli.js compile examples/web_fetch.noeon --canonical --json
+node src/cli.js run examples/web_fetch.noeon --json --canonical
+
+# Playground + Workbench (Code · IR · Trace · Architecture)
 node src/cli.js playground
-# → http://localhost:8787/workbench.html
+# → http://localhost:5177/playground.html
+# → http://localhost:5177/workbench.html  (toggle Canonical IR primary in toolbar)
 
 # Engineering health check
 node src/cli.js doctor
@@ -239,16 +245,17 @@ node src/cli.js --help
 | Command | Description |
 |---|---|
 | `noeon run <file>` | Execute through unified cognitive kernel |
-| `noeon compile <file>` | Compile to Cognitive IR (`--format ir\|ael\|both`) |
+| `noeon compile <file>` | Compile to Cognitive IR (`--format ir\|ael\|both`, `--canonical`, `--json`) |
 | `noeon inspect <file>` | Execute with full tracing |
 | `noeon validate <file>` | Validate syntax and semantics |
 | `noeon parse <file>` | Show AST structure |
 | `noeon explain <file>` | Natural language explanation |
 | `noeon repl` | Interactive cognitive session |
 | `noeon init <name>` | Create project (`--profile general\|ael\|liminal`) |
-| `noeon doctor` | Environment and dependency check |
+| `noeon doctor` | Environment, stdlib, canonical mode, and tool-demo checks |
 | `noeon status` | Show kernel status |
 | `noeon playground` | Start web playground + API (port 5177) |
+| VS Code extension | `noeon.generalCanonicalPrimary` · **Noeon: Compile Current File** · Architecture panel with ACT trace |
 | `noeon studio` | Open canonical semantic dashboard (via playground server) |
 | `noeon lsp` | Start language server (stdio) |
 | `noeon conform parity` | Verify all parity surfaces emit canonical reports |
@@ -260,7 +267,13 @@ node src/cli.js --help
 | `noeon train` | Multi-round policy training |
 | `noeon rollback` | Roll back persisted state |
 
-**Common flags:** `--trace`, `--verbose`, `--json`, `--with-protocol auto|on|off`, `--profile general|ael|liminal` (capability entry selector)
+**Common flags:** `--trace`, `--verbose`, `--json`, `--canonical` (General dual-IR primary), `--with-protocol auto|on|off`, `--profile general|ael|liminal` (capability entry selector)
+
+Set `NOEON_GENERAL_CANONICAL=1` to default compile/run presentation to canonical-primary (Playground/Workbench checkbox overrides per request).
+
+With `--canonical`, tool demos execute ACT plugins directly from `canonical.execution.acts` (phase `canonical-act`) without the legacy cognitive kernel path. Tool-only General programs auto-enable this path by default (`cognition.general_canonical_tools: true` in `.noeonrc.json` / runtime defaults). Override with `--canonical` off via `general_canonical: false` in API/CLI options, or set `general_canonical_tools: false` in project config.
+
+**Execution summary** (`noeon.execution.summary/v1`): `noeon run --json`, Playground, Workbench, LSP, and Golden Gate report `strategy`, `path` (`snapshot-act` / `hybrid` / `cognitive`), and phase tags. Workbench and VS Code show the static path before run via `/api/brain` and file-level LSP analysis.
 
 `noeon ai creator` emits the shared creator blueprint: readiness signals, the brain-inspired cognitive design contract, the creator charter, workstreams, and priority actions for human/AI co-development.
 
@@ -311,9 +324,26 @@ Noeon provides 50+ cognitive keywords organized by phase:
 
 ---
 
+## Standard Library (alpha)
+
+General-profile programs can import typed stdlib modules; ACT steps bind to runtime plugins:
+
+| Module | Exports | Plugin |
+|--------|---------|--------|
+| `std.http` | `get`, `post`, `fetch` | `http_call` |
+| `std.fs` | `read`, `write`, `list` | `fs_call` |
+| `std.github` | `repo`, `get`, `post` | `http_call` (api.github.com) |
+| `std.web` | `fetch`, `text`, `title` | `http_call` + content extract |
+
+Mock mode (default in demos): `mock=true` or `NOEON_HTTP_MOCK=1`. Run output includes an **ACT** trace with `last_fetch` for web extraction demos.
+
+---
+
 ## Test Results
 
 ```
+Alpha gate (CI):       npm run gate:alpha     # 22 checks — hybrid + golden gate + LSP execution
+Product suite:         npm run test:product
 Core runtime:          npm run test:core
 Canonical pipeline:    npm run test:canonical
 Fusion/alignment:      npm run test:fusion
@@ -321,6 +351,7 @@ Surface policy:        npm run test:surface-freeze
 Creator blueprint:     npm run test:creator
 Cognitive loop:        npm run test:cognitive-loop
 Protocol conformance:  npm run conformance
+Doctor:                node src/cli.js doctor   # stdlib + canonical + tool demos
 ```
 
 Run locally: `npm test`

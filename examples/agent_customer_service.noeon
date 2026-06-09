@@ -9,6 +9,7 @@ AGENT "SupportAgent"
   FLOW
     PERCEIVE source=customer_inquiry modality=text
     REASON strategy=empathetic_resolution depth=2
+    ACT action=lookup_order url="https://example.com/orders/lookup" channel=web plugin=http_call mock=true
     DECIDE action=resolve threshold=0.75 fallback=escalate
     ACT action=respond_customer channel=chat
     FEEDBACK source=customer signal=satisfaction window=1

@@ -9,6 +9,7 @@ AGENT "ResearchAnalyst"
   FLOW
     PERCEIVE source=market_data modality=text
     REASON strategy=comparative depth=3
+    ACT action=fetch_sources url="https://example.com/research" channel=web plugin=http_call extract=text mock=true
     DECIDE action=write_report threshold=0.75 fallback=escalate
     ACT action=write_report channel=document
     REFLECT

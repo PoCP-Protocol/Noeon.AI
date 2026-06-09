@@ -12,6 +12,8 @@ const { evaluateAiNative } = require('./ai-native-lens');
 const { imagineProgram } = require('./ai-imagination');
 const { buildSelfExport } = require('./self-introspection');
 const { executeProgram } = require('../vm/unified-executor');
+const { loadProjectConfig } = require('./config');
+const { resolveGeneralCanonical } = require('./general-canonical-mode');
 
 const GOLDEN_SCHEMA = 'noeon.golden.path/v1';
 const MIN_GRADE_SCORE = { A: 0.85, B: 0.7, C: 0.55, D: 0.4, F: 0 };
@@ -41,8 +43,25 @@ async function runGoldenPath(input, options = {}) {
 
   steps.push(step('parse', 'ok', { surface: ast.noeonStack?.surface || ast.profile }));
 
-  const prep = prepareCanonicalExecution(ast, { ...options, filename });
-  steps.push(step('canonical', 'ok', { fingerprint: prep.fingerprint }));
+  const { config } = loadProjectConfig({ cwd: path.dirname(filename) });
+  const generalCanonical = resolveGeneralCanonical(ast, {
+    ...options,
+    projectConfig: config,
+    general_canonical: options.general_canonical
+  });
+  const runOptions = {
+    ...options,
+    filename,
+    general_canonical: generalCanonical,
+    projectConfig: config
+  };
+
+  const prep = prepareCanonicalExecution(ast, runOptions);
+  steps.push(step('canonical', 'ok', {
+    fingerprint: prep.fingerprint,
+    executionDriver: prep.executionDriver || null,
+    canonicalPrimary: prep.canonicalPrimary === true
+  }));
 
   const aiNativePre = evaluateAiNative(ast, prep, null);
   steps.push(step('ai_evaluate_pre', 'ok', { grade: aiNativePre.grade, score: aiNativePre.score }));
@@ -60,10 +79,9 @@ async function runGoldenPath(input, options = {}) {
     steps.push(step('run', 'skip', { lens_only: true }));
   } else {
     run = await executeProgram(ast, {
-      ...options,
+      ...runOptions,
       quiet: true,
       with_protocol: options.with_protocol || 'off',
-      filename,
       source: sourceText || undefined,
       human_gate_dir: options.human_gate_dir
     });
@@ -71,7 +89,9 @@ async function runGoldenPath(input, options = {}) {
     steps.push(step('run', run.success && !run.blocked ? 'ok' : run.awaitingHuman ? 'gate' : 'fail', {
       success: run.success,
       blocked: run.blocked,
-      phases: run.phases
+      phases: run.phases,
+      executionStrategy: run.executionStrategy || null,
+      hybridActExecution: run.hybridActExecution === true
     }));
   }
 
@@ -107,6 +127,12 @@ async function runGoldenPath(input, options = {}) {
       pendingApproval: run.pendingApproval || null,
       phases: run.phases,
       error: run.error || null,
+      executionDriver: run.executionDriver || null,
+      actDriver: run.actDriver || null,
+      executionStrategy: run.executionStrategy || null,
+      snapshotActExecution: run.snapshotActExecution === true,
+      hybridActExecution: run.hybridActExecution === true,
+      canonicalPrimary: run.canonicalPrimary === true,
       meshRuntime: run.meshRuntime || null,
       meshTrace: run.meshTrace || run.report?.observability?.mesh_trace || null
     },

@@ -11,8 +11,10 @@
     "onCommand:noeon.planFile",
     "onCommand:noeon.brainMap",
     "onCommand:noeon.pipelineFile",
+    "onCommand:noeon.compileFile",
     "onCommand:noeon.toggleBrainHighlight",
-    "onCommand:noeon.showArchitecturePanel"
+    "onCommand:noeon.showArchitecturePanel",
+    "onCommand:noeon.refreshGoldenGateStatus"
   ],
   "engines": {
     "vscode": "^1.75.0"
@@ -69,8 +71,16 @@
         "title": "Noeon: Run Unified Pipeline (JSON Report)"
       },
       {
+        "command": "noeon.compileFile",
+        "title": "Noeon: Compile Current File (JSON IR)"
+      },
+      {
         "command": "noeon.showArchitecturePanel",
         "title": "Noeon: Open Architecture Panel"
+      },
+      {
+        "command": "noeon.refreshGoldenGateStatus",
+        "title": "Noeon: Refresh Golden Gate Status"
       },
       {
         "command": "noeon.toggleBrainHighlight",
@@ -123,6 +133,21 @@
           "type": "boolean",
           "default": true,
           "description": "Run pipeline via LSP noeon/run request (in-process) instead of CLI subprocess when language server is active."
+        },
+        "noeon.generalCanonicalPrimary": {
+          "type": "boolean",
+          "default": false,
+          "description": "Present Canonical Semantic IR as primary in compile/run/LSP pipeline responses (matches NOEON_GENERAL_CANONICAL=1)."
+        },
+        "noeon.showGoldenGateStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Golden Gate PASS/FAIL badge in the status bar (from noeon status --json)."
+        },
+        "noeon.showExecutionStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show last pipeline execution path in the status bar after Noeon: Run."
         }
       }
     }

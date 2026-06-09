@@ -1,0 +1,9 @@
+profile "general"
+version "1.0.0-alpha.1"
+module "hybrid_tool_agent"
+
+AGENT "HybridTool"
+  GOAL "Run plugin ACT then complete cognitive reflect cycle"
+  FLOW
+    ACT action=fetch url="https://example.com/hybrid" channel=http plugin=http_call mock=true
+    REFLECT

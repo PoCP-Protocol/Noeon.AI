@@ -14,6 +14,15 @@ function activate(context) {
   const service = loadNoeonService(context.extensionPath);
   const output = vscode.window.createOutputChannel('Noeon Architecture');
   context.subscriptions.push(output);
+
+  const goldenGateBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  goldenGateBar.command = 'noeon.refreshGoldenGateStatus';
+  context.subscriptions.push(goldenGateBar);
+
+  const executionBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  executionBar.name = 'Noeon Execution Path';
+  context.subscriptions.push(executionBar);
+
   let architecturePanel = null;
   let lspClient = null;
 
@@ -33,29 +42,37 @@ function activate(context) {
     applyBrainDecorations(editor, service, decorationTypes, vscode);
   }
 
-  function refreshActiveDecorations() {
-    refreshBrainDecorations(vscode.window.activeTextEditor);
+  function refreshActiveEditorChrome() {
+    const editor = vscode.window.activeTextEditor;
+    refreshBrainDecorations(editor);
+    refreshFileExecutionStatusBar(editor);
   }
 
   context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor(refreshBrainDecorations),
+    vscode.window.onDidChangeActiveTextEditor(() => refreshActiveEditorChrome()),
     vscode.workspace.onDidChangeTextDocument((e) => {
       if (vscode.window.activeTextEditor?.document === e.document) {
-        refreshBrainDecorations(vscode.window.activeTextEditor);
+        refreshActiveEditorChrome();
       }
     }),
     vscode.workspace.onDidOpenTextDocument((doc) => {
       if (vscode.window.activeTextEditor?.document === doc) {
-        refreshBrainDecorations(vscode.window.activeTextEditor);
+        refreshActiveEditorChrome();
       }
     })
   );
-  refreshActiveDecorations();
+  refreshActiveEditorChrome();
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('noeon.brainHighlight')) {
-        refreshActiveDecorations();
+        refreshActiveEditorChrome();
+      }
+      if (e.affectsConfiguration('noeon.showGoldenGateStatus')) {
+        refreshGoldenGateStatusBar();
+      }
+      if (e.affectsConfiguration('noeon.showExecutionStatus')) {
+        refreshFileExecutionStatusBar(vscode.window.activeTextEditor);
       }
     })
   );
@@ -79,6 +96,69 @@ function activate(context) {
     });
   }
 
+  async function refreshGoldenGateStatusBar() {
+    if (!vscode.workspace.getConfiguration('noeon').get('showGoldenGateStatus', true)) {
+      goldenGateBar.hide();
+      return;
+    }
+    try {
+      const stdout = await runCli(['status', '--json'], '', { showOutput: false });
+      const status = JSON.parse(stdout);
+      const gg = status.goldenGate;
+      if (!gg?.available) {
+        goldenGateBar.text = '$(circle-outline) Golden Gate —';
+        goldenGateBar.tooltip = 'Run npm run gate:golden to generate artifacts/golden-gate/';
+      } else if (gg.ok) {
+        const probes = gg.probes?.total != null ? ` · probes ${gg.probes.passed}/${gg.probes.total}` : '';
+        goldenGateBar.text = `$(pass) Golden Gate${probes}`;
+        goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total} · hybrid ${gg.aiPath?.hybrid ?? 0}`;
+      } else {
+        goldenGateBar.text = '$(error) Golden Gate FAIL';
+        goldenGateBar.tooltip = `AI ${gg.aiPath?.passed}/${gg.aiPath?.total}`;
+      }
+      goldenGateBar.show();
+    } catch {
+      goldenGateBar.text = '$(circle-outline) Noeon';
+      goldenGateBar.show();
+    }
+  }
+
+  function updateExecutionStatusBar(result) {
+    if (!vscode.workspace.getConfiguration('noeon').get('showExecutionStatus', true)) {
+      executionBar.hide();
+      return;
+    }
+    const summary = result?.executionSummary;
+    if (!summary?.strategy) {
+      executionBar.hide();
+      return;
+    }
+    executionBar.text = `$(play) ${summary.path || summary.strategy}`;
+    executionBar.tooltip = [
+      summary.strategy,
+      summary.hybrid ? 'hybrid' : null,
+      summary.snapshotAct ? 'snapshot-act' : null,
+      summary.phases?.length ? summary.phases.join(' → ') : null
+    ].filter(Boolean).join(' · ');
+    executionBar.show();
+  }
+
+  function refreshFileExecutionStatusBar(editor) {
+    if (!editor || !service?.getFileExecutionSummary) {
+      executionBar.hide();
+      return;
+    }
+    const doc = editor.document;
+    if (doc.languageId !== 'noeon' &&
+        !doc.fileName.endsWith('.ael') &&
+        !doc.fileName.endsWith('.noeon')) {
+      executionBar.hide();
+      return;
+    }
+    const summary = service.getFileExecutionSummary(doc.getText(), doc.fileName);
+    updateExecutionStatusBar({ executionSummary: summary });
+  }
+
   async function applyPipelineJson(payload) {
     const result = typeof payload === 'string' ? JSON.parse(payload) : payload;
     if (architecturePanel) {
@@ -87,16 +167,35 @@ function activate(context) {
         blocked: result.blocked,
         phases: result.phases,
         scheduler: result.scheduler,
-        architecture: result.architecture
+        architecture: result.architecture,
+        compileMode: result.compileMode,
+        primaryIr: result.primaryIr,
+        canonicalPrimary: result.canonicalPrimary,
+        canonicalSource: result.canonicalSource,
+        executionDriver: result.executionDriver,
+        snapshotActCount: result.snapshotActCount,
+        actDriver: result.actDriver,
+        snapshotActExecution: result.snapshotActExecution,
+        era: result.era,
+        actionTrace: result.actionTrace,
+        executionStrategy: result.executionStrategy,
+        hybridActExecution: result.hybridActExecution,
+        executionSummary: result.executionSummary
       });
+      updateExecutionStatusBar(result);
       await vscode.commands.executeCommand('noeon.architecture.focus');
     }
     return result;
   }
 
+  function generalCanonicalEnabled() {
+    return vscode.workspace.getConfiguration('noeon').get('generalCanonicalPrimary', false);
+  }
+
   async function runPipelineViaClient(file, options = {}) {
     const editor = vscode.window.activeTextEditor;
     const useLsp = vscode.workspace.getConfiguration('noeon').get('runViaLsp', true);
+    const generalCanonical = options.generalCanonical ?? generalCanonicalEnabled();
     if (lspClient && useLsp) {
       try {
         return await lspClient.sendRequest('noeon/run', {
@@ -106,7 +205,8 @@ function activate(context) {
           options: {
             with_protocol: options.withProtocol ?? 'off',
             trace: options.trace === true,
-            canonical_audit: options.canonicalAudit !== false
+            canonical_audit: options.canonicalAudit !== false,
+            general_canonical: generalCanonical
           }
         });
       } catch {
@@ -115,7 +215,9 @@ function activate(context) {
     }
     const args = ['pipeline', file, '--json'];
     if (options.trace) args.push('--trace');
+    if (generalCanonical) process.env.NOEON_GENERAL_CANONICAL = '1';
     const stdout = await runCli(args, 'Pipeline Run', { showOutput: false });
+    if (generalCanonical) delete process.env.NOEON_GENERAL_CANONICAL;
     return JSON.parse(stdout);
   }
 
@@ -226,6 +328,17 @@ function activate(context) {
         vscode.window.showErrorMessage(e.message);
       }
     }),
+    vscode.commands.registerCommand('noeon.compileFile', async () => {
+      const file = await getActiveFile();
+      if (!file) return;
+      try {
+        const args = ['compile', file, '--json'];
+        if (generalCanonicalEnabled()) args.push('--canonical');
+        await runCli(args, 'Compile IR');
+      } catch (e) {
+        vscode.window.showErrorMessage(e.message);
+      }
+    }),
     vscode.commands.registerCommand('noeon.brainMap', async () => {
       const editor = vscode.window.activeTextEditor;
       const file = await getActiveFile();
@@ -264,7 +377,7 @@ function activate(context) {
       const next = !config.get('brainHighlight', true);
       config.update('brainHighlight', next, vscode.ConfigurationTarget.Workspace);
       if (next) {
-        refreshActiveDecorations();
+        refreshActiveEditorChrome();
       } else if (vscode.window.activeTextEditor) {
         for (const type of Object.values(decorationTypes)) {
           vscode.window.activeTextEditor.setDecorations(type, []);
@@ -272,12 +385,14 @@ function activate(context) {
       }
       vscode.window.showInformationMessage(`Noeon brain highlight: ${next ? 'on' : 'off'}`);
     }),
+    vscode.commands.registerCommand('noeon.refreshGoldenGateStatus', () => refreshGoldenGateStatusBar()),
     vscode.commands.registerCommand('noeon.showArchitecturePanel', async () => {
       await vscode.commands.executeCommand('noeon.architecture.focus');
       const editor = vscode.window.activeTextEditor;
       if (architecturePanel && editor) architecturePanel.refresh(editor);
     })
   );
+  refreshGoldenGateStatusBar();
 }
 
 function deactivate() {}

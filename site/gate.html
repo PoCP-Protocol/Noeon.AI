@@ -55,10 +55,11 @@
       <section class="gate-section">
         <h2>AI Golden Gate</h2>
         <p>Review auto-remediated AI-native patches before applying to the worktree.</p>
-        <div class="fusion-controls" style="margin:1rem 0;">
+        <div class="fusion-controls" style="margin:1rem 0;align-items:center;">
           <button id="btn-gg-refresh" class="btn primary">Refresh</button>
           <button id="btn-gg-remediate" class="btn ghost">Remediate</button>
           <button id="btn-gg-apply" class="btn ghost">Apply All</button>
+          <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
           <a href="./studio.html" class="btn ghost">Open Studio</a>
         </div>
         <p id="gg-stats" class="stats">Loading…</p>
@@ -69,13 +70,15 @@
         </div>
         <table class="gate-table">
           <thead>
-            <tr><th>File</th><th>Grade</th><th>Verdict</th><th>Remediate</th><th></th></tr>
+            <tr><th>File</th><th>Grade</th><th>Verdict</th><th>Execution</th><th>Remediate</th><th></th></tr>
           </thead>
           <tbody id="gg-body"></tbody>
         </table>
       </section>
     </main>
 
+    <script src="./golden-gate-badge.js"></script>
+    <script src="./execution-summary.js"></script>
     <script src="./gate.js"></script>
   </body>
 </html>

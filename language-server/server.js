@@ -97,7 +97,8 @@ function handleMessage(msg) {
   if (method === 'textDocument/hover') {
     const { textDocument, position } = params;
     const doc = documents.get(textDocument.uri);
-    const hover = getHover(doc ? doc.getText() : '', position.line, position.character);
+    const filename = decodeURIComponent(String(textDocument.uri).split('/').pop() || 'buffer.noeon');
+    const hover = getHover(doc ? doc.getText() : '', position.line, position.character, filename);
     if (!hover) {
       send({ jsonrpc: '2.0', id, result: null });
       return;
@@ -116,7 +117,7 @@ function handleMessage(msg) {
     const { textDocument } = params;
     const doc = documents.get(textDocument.uri);
     const symbols = getDocumentSymbols(doc ? doc.getText() : '');
-    const kindMap = { intent: 18, goal: 12, cognitive: 14, agent: 5 };
+    const kindMap = { intent: 18, goal: 12, cognitive: 14, agent: 5, execution: 13, function: 12, import: 9 };
     send({
       jsonrpc: '2.0',
       id,

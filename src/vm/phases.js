@@ -18,7 +18,8 @@ const PIPELINE_PHASE_TO_REGIONS = {
   alignment: ['amygdala', 'prefrontal_cortex'],
   consciousness: ['thalamus', 'association_cortex'],
   cognitive: ['association_cortex', 'basal_ganglia', 'motor_cortex'],
-  protocol: ['prefrontal_cortex']
+  protocol: ['prefrontal_cortex'],
+  'canonical-act': ['motor_cortex', 'basal_ganglia']
 };
 
 const PHASE = {
@@ -34,6 +35,7 @@ const PHASE = {
   ALIGNMENT: 'alignment',
   CONSCIOUSNESS: 'consciousness',
   COGNITIVE: 'cognitive',
+  CANONICAL_ACT: 'canonical-act',
   PROTOCOL: 'protocol'
 };
 

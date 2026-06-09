@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { runGoldenPath } = require('../src/core/golden-path');
 const { runParityConformance } = require('../src/core/canonical-conform');
+const { buildExecutionSummary } = require('../src/core/canonical-probes');
 const { buildPrCommentMarkdown, enrichProgramsWithPreviews } = require('./golden-gate-pr-comment');
 
 const GATE_SCHEMA = 'noeon.golden.gate/v1';
@@ -22,6 +23,51 @@ const GRADE_RANK = { A: 5, B: 4, C: 3, D: 2, F: 1 };
 
 function gradeOk(actual, minimum) {
   return (GRADE_RANK[actual] || 0) >= (GRADE_RANK[minimum] || 0);
+}
+
+function buildGateExecutionEntry(payload, filePath, root, spec) {
+  const run = payload.run || {};
+  const execution = {
+    strategy: run.executionStrategy || null,
+    driver: run.executionDriver || null,
+    actDriver: run.actDriver || null,
+    snapshotAct: run.snapshotActExecution === true,
+    hybrid: run.hybridActExecution === true,
+    canonicalPrimary: run.canonicalPrimary === true,
+    phases: run.phases || [],
+    lensOnly: spec.lensOnly === true
+  };
+
+  if (!execution.strategy || (spec.lensOnly && !execution.phases.length)) {
+    try {
+      const { parseNoeonInput } = require('../src/core/pipeline');
+      const { loadProjectConfig } = require('../src/core/config');
+      const { resolveExecutionStrategy } = require('../src/core/general-canonical-mode');
+      const { ast } = parseNoeonInput(filePath, { filename: filePath });
+      const { config } = loadProjectConfig({ cwd: root });
+      const strategy = resolveExecutionStrategy(ast, { projectConfig: config });
+      execution.strategy = strategy;
+      execution.snapshotAct = strategy === 'tool-snapshot-primary';
+      execution.hybrid = strategy === 'hybrid-canonical-acts';
+      execution.canonicalPrimary = strategy !== 'cognitive-primary';
+      execution.inferred = true;
+    } catch {
+      /* keep run-derived execution */
+    }
+  }
+
+  Object.assign(execution, buildExecutionSummary({
+    executionStrategy: execution.strategy,
+    executionDriver: execution.driver,
+    actDriver: execution.actDriver,
+    hybridActExecution: execution.hybrid,
+    snapshotActExecution: execution.snapshotAct,
+    canonicalPrimary: execution.canonicalPrimary,
+    phases: execution.phases
+  }));
+  execution.lensOnly = spec.lensOnly === true;
+
+  return execution;
 }
 
 async function runGoldenGate(options = {}) {
@@ -63,6 +109,7 @@ async function runGoldenGate(options = {}) {
         verdict: payload.verdict,
         hints: payload.hints
       };
+      entry.execution = buildGateExecutionEntry(payload, filePath, root, spec);
 
       if (!gradeOk(entry.grade, spec.minGrade)) {
         entry.ok = false;
@@ -133,6 +180,18 @@ async function runGoldenGate(options = {}) {
   }
 
   let conform = null;
+  let canonicalProbes = null;
+  if (options.canonical_probes !== false) {
+    try {
+      const { runCanonicalProbes } = require('../src/core/canonical-probes');
+      canonicalProbes = await runCanonicalProbes({ root, ...options });
+      if (!canonicalProbes.ok) failed += 1;
+    } catch (e) {
+      canonicalProbes = { ok: false, error: e.message, programs: [] };
+      failed += 1;
+    }
+  }
+
   if (options.conform !== false) {
     try {
       conform = await runParityConformance();
@@ -148,11 +207,13 @@ async function runGoldenGate(options = {}) {
     generatedAt: new Date().toISOString(),
     ok: failed === 0,
     programs: results,
+    canonicalProbes,
     conform,
     summary: {
       passed: results.filter((r) => r.ok).length,
       total: results.length,
-      conform: conform?.allValid ?? null
+      conform: conform?.allValid ?? null,
+      canonicalProbes: canonicalProbes?.summary?.passed ?? null
     }
   };
 
@@ -182,6 +243,16 @@ async function main() {
   if (payload.conform) {
     const mark = payload.conform.allValid ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m';
     console.log(`  ${mark} conform parity`);
+  }
+  if (payload.canonicalProbes) {
+    const mark = payload.canonicalProbes.ok ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m';
+    const s = payload.canonicalProbes.summary || {};
+    console.log(`  ${mark} canonical probes ${s.passed ?? 0}/${s.total ?? payload.canonicalProbes.programs?.length ?? 0}`);
+    for (const p of payload.canonicalProbes.programs || []) {
+      if (!p.ok) {
+        for (const err of p.errors || []) console.log(`         \x1b[31m${p.file}: ${err}\x1b[0m`);
+      }
+    }
   }
   console.log(`\n${payload.ok ? '\x1b[32m' : '\x1b[31m'}Golden gate: ${payload.summary.passed}/${payload.summary.total} programs\x1b[0m\n`);
   if (!payload.ok) {

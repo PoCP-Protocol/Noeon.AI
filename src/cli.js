@@ -29,6 +29,7 @@ const {
 const { runDoctor, formatDoctorReport } = require('./doctor');
 const { buildReleaseManifest, NOEON_VERSION } = require('./core/release-version');
 const { buildCognitiveGraph, formatMermaidGraph } = require('./graph');
+const { extractActionTrace, formatActionTraceLines, formatExecutionSummaryLines, buildExecutionSummary } = require('./core/action-trace');
 
 const VERSION = NOEON_VERSION;
 
@@ -61,7 +62,10 @@ function resolveFile(filePath) {
 }
 
 async function cmdRun(filePath) {
-  if (!filePath) { console.error('Usage: noeon run <file.ael|file.noeon> [--json] [--trace] [--verbose] [--auto-evolve] [--approval-token TOKEN] [--next-memory-in file] [--next-memory-out file]'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: noeon run <file.ael|file.noeon> [--json] [--trace] [--canonical] [--verbose] [--auto-evolve] [--approval-token TOKEN] [--next-memory-in file] [--next-memory-out file]');
+    process.exit(1);
+  }
   const nextMemoryInFlag = flags['next-memory-in'] || flags.next_memory_in;
   const nextMemoryOutFlag = flags['next-memory-out'] || flags.next_memory_out;
   const nextMemoryInPath = nextMemoryInFlag ? (nextMemoryInFlag === true ? 'next-memory.json' : nextMemoryInFlag) : null;
@@ -69,7 +73,7 @@ async function cmdRun(filePath) {
   const nextMemoryIn = nextMemoryInPath ? readJsonFileIfExists(nextMemoryInPath) : undefined;
 
   const { ast, resolved } = parseProgram(filePath);
-  const result = await runProgram(ast, {
+  const runOptions = {
     verbose: flags.verbose,
     trace: flags.trace,
     quiet: flags.quiet,
@@ -84,7 +88,9 @@ async function cmdRun(filePath) {
     strict_protocol: Boolean(flags['strict-protocol'] || flags.strict_protocol),
     approval_token: flags['approval-token'] || flags.approval_token || undefined,
     feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
-  });
+  };
+  if (flags.canonical) runOptions.general_canonical = true;
+  const result = await runProgram(ast, runOptions);
 
   let writtenNextMemory = null;
   if (nextMemoryOutPath && result.next?.nextMemory) {
@@ -92,8 +98,34 @@ async function cmdRun(filePath) {
     fs.writeFileSync(writtenNextMemory, JSON.stringify(result.next.nextMemory, null, 2), 'utf8');
   }
 
+  const actionTrace = extractActionTrace(result);
+  let compilePresentation = null;
+  if (flags.canonical || result.canonicalPrimary) {
+    compilePresentation = compileProgram(ast, 'ir', {
+      general_canonical: result.canonicalPrimary || flags.canonical
+    });
+  }
+
   if (flags.json) {
-    console.log(JSON.stringify(result, null, 2));
+    const payload = {
+      ...result,
+      actionTrace,
+      executionSummary: buildExecutionSummary(result),
+      era: require('./core/release-version').NOEON_ERA,
+      ...(compilePresentation
+        ? {
+            compileMode: result.compileMode || compilePresentation.compileMode,
+            primaryIr: result.primaryIr || compilePresentation.primaryIr,
+            cognitiveIr: compilePresentation.program?.toJSON?.() || null,
+            canonicalIr: compilePresentation.canonicalIr || ast.general?.canonicalIr || null
+          }
+        : {
+            compileMode: result.compileMode,
+            primaryIr: result.primaryIr,
+            canonicalIr: ast.general?.canonicalIr || result.canonical || null
+          })
+    };
+    console.log(JSON.stringify(payload, null, 2));
     if (writtenNextMemory) {
       console.error(`next memory -> ${writtenNextMemory}`);
     }
@@ -125,6 +157,11 @@ async function cmdRun(filePath) {
     console.log(`Cycles:  ${result.stats?.cycles ?? 0}`);
     console.log(`Nodes:   ${result.stats?.nodes_processed ?? 0}`);
     console.log(`Time:    ${result.stats?.elapsed_ms ?? 0}ms`);
+    const pathLines = formatExecutionSummaryLines(result);
+    if (pathLines.length) {
+      console.log('');
+      pathLines.forEach((line) => console.log(line));
+    }
     if (result.llm) console.log(`LLM:     ${result.llm.totalCalls} call(s), mode ${process.env.NOEON_LLM_MODE || 'auto'}`);
     if (result.protocol?.enriched) {
       console.log(`Protocol:  ${result.protocol.protocolSuccess ? '\x1b[32m✓ OK\x1b[0m' : '\x1b[33m⚠ issues\x1b[0m'} (compute + META)`);
@@ -148,6 +185,14 @@ async function cmdRun(filePath) {
     if (writtenNextMemory) {
       console.log(`Next memory: ${writtenNextMemory}`);
     }
+    if (actionTrace.count > 0 || actionTrace.lastAction || actionTrace.lastFetch) {
+      console.log('\nACT:');
+      formatActionTraceLines(actionTrace).forEach((line) => console.log(line));
+    }
+    if (compilePresentation || result.canonicalPrimary) {
+      console.log(`\nEra: ${require('./core/release-version').NOEON_ERA}`);
+      console.log(`Compile: ${result.compileMode || compilePresentation?.compileMode} · primary ${result.primaryIr || compilePresentation?.primaryIr}`);
+    }
   }
   process.exit(result.success ? 0 : 1);
 }
@@ -159,19 +204,45 @@ function cmdParse(filePath) {
 }
 
 function cmdCompile(filePath) {
-  if (!filePath) { console.error('Usage: noeon compile <file.ael> [--format ir|ael|both] [--out file]'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: noeon compile <file.ael|file.noeon> [--format ir|ael|both] [--canonical] [--json] [--out file]');
+    process.exit(1);
+  }
   const { ast } = parseProgram(filePath);
   const format = flags.format === 'ael' ? 'ael' : flags.format === 'both' ? 'both' : 'ir';
-  const compiled = compileProgram(ast, format);
+  const compileOpts = {
+    general_canonical: Boolean(flags.canonical)
+  };
+  const compiled = compileProgram(ast, format, compileOpts);
+  const cognitiveIr = format !== 'ael' ? compiled.program?.toJSON?.() : null;
+  const canonicalIr = compiled.canonicalIr || ast.general?.canonicalIr || null;
 
   let output;
-  if (format === 'ir') output = compiled.program.toJSON();
-  else if (format === 'both') output = { ir: compiled.program.toJSON(), artifact: compiled.artifact, warnings: compiled.warnings };
-  else output = compiled.artifact;
+  if (flags.json) {
+    output = {
+      format,
+      compileMode: compiled.compileMode || 'cognitive-primary',
+      primaryIr: compiled.primaryIr || 'cognitive',
+      cognitiveIr,
+      canonicalIr,
+      warnings: compiled.warnings || []
+    };
+    if (format === 'ael' || format === 'both') output.artifact = compiled.artifact;
+    if (format === 'both') output.ir = cognitiveIr;
+  } else if (format === 'ir') {
+    output = compiled.primaryIr === 'canonical' && canonicalIr ? canonicalIr : cognitiveIr;
+  } else if (format === 'both') {
+    output = { ir: cognitiveIr, artifact: compiled.artifact, warnings: compiled.warnings };
+  } else {
+    output = compiled.artifact;
+  }
 
   if (flags.out) {
     fs.writeFileSync(resolveFile(flags.out), JSON.stringify(output, null, 2), 'utf8');
     console.log(`Written: ${resolveFile(flags.out)}`);
+    if (!flags.json && format === 'ir') {
+      console.error(`compileMode: ${compiled.compileMode || 'cognitive-primary'} · primaryIr: ${compiled.primaryIr || 'cognitive'}`);
+    }
   } else {
     console.log(JSON.stringify(output, null, 2));
   }
@@ -1008,8 +1079,9 @@ Remote index:     ${process.env.NOEON_REGISTRY_URL || '(not set)'}`);
 }
 
 function cmdStatus() {
+  const { formatRuntimeStatusText } = require('./runtime/unified-runtime');
   const status = getRuntimeStatus();
-  console.log(JSON.stringify(status, null, 2));
+  console.log(flags.json ? JSON.stringify(status, null, 2) : formatRuntimeStatusText(status));
 }
 
 function cmdDoctor() {
@@ -1501,7 +1573,7 @@ function cmdHelp() {
 \x1b[1mNext:\x1b[0m       epoch | diff | merge | mycelium | field-memory
 \x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | studio | lsp
 
-\x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --out file
+\x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --canonical --out file
        --with-protocol auto|on|off --strict-protocol --port 5177 --file program.ael
        --profile general|ael|liminal --auto-evolve --strict-next --approval-token TOKEN
        --next-memory-in file --next-memory-out file
@@ -1536,6 +1608,8 @@ function cmdHelp() {
   noeon diff examples/genesis.next
   noeon merge examples/genesis.next --three-way --theirs file.merged
   noeon mycelium events dream_cluster --limit 10
+  noeon compile examples/web_fetch.noeon --canonical --json
+  noeon run examples/web_fetch.noeon --json --canonical
   noeon compile examples/cognitive_minimal.ael --format both --out out.json
   noeon doctor --file examples/cognitive_minimal.ael
   noeon test examples/agent_research.noeon

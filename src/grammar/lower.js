@@ -605,9 +605,8 @@ function lowerGeneralProgram(general) {
   ast.noeonStack = buildStackManifest(ast);
 
   try {
-    const { lowerToCanonical } = require('../core/canonical-lower');
-    ast.general = ast.general || {};
-    ast.general.canonicalIr = lowerToCanonical(ast);
+    const { attachGeneralCanonicalSnapshot } = require('../core/general-canonical-snapshot');
+    attachGeneralCanonicalSnapshot(ast);
   } catch {
     // non-fatal during alpha — legacy AST remains execution path
   }

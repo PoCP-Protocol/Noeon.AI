@@ -88,6 +88,11 @@ function renderArchitectureHtml(model, filename) {
        </script>`
     : '';
 
+  const exec = model.executionSummary;
+  const execHtml = exec?.strategy
+    ? `<div class="route exec">⚡ ${escapeHtml(exec.path || exec.strategy)} · ${escapeHtml(exec.strategy)}${exec.hybrid ? ' · hybrid' : ''}${exec.snapshotAct ? ' · snapshot-act' : ''}${exec.phases?.length ? ` · ${escapeHtml(exec.phases.join(' → '))}` : ''}</div>`
+    : '';
+
   const csp = model.architectureMermaid
     ? "default-src 'none'; img-src data:; style-src 'unsafe-inline' https://cdn.jsdelivr.net; script-src https://cdn.jsdelivr.net 'unsafe-inline';"
     : "default-src 'none'; style-src 'unsafe-inline';";
@@ -102,6 +107,7 @@ function renderArchitectureHtml(model, filename) {
     h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.65; margin: 16px 0 8px; }
     h2:first-child { margin-top: 0; }
     .route { font-family: var(--vscode-editor-font-family, monospace); font-size: 13px; padding: 8px 10px; border-radius: 6px; background: var(--vscode-editor-inactiveSelectionBackground); border-left: 3px solid var(--vscode-textLink-foreground); }
+    .route.exec { border-left-color: #d4a574; margin-top: 8px; }
     .meta, .runtime-meta { opacity: 0.75; margin-top: 6px; font-size: 11px; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
     .chip { padding: 2px 8px; border-radius: 999px; background: var(--vscode-badge-background); color: var(--vscode-badge-foreground); font-size: 11px; }
@@ -127,7 +133,9 @@ function renderArchitectureHtml(model, filename) {
 <body>
   <div class="file">${escapeHtml(filename || 'untitled')}</div>
   <div class="route">▸ ${escapeHtml(model.routeLabel || 'plan')}</div>
-  <div class="meta">core: ${escapeHtml(REGION_LABELS[model.core_field] || model.core_field || 'field')} · executive: ${escapeHtml(REGION_LABELS[model.executive] || 'Executive')} · ${(model.active_regions || []).length} regions${model.runtime ? ' · runtime attached' : ''}</div>
+  ${execHtml}
+  <div class="meta">core: ${escapeHtml(REGION_LABELS[model.core_field] || model.core_field || 'field')} · executive: ${escapeHtml(REGION_LABELS[model.executive] || 'Executive')} · ${(model.active_regions || []).length} regions${model.runtime ? ' · runtime attached' : ''}${model.compileMode ? ` · compile: ${escapeHtml(model.compileMode)} (${escapeHtml(model.primaryIr || 'cognitive')})` : ''}</div>
+  ${model.actionTrace?.lastFetch ? `<div class="meta">last_fetch: ${escapeHtml(String(model.actionTrace.lastFetch).slice(0, 160))}</div>` : ''}
 
   ${renderRuntimePhases(model)}
 

@@ -37,6 +37,8 @@ const meshTraceMermaid = document.getElementById("mesh-trace-mermaid");
 const actionTraceEl = document.getElementById("action-trace");
 
 let activeExampleName = null;
+let activeExampleCategory = null;
+let cachedExamples = [];
 let pendingGateApproval = null;
 let mermaidReady = false;
 
@@ -241,8 +243,13 @@ function updateRouteBar(data) {
   const routeLens = (data.code_lenses || []).find((l) => l.title?.includes("route:"));
   const cycleLens = (data.code_lenses || []).find((l) => l.title?.includes("cycle:"));
   const runtimePhases = data.runtime?.phases?.length ? `ran: ${data.runtime.phases.join("→")}` : null;
+  const execSummary = data.executionSummary;
+  const execStrategy = execSummary?.strategy
+    ? `exec: ${execSummary.path || execSummary.strategy}`
+    : (data.executionStrategy ? `exec: ${data.executionStrategy}` : null);
   sourceRouteBar.textContent = [
     routeLens?.title || (data.routeLabel ? `▸ route: ${data.routeLabel}` : null),
+    execStrategy,
     data.active_regions?.length ? `${data.active_regions.length} regions` : null,
     runtimePhases,
     cycleLens ? cycleLens.title.replace("◎ ", "") : null
@@ -281,10 +288,13 @@ function updateSourceBrainGutter(data) {
       label = REGION_LABELS[region];
     }
 
-    if (lens && (lens.title.includes("route:") || lens.title.includes("cycle:") || lens.title.includes("integration:"))) {
+    if (lens && (lens.title.includes("route:") || lens.title.includes("cycle:") || lens.title.includes("integration:") || lens.title.includes("exec:"))) {
       tag.className = "brain-line-tag lens";
       tag.style.setProperty("--brain-color", REGION_COLORS[region] || "#9c7bd8");
-      tag.textContent = lens.title.includes("route:") ? "▸rt" : lens.title.includes("cycle:") ? "◎cy" : "◎fu";
+      tag.textContent = lens.title.includes("route:") ? "▸rt"
+        : lens.title.includes("cycle:") ? "◎cy"
+        : lens.title.includes("exec:") ? "⚡ex"
+        : "◎fu";
       tag.title = lens.title;
     } else if (region) {
       tag.className = "brain-line-tag";
@@ -452,8 +462,55 @@ function renderActionTrace(data) {
 
 function compileExtras() {
   const el = document.getElementById("canonical-mode");
-  return el?.checked ? { general_canonical: true } : {};
+  if (el?.checked) return { general_canonical: true };
+  if (activeExampleCategory === "tools") return { general_canonical: true };
+  const ex = cachedExamples.find((e) => e.name === activeExampleName);
+  if (ex?.autoCanonical) return { general_canonical: true };
+  return {};
 }
+
+function updateExamplePathHint(ex) {
+  const el = document.getElementById("example-path-hint");
+  if (!el) return;
+  if (!ex?.executionPath || ex.executionPath === "cognitive") {
+    el.textContent = "";
+    el.className = "example-path-hint hidden";
+    return;
+  }
+  el.className = `example-path-hint path-${ex.executionPath}`;
+  el.textContent = ex.autoCanonical
+    ? `path: ${ex.executionPath} (auto canonical)`
+    : `path: ${ex.executionPath}`;
+}
+
+function applyExampleCanonicalPreference(ex) {
+  activeExampleCategory = ex?.category || null;
+  const el = document.getElementById("canonical-mode");
+  if (!el) return;
+  const key = "noeon.playground.canonical-primary";
+  const pref = localStorage.getItem(key);
+  if (pref === "1") {
+    el.checked = true;
+    return;
+  }
+  if (pref === "0") {
+    el.checked = false;
+    return;
+  }
+  el.checked = ex?.autoCanonical === true || ex?.category === "tools";
+}
+
+(function initCanonicalPreference() {
+  const el = document.getElementById("canonical-mode");
+  if (!el) return;
+  const key = "noeon.playground.canonical-primary";
+  const pref = localStorage.getItem(key);
+  if (pref === "1") el.checked = true;
+  else if (pref === "0") el.checked = false;
+  el.addEventListener("change", () => {
+    localStorage.setItem(key, el.checked ? "1" : "0");
+  });
+})();
 
 function renderBrainTraceCompact(data) {
   const arch = data?.architecture;
@@ -513,13 +570,29 @@ function scheduleBrainSync() {
   brainSyncTimer = setTimeout(() => syncBrainFromApi(), 700);
 }
 
+function architectureDetailLines(data) {
+  return window.NoeonArchitecturePanel?.formatArchitectureLines(data) || [];
+}
+
 function renderBrainTrace(data) {
   liveBrainEnabled = false;
   clearTimeout(brainSyncTimer);
   const mesh = data?.meshTrace || data?.report?.observability?.mesh_trace;
   const arch = data?.architecture;
+  const archDetails = architectureDetailLines(data);
+
   if (!arch?.active_regions?.length) {
-    brainPanel.classList.add("hidden");
+    if (archDetails.length) {
+      brainPanel.classList.remove("hidden");
+      brainSummary.textContent = [
+        data.routeLabel ? `route: ${data.routeLabel}` : null,
+        data.compileMode ? `compile: ${data.compileMode}` : null
+      ].filter(Boolean).join(" · ") || "Architecture";
+      brainRegions.innerHTML = "";
+      brainFlow.textContent = archDetails.join("\n");
+    } else {
+      brainPanel.classList.add("hidden");
+    }
     renderActionTrace(data);
     renderMeshTracePanel(mesh);
     return;
@@ -530,6 +603,8 @@ function renderBrainTrace(data) {
   brainSummary.textContent = [
     `executive: ${REGION_LABELS[executive] || executive}`,
     `core: ${REGION_LABELS[arch.core_field] || arch.core_field || "field"}`,
+    data.routeLabel ? `route: ${data.routeLabel}` : null,
+    data.compileMode ? `compile: ${data.compileMode}` : null,
     data.runtime?.phases?.length ? `ran: ${data.runtime.phases.join("→")}` : null,
     arch.phase_regions?.length ? `phases: ${arch.phase_regions.length} regions` : null
   ].filter(Boolean).join(" · ");
@@ -553,6 +628,9 @@ function renderBrainTrace(data) {
       "pipeline: " +
         arch.pipeline_phases.map((p) => `${p.phase}[${(p.regions || []).map((r) => REGION_LABELS[r] || r).join("+")}]`).join(" → ")
     );
+  }
+  if (archDetails.length) {
+    flowLines.push("", "--- details ---", ...archDetails);
   }
   brainFlow.textContent = flowLines.length ? flowLines.join("\n") : "No agent flow — static region map only.";
 
@@ -637,8 +715,11 @@ async function previewFusion() {
 
 function formatExampleLabel(ex) {
   const title = ex.title || ex.name;
-  if (ex.category) return `[${ex.category}] ${title}`;
-  return title;
+  const pathTag = ex.executionPath && ex.executionPath !== "cognitive"
+    ? ` · ${ex.executionPath}`
+    : "";
+  if (ex.category) return `[${ex.category}] ${title}${pathTag}`;
+  return `${title}${pathTag}`;
 }
 
 async function loadExamples() {
@@ -646,6 +727,7 @@ async function loadExamples() {
     const res = await fetch("/api/examples");
     const data = await res.json();
     const examples = data.examples || [];
+    cachedExamples = examples;
 
     for (const ex of examples) {
       const opt = document.createElement("option");
@@ -658,6 +740,8 @@ async function loadExamples() {
     if (hello) {
       sourceEl.value = hello.source;
       activeExampleName = hello.name;
+      applyExampleCanonicalPreference(hello);
+      updateExamplePathHint(hello);
       exampleSelect.value = hello.name;
     } else {
       sourceEl.value = FALLBACK_SOURCE;
@@ -667,12 +751,15 @@ async function loadExamples() {
       const name = exampleSelect.value;
       if (!name) {
         activeExampleName = null;
+        updateExamplePathHint(null);
         return;
       }
       const ex = examples.find((e) => e.name === name);
       if (ex) {
         sourceEl.value = ex.source;
         activeExampleName = name;
+        applyExampleCanonicalPreference(ex);
+        updateExamplePathHint(ex);
         updateFusionBadge();
         updateSourceBrainGutter();
         setStatus(`Loaded ${ex.title || name}`);
@@ -710,6 +797,75 @@ document.getElementById("btn-compile").addEventListener("click", async () => {
     setOutput(e.message, true, e.line);
   }
 });
+
+function formatRunExecutionSummary(data) {
+  if (!data) return "";
+  const summary = data.executionSummary;
+  if (summary?.strategy) {
+    const tags = [
+      `strategy: ${summary.strategy}`,
+      summary.path ? `path: ${summary.path}` : null,
+      summary.hybrid ? "hybrid" : null,
+      summary.snapshotAct ? "snapshot-act" : null,
+      summary.actDriver ? `act: ${summary.actDriver}` : null,
+      summary.phases?.length ? `phases: ${summary.phases.join("→")}` : null
+    ].filter(Boolean);
+    return ["── Execution ──", ...tags, ""].join("\n");
+  }
+  const strategy = data.executionStrategy || null;
+  const phases = data.executionPhases || data.phases || data.runtime?.phases || [];
+  const tags = [
+    strategy ? `strategy: ${strategy}` : null,
+    data.hybridActExecution ? "hybrid" : null,
+    data.snapshotActExecution ? "snapshot-act" : null,
+    data.actDriver ? `act: ${data.actDriver}` : null,
+    data.executionDriver ? `driver: ${data.executionDriver}` : null,
+    phases.length ? `phases: ${phases.join("→")}` : null
+  ].filter(Boolean);
+  if (!tags.length) return "";
+  return ["── Execution ──", ...tags, ""].join("\n");
+}
+
+function executionPathClass(data) {
+  const summary = data?.executionSummary;
+  if (summary?.path) return `path-${summary.path}`;
+  const strategy = data?.executionStrategy;
+  if (strategy === "hybrid-canonical-acts") return "path-hybrid";
+  if (strategy === "tool-snapshot-primary") return "path-snapshot-act";
+  if (strategy === "snapshot-primary") return "path-canonical";
+  return "path-cognitive";
+}
+
+function updateRunExecutionBar(data) {
+  const el = document.getElementById("run-execution-bar");
+  if (!el) return;
+  const summary = data?.executionSummary;
+  if (summary?.strategy) {
+    el.className = `run-execution-bar ${executionPathClass(data)}`;
+    el.textContent = [
+      summary.strategy,
+      summary.hybrid ? "hybrid" : null,
+      summary.snapshotAct ? "snapshot-act" : null,
+      summary.phases?.length ? summary.phases.join(" → ") : null
+    ].filter(Boolean).join(" · ");
+    return;
+  }
+  const strategy = data?.executionStrategy;
+  const phases = data?.executionPhases || data?.phases || [];
+  if (!strategy && !phases.length && !data?.hybridActExecution && !data?.snapshotActExecution) {
+    el.textContent = "";
+    el.className = "run-execution-bar hidden";
+    return;
+  }
+  const parts = [
+    strategy || "cognitive-primary",
+    data.hybridActExecution ? "hybrid" : null,
+    data.snapshotActExecution ? "snapshot-act" : null,
+    phases.length ? phases.join(" → ") : null
+  ].filter(Boolean);
+  el.className = `run-execution-bar ${executionPathClass(data)}`;
+  el.textContent = parts.join(" · ");
+}
 
 function formatCanonicalReportSummary(report) {
   if (!report?.schema) return "";
@@ -779,7 +935,11 @@ async function approveAndRerun() {
     pendingGateApproval = null;
     renderHumanGate(data);
     renderBrainTrace(data);
-    const summary = formatCanonicalReportSummary(data.report || data.unifiedReport);
+    updateRunExecutionBar(data);
+    const summary = [
+      formatRunExecutionSummary(data),
+      formatCanonicalReportSummary(data.report || data.unifiedReport)
+    ].filter(Boolean).join("\n");
     setOutput(`${summary}${JSON.stringify(data, null, 2)}`, !data.success);
   } catch (e) {
     setOutput(e.message, true, e.line);
@@ -798,10 +958,15 @@ document.getElementById("btn-run").addEventListener("click", async () => {
     const withProtocol = isNoeon ? "off" : "auto";
     const payload = { trace: true, with_protocol: withProtocol };
     if (pendingGateApproval?.token) payload.approval_token = pendingGateApproval.token;
-    const data = await api("/api/run", payload);
+    const data = await api("/api/run", { ...payload, ...compileExtras() });
     renderHumanGate(data);
     renderBrainTrace(data);
-    const summary = formatCanonicalReportSummary(data.report || data.unifiedReport);
+    renderActionTrace(data);
+    updateRunExecutionBar(data);
+    const summary = [
+      formatRunExecutionSummary(data),
+      formatCanonicalReportSummary(data.report || data.unifiedReport)
+    ].filter(Boolean).join("\n");
     const body = JSON.stringify(data, null, 2);
     setOutput(summary ? `${summary}${body}` : body, !data.success);
   } catch (e) {
@@ -1017,7 +1182,12 @@ updateLineInfo();
 updateSourceBrainGutter();
 loadExamples().then(() => scheduleBrainSync());
 fetch("/api/status").then((r) => r.json()).then((s) => {
-  const base = `Noeon ${s.version} | LLM ${s.llm?.mode}`;
+  window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+    document.getElementById("golden-gate-badge"),
+    s.goldenGate
+  );
+  const era = s.era ? ` · ${s.era}` : "";
+  const base = `Noeon ${s.version}${era} | LLM ${s.llm?.mode}`;
   fetch("/api/pkg/search?q=", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
     .then((r) => r.json())
     .then((pkg) => setStatus(`${base} | registry ${pkg.count ?? 0} packages`))

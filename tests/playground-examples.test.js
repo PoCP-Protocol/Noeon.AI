@@ -18,11 +18,23 @@ const examples = loadCuratedExamples({ root });
 
 assert(Array.isArray(examples) && examples.length > 0, 'loadCuratedExamples returns non-empty list');
 assert(examples.every((e) => e.name && e.source), 'each example includes name and source');
+assert(examples.every((e) => e.executionStrategy && e.executionPath), 'each example includes execution metadata');
 
 const names = new Set(examples.map((e) => e.name));
 assert(names.has('hello.noeon'), 'includes hello.noeon');
 assert(names.has('http_demo.noeon'), 'includes http_demo.noeon');
 assert(names.has('web_fetch.noeon'), 'includes web_fetch.noeon');
+
+const httpDemo = examples.find((e) => e.name === 'http_demo.noeon');
+assert(httpDemo?.executionPath === 'snapshot-act', 'http_demo tagged snapshot-act');
+assert(httpDemo?.autoCanonical === true, 'http_demo auto canonical');
+
+const agentResearch = examples.find((e) => e.name === 'agent_research.noeon');
+assert(agentResearch?.executionPath === 'hybrid', 'agent_research tagged hybrid');
+assert(agentResearch?.autoCanonical === true, 'agent_research auto canonical');
+
+const hello = examples.find((e) => e.name === 'hello.noeon');
+assert(hello?.executionPath === 'cognitive', 'hello cognitive path');
 
 const curatedNames = new Set(CURATED_EXAMPLES.map((e) => e.name));
 for (const ex of examples) {

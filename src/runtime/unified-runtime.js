@@ -18,7 +18,7 @@ const { runGovernancePreflight } = require('../core/governance');
 const { loadProjectConfig, resolveRunOptions } = require('../core/config');
 const { prepareCanonicalExecution, finalizeCanonicalResult } = require('../core/canonical-runtime');
 const { planExecutionPhases } = require('../core/canonical-plan');
-const { resolveCompilePresentation } = require('../core/general-canonical-mode');
+const { resolveCompilePresentation, resolveGeneralCanonical } = require('../core/general-canonical-mode');
 const { loadConvergenceFromDir, buildConvergenceMatrix } = require('../core/canonical-convergence');
 const { deriveExecutionRoute } = require('../core/canonical-route');
 const { computeSemanticPulse } = require('../core/canonical-pulse');
@@ -115,13 +115,15 @@ function validateProgram(ast, options = {}) {
 }
 
 function compileProgram(ast, format = 'ir', options = {}) {
+  const { config } = loadProjectConfig(options);
+  const compileOpts = { ...options, projectConfig: config };
   if (format === 'ael' || format === 'artifact') {
     return { format: 'ael', artifact: compileAel(ast) };
   }
   if (format === 'both') {
     const compiler = new AELtoIRCompiler();
     const { program, warnings } = compiler.compile(ast);
-    const presentation = resolveCompilePresentation(ast, program, options);
+    const presentation = resolveCompilePresentation(ast, program, compileOpts);
     return {
       format: 'both',
       program,
@@ -132,7 +134,7 @@ function compileProgram(ast, format = 'ir', options = {}) {
   }
   const compiler = new AELtoIRCompiler();
   const { program, warnings } = compiler.compile(ast);
-  const presentation = resolveCompilePresentation(ast, program, options);
+  const presentation = resolveCompilePresentation(ast, program, compileOpts);
   return { format: 'ir', program, warnings, ...presentation };
 }
 
@@ -174,9 +176,20 @@ async function runProgram(ast, options = {}) {
     obs.traceExecution(options.program_name || ast.task?.name || 'program');
   }
 
+  const generalCanonical = resolveGeneralCanonical(ast, {
+    ...options,
+    projectConfig: config,
+    general_canonical: options.general_canonical != null
+      ? options.general_canonical
+      : runOpts.general_canonical,
+    general_canonical_tools: options.general_canonical_tools ?? runOpts.general_canonical_tools,
+    general_canonical_agents: options.general_canonical_agents ?? runOpts.general_canonical_agents
+  });
+
   const result = await executeProgram(ast, {
     ...runOpts,
     ...options,
+    general_canonical: generalCanonical,
     with_protocol: runOpts.with_protocol,
     feedback: options.feedback || {},
     verbose: runOpts.verbose
@@ -543,10 +556,17 @@ function getRuntimeStatus() {
   const kernel = createKernel({ enable_llm: false });
   const { configPath, config } = loadProjectConfig();
   const engineering = buildEngineeringStatus();
+  const { isGeneralCanonicalEnabled } = require('../core/general-canonical-mode');
+  const { buildGoldenGateStatusSummary } = require('../core/golden-gate-status');
   return {
     ...engineering,
     version: RUNTIME_VERSION,
     vm: VM_VERSION,
+    generalCanonicalDefault: isGeneralCanonicalEnabled({}),
+    generalCanonicalToolsAuto: config.cognition?.general_canonical_tools === true,
+    generalCanonicalAgentsAuto: config.cognition?.general_canonical_agents === true,
+    generalCanonicalToolsEnv: process.env.NOEON_GENERAL_CANONICAL_TOOLS != null,
+    goldenGate: buildGoldenGateStatusSummary(),
     kernel: kernel.getStatus(),
     config: { path: configPath, environment: config.environment },
     llm: {
@@ -554,6 +574,24 @@ function getRuntimeStatus() {
       configured: Boolean(process.env.OPENAI_API_KEY || process.env.NOEON_API_KEY)
     }
   };
+}
+
+function formatRuntimeStatusText(status = getRuntimeStatus()) {
+  const lines = [
+    `Noeon ${status.version} · era ${status.era || '—'}`,
+    `Canonical auto: tools=${status.generalCanonicalToolsAuto ? 'on' : 'off'} agents=${status.generalCanonicalAgentsAuto ? 'on' : 'off'}`,
+    `Alpha gate: ${status.engineering?.alphaGateTests?.length ?? '—'} tests`
+  ];
+  const gg = status.goldenGate;
+  if (gg?.available) {
+    const probes = gg.probes?.total != null ? ` · probes ${gg.probes.passed}/${gg.probes.total}` : '';
+    lines.push(`Golden Gate: ${gg.ok ? 'PASS' : 'FAIL'} · AI ${gg.aiPath?.passed}/${gg.aiPath?.total}${probes}`);
+    if (gg.aiPath?.hybrid) lines.push(`  hybrid programs tracked: ${gg.aiPath.hybrid}`);
+  } else {
+    lines.push('Golden Gate: — (run npm run gate:golden)');
+  }
+  lines.push(`LLM: ${status.llm?.mode || 'auto'} · configured=${status.llm?.configured ? 'yes' : 'no'}`);
+  return lines.join('\n');
 }
 
 module.exports = {
@@ -573,6 +611,7 @@ module.exports = {
   rollbackState,
   explainProgram,
   getRuntimeStatus,
+  formatRuntimeStatusText,
   loadProjectConfig,
   hasProtocolFeatures,
   enrichWithProtocol,

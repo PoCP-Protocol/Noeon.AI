@@ -13,9 +13,20 @@ const { attachSelfIntrospection, refreshSelfIntrospection } = require('./self-in
 const { runPostRunSelfImprove } = require('./self-improve');
 const { runUniversalMeshRuntime } = require('../runtime/universal-mesh-runtime');
 const { attachMeshTraceToResult } = require('../runtime/universal-mesh-trace');
+const {
+  resolveCanonicalForExecution,
+  markCanonicalPrimaryContext,
+  attachExecutionPresentation
+} = require('./general-canonical-execution');
 
 function prepareCanonicalExecution(ast, options = {}) {
-  const canonical = lowerToCanonical(ast, options);
+  const resolved = resolveCanonicalForExecution(ast, options);
+  const canonical = resolved.primary
+    ? resolved.canonical
+    : (resolved.canonical || lowerToCanonical(ast, options));
+  if (resolved.primary) {
+    markCanonicalPrimaryContext(ast, resolved);
+  }
   const governance = arbitrateGovernance(canonical, options);
   const plan = applyPlanGovernanceTier(planExecutionPhases(canonical, options), governance);
 
@@ -38,7 +49,13 @@ function prepareCanonicalExecution(ast, options = {}) {
     plan,
     snapshot: canonicalSnapshot(canonical),
     fingerprint: governanceFingerprint(governance),
-    cognitiveBridge: ast.cognition?.context?._cognitiveBridge || bridge
+    cognitiveBridge: ast.cognition?.context?._cognitiveBridge || bridge,
+    canonicalPrimary: resolved.primary,
+    canonicalSource: resolved.primary ? resolved.source : 'runtime.lower',
+    executionDriver: resolved.primary ? 'snapshot-primary' : 'runtime-lower',
+    snapshotActCount: resolved.primary
+      ? (resolved.canonical?.execution?.acts?.length ?? 0)
+      : null
   };
 }
 
@@ -49,6 +66,8 @@ function mergeCanonicalIntoResult(result, prepared) {
   result.governanceArbitration = prepared.governance;
   result.governanceFingerprint = prepared.fingerprint;
   result.executionPlan = prepared.plan;
+  result.executionDriver = prepared.executionDriver || result.executionDriver || null;
+  result.snapshotActCount = prepared.snapshotActCount ?? result.snapshotActCount ?? null;
   return result;
 }
 
@@ -56,6 +75,7 @@ function finalizeCanonicalResult(result, ast, prepared, options = {}) {
   if (!prepared) return result;
 
   mergeExecutionIntoCanonical(prepared.canonical, result);
+  attachExecutionPresentation(result, ast, options);
   if (ast?.noeonStack) {
     ast.noeonStack.runtime = {
       ...(ast.noeonStack.runtime || {}),

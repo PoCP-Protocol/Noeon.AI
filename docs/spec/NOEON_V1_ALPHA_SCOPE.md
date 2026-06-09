@@ -32,13 +32,42 @@ Capability entry modes remain: `.noeon`, `.next`, `.lim`, `.ael`.
 ## Golden proof set
 
 - 3 vertical demos: `examples/hello.noeon`, `agent_research`, `agent_risk_review`, `agent_customer_service`
+- Tool demos: `http_demo`, `fs_demo`, `github_demo`, `web_fetch` (stdlib + ACT plugins, mock mode)
 - 4-surface parity: `examples/parity/risk_assess.*`
-- Gate: `npm run test:golden`, `npm run gate:golden` (when configured)
+- Gate: `npm run gate:alpha` (22 tests), `npm run test:golden`, `npm run gate:golden` (when configured)
+
+## Alpha engineering surface (shipped)
+
+| Area | Status |
+|------|--------|
+| `std.http` / `std.fs` / `std.github` / `std.web` | ACT → `http_call` / `fs_call`; `--canonical` direct `canonical.execution.acts` |
+| General `canonicalIr` snapshot | Parallel attach at lower time |
+| `NOEON_GENERAL_CANONICAL=1` / `--canonical` | Compile/run canonical-primary presentation + snapshot-driven prep |
+| `cognition.general_canonical_tools` (default **true**) | Auto canonical act path for tool-only General programs |
+| Era | `canonical-primary-era` (`NOEON_ERA` in release manifest) |
+| Playground + Workbench | Code · IR · Trace · Architecture (`/workbench.html`) |
+| `noeon doctor` | stdlib, canonical mode, tool demos, engineering gate |
+| CI | `alpha-gate.yml` badge (22 tests) |
+| LSP / VS Code | stdlib hover, execution path CodeLens/symbols, `generalCanonicalPrimary`, compile command |
+
+## Execution summary (`noeon.execution.summary/v1`)
+
+Runtime, CLI (`--json`), Playground `/api/run`, LSP, Golden Gate, and Studio/Gate surfaces emit a compact execution summary:
+
+| Field | Meaning |
+|-------|---------|
+| `strategy` | `tool-snapshot-primary` · `hybrid-canonical-acts` · `cognitive-primary` |
+| `path` | UI label: `snapshot-act` · `hybrid` · `cognitive` · `canonical` |
+| `hybrid` / `snapshotAct` | Canonical act path flags |
+| `actDriver` | e.g. `canonical.execution.acts` or `canonical.execution.acts+kernel` |
+| `phases` | Executed pipeline phases (when run) |
+
+Static file analysis (Workbench `/api/brain`, LSP document symbols) uses the same schema without `phases` until run.
 
 ## Next engineering priorities (alpha → beta)
 
-1. Real `ACT` → plugins — **`std.http` + `std.fs` + `std.github` + kernel plugin path (alpha)**
-2. General `.noeon` lowers with **parallel `canonicalIr` snapshot** (legacy AST still executes)
-2. General AST → Canonical IR without permanent legacy-only path
-3. CI badge + reproducible test report on GitHub
-4. Noeon Studio minimal: Code · IR · Trace · Architecture panels (Playground API ready)
+1. ~~Real `ACT` → plugins~~ — **done (alpha)**
+2. ~~General `.noeon` parallel `canonicalIr` snapshot~~ — **done (alpha)**
+3. General AST → Canonical IR without permanent legacy-only execution path — **tool snapshot-primary + hybrid canonical-act + kernel (beta-in-alpha)**
+4. ~~VS Code / LSP: canonical hover + compile/run parity~~ — **done (alpha)**
+5. Production hardening: allowlists, audit export, plugin policy defaults

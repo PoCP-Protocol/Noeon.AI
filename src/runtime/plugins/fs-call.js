@@ -61,8 +61,33 @@ function buildFailure({ reason, latencyMs, errorCode, failureCategory = 'executi
   };
 }
 
-function buildAuditMeta({ op, path: filePath, bytes, durationMs, mocked }) {
-  return { template: 'fs_call', op, path: filePath, bytes, durationMs, mocked: !!mocked };
+function buildAuditMeta({ op, path: filePath, bytes, durationMs, mocked, encoding }) {
+  return {
+    template: 'fs_call',
+    op,
+    path: filePath,
+    bytes,
+    durationMs,
+    mocked: !!mocked,
+    encoding: encoding || 'utf8'
+  };
+}
+
+function executeMock({ binding, targetPath, op, latencyMs }) {
+  const bytes = op === 'write' ? Buffer.byteLength(String(binding.content || binding.body || '')) : 64;
+  return {
+    status: 'done',
+    reason: `fs ${op} succeeded (mock)`,
+    latencyMs,
+    failureCategory: null,
+    pluginMeta: buildAuditMeta({
+      op,
+      path: targetPath,
+      bytes,
+      durationMs: latencyMs,
+      mocked: true
+    })
+  };
 }
 
 async function execute({ stepName, binding = {}, feedback = {} }) {
@@ -110,14 +135,7 @@ async function execute({ stepName, binding = {}, feedback = {} }) {
   }
 
   if (mockEnabled) {
-    const bytes = op === 'write' ? Buffer.byteLength(String(binding.content || binding.body || '')) : 64;
-    return {
-      status: 'done',
-      reason: `fs ${op} succeeded (mock)`,
-      latencyMs,
-      failureCategory: null,
-      pluginMeta: buildAuditMeta({ op, path: targetPath, bytes, durationMs: latencyMs, mocked: true })
-    };
+    return executeMock({ binding, targetPath, op, latencyMs });
   }
 
   try {
@@ -231,4 +249,9 @@ async function execute({ stepName, binding = {}, feedback = {} }) {
   }
 }
 
-module.exports = { execute, resolveRoot, resolveTargetPath, pathAllowed };
+module.exports = {
+  execute,
+  resolveRoot,
+  resolveTargetPath,
+  pathAllowed
+};

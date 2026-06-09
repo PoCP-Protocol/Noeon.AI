@@ -71,7 +71,10 @@ assert(typeof governance.valid === 'boolean', 'governance preflight returns vali
   // Playground API smoke test
   const mockRes = { writeHead: () => {}, end: (body) => { mockRes.body = body; } };
   await handlePlaygroundApi({ method: 'GET', url: '/api/status' }, mockRes, '/api/status');
-  assert(mockRes.body && JSON.parse(mockRes.body).version, 'playground status API');
+  const statusPayload = JSON.parse(mockRes.body);
+  assert(statusPayload.version, 'playground status API');
+  assert(statusPayload.goldenGate != null, 'status includes goldenGate summary');
+  assert(typeof statusPayload.goldenGate.available === 'boolean', 'goldenGate.available boolean');
 
   console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
   process.exit(failed > 0 ? 1 : 0);

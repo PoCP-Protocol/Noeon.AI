@@ -18,9 +18,12 @@
       .ir-meta { font-size: 11px; padding: 0.35rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); font-family: "IBM Plex Mono", monospace; }
       .ir-meta.primary-canonical { color: #ffd699; background: rgba(255, 214, 153, 0.06); }
       .ir-meta.primary-cognitive { color: #9fd4ff; background: rgba(159, 212, 255, 0.06); }
-      .ir-block-label { color: #7a9bb8; font-size: 10px; letter-spacing: 0.06em; }
-      .ir-block-label.primary { color: #ffd699; }
-      .ir-block-label.primary.cognitive { color: #9fd4ff; }
+      .ir-body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+      .ir-body pre { flex: 1; min-height: 120px; }
+      .ir-secondary-wrap { border-top: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2); }
+      .ir-secondary-wrap summary { cursor: pointer; padding: 0.35rem 0.75rem; font-size: 10px; color: #7a9bb8; letter-spacing: 0.06em; text-transform: uppercase; user-select: none; }
+      .ir-secondary-wrap pre { max-height: 180px; color: #8aa4bf; font-size: 10px; }
+      .ir-secondary-wrap[open] summary { color: #9fd4ff; }
       @media (max-width: 900px) { .workbench-grid { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; } }
     </style>
   </head>
@@ -44,6 +47,9 @@
         <select id="example-select" aria-label="Load example">
           <option value="">Load example…</option>
         </select>
+        <span id="example-path-hint" class="example-path-hint hidden" aria-live="polite"></span>
+        <span id="exec-path-bar" class="run-execution-bar hidden" aria-live="polite"></span>
+        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
         <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
           <input type="checkbox" id="canonical-mode" />
           Canonical IR primary
@@ -61,7 +67,13 @@
         <section class="wb-panel">
           <h2>Cognitive / Canonical IR</h2>
           <div id="ir-meta" class="ir-meta primary-cognitive">Run Compile IR or Run.</div>
-          <pre id="ir-pane">—</pre>
+          <div class="ir-body">
+            <pre id="ir-primary">—</pre>
+            <details id="ir-secondary-wrap" class="ir-secondary-wrap" hidden>
+              <summary id="ir-secondary-label">Secondary IR</summary>
+              <pre id="ir-secondary">—</pre>
+            </details>
+          </div>
         </section>
         <section class="wb-panel">
           <h2>Execution Trace</h2>
@@ -73,6 +85,9 @@
         </section>
       </div>
     </main>
+    <script src="./architecture-panel.js"></script>
+    <script src="./golden-gate-badge.js"></script>
+    <script src="./execution-summary.js"></script>
     <script src="./workbench.js"></script>
   </body>
 </html>

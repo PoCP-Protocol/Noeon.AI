@@ -816,9 +816,13 @@ function parseComputeCall(value, lineNo) {
 
 function parseAel(source, options = {}) {
   const { dispatchParseSurface } = require('./grammar/parse-dispatch');
+  const { attachGeneralCanonicalSnapshot } = require('./core/general-canonical-snapshot');
 
   let ast = dispatchParseSurface(source, options);
-  if (ast) return ast;
+  if (ast) {
+    attachGeneralCanonicalSnapshot(ast);
+    return ast;
+  }
 
   const lines = source.split(/\r?\n/);
   ast = {
@@ -1343,6 +1347,7 @@ function parseAel(source, options = {}) {
 
   const { detectSurface, SURFACES } = require('./grammar/parse-dispatch');
   ast.detectedSurface = ast.detectedSurface || ast.profile || detectSurface(source, options) || SURFACES.AEL;
+  attachGeneralCanonicalSnapshot(ast);
   return ast;
 }
 

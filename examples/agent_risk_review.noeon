@@ -9,6 +9,7 @@ AGENT "RiskReviewer"
   FLOW
     PERCEIVE source=payment_request modality=structured
     REASON strategy=risk_analysis depth=2
+    ACT action=fetch_fraud_signals url="https://example.com/risk/signals" channel=web plugin=http_call mock=true
     DECIDE action=approve threshold=0.80 fallback=escalate
     ACT action=process_payment channel=ledger
     REFLECT

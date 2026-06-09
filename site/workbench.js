@@ -1,8 +1,12 @@
 const sourceEl = document.getElementById("source");
-const irPane = document.getElementById("ir-pane");
+const irPrimaryEl = document.getElementById("ir-primary");
+const irSecondaryEl = document.getElementById("ir-secondary");
+const irSecondaryWrap = document.getElementById("ir-secondary-wrap");
+const irSecondaryLabel = document.getElementById("ir-secondary-label");
 const irMetaEl = document.getElementById("ir-meta");
 const tracePane = document.getElementById("trace-pane");
 const archPane = document.getElementById("arch-pane");
+const execPathBar = document.getElementById("exec-path-bar");
 const statusEl = document.getElementById("status-bar");
 const exampleSelect = document.getElementById("example-select");
 const canonicalModeEl = document.getElementById("canonical-mode");
@@ -22,8 +26,61 @@ fn main() {
 
 sourceEl.value = DEFAULT_SOURCE;
 
+const CANONICAL_PREF_KEY = "noeon.workbench.canonical-primary";
+let activeExampleCategory = null;
+
+function updateExamplePathHint(ex) {
+  const el = document.getElementById("example-path-hint");
+  if (!el) return;
+  if (!ex?.executionPath || ex.executionPath === "cognitive") {
+    el.textContent = "";
+    el.className = "example-path-hint hidden";
+    return;
+  }
+  el.className = `example-path-hint path-${ex.executionPath}`;
+  el.textContent = ex.autoCanonical
+    ? `path: ${ex.executionPath} (auto canonical)`
+    : `path: ${ex.executionPath}`;
+}
+
+function applyExampleCanonicalPreference(ex) {
+  activeExampleCategory = ex?.category || null;
+  if (!canonicalModeEl) return;
+  const pref = localStorage.getItem(CANONICAL_PREF_KEY);
+  if (pref === "1") {
+    canonicalModeEl.checked = true;
+    return;
+  }
+  if (pref === "0") {
+    canonicalModeEl.checked = false;
+    return;
+  }
+  canonicalModeEl.checked = ex?.autoCanonical === true || ex?.category === "tools";
+}
+
+if (canonicalModeEl) {
+  const pref = localStorage.getItem(CANONICAL_PREF_KEY);
+  if (pref === "1") canonicalModeEl.checked = true;
+  else if (pref === "0") canonicalModeEl.checked = false;
+  canonicalModeEl.addEventListener("change", () => {
+    localStorage.setItem(CANONICAL_PREF_KEY, canonicalModeEl.checked ? "1" : "0");
+  });
+}
+
 function compileExtras() {
-  return canonicalModeEl?.checked ? { general_canonical: true } : {};
+  if (canonicalModeEl?.checked) return { general_canonical: true };
+  if (activeExampleCategory === "tools") return { general_canonical: true };
+  const ex = cachedExamples.find((e) => e.name === exampleSelect?.value);
+  if (ex?.autoCanonical) return { general_canonical: true };
+  return {};
+}
+
+function formatExampleLabel(ex) {
+  const title = ex.title || ex.name;
+  const pathTag = ex.executionPath && ex.executionPath !== "cognitive"
+    ? ` · ${ex.executionPath}`
+    : "";
+  return pathTag ? `${title}${pathTag}` : title;
 }
 
 function renderIrPanel(data) {
@@ -40,14 +97,21 @@ function renderIrPanel(data) {
     irMetaEl.className = `ir-meta primary-${primaryIr}`;
   }
 
-  const blocks = [];
-  if (primary != null) {
-    blocks.push(`=== PRIMARY · ${primaryIr} ===`, JSON.stringify(primary, null, 2));
+  if (irPrimaryEl) {
+    irPrimaryEl.textContent = primary != null ? JSON.stringify(primary, null, 2) : "No IR payload";
   }
-  if (secondary != null) {
-    blocks.push("", `=== ${secondaryLabel.toUpperCase()} ===`, JSON.stringify(secondary, null, 2));
+
+  if (irSecondaryWrap && irSecondaryEl && irSecondaryLabel) {
+    if (secondary != null) {
+      irSecondaryLabel.textContent = secondaryLabel;
+      irSecondaryEl.textContent = JSON.stringify(secondary, null, 2);
+      irSecondaryWrap.hidden = false;
+      irSecondaryWrap.open = false;
+    } else {
+      irSecondaryWrap.hidden = true;
+      irSecondaryEl.textContent = "—";
+    }
   }
-  irPane.textContent = blocks.length ? blocks.join("\n") : "No IR payload";
 }
 
 async function api(path, extra = {}) {
@@ -92,20 +156,53 @@ function renderTrace(data) {
   tracePane.textContent = lines.length ? lines.join("\n") : JSON.stringify(data.actionTrace || data.trace || data, null, 2);
 }
 
-function renderArchitecture(data) {
-  const arch = data.architecture;
-  if (!arch) {
-    archPane.textContent = data.routeLabel ? `route: ${data.routeLabel}` : "No architecture payload";
+function executionPathClass(summary) {
+  const path = summary?.path;
+  if (path === "hybrid") return "path-hybrid";
+  if (path === "snapshot-act" || path === "canonical") return "path-snapshot-act";
+  return "path-cognitive";
+}
+
+function updateExecPathBar(summary) {
+  if (!execPathBar) return;
+  const text = window.NoeonExecutionSummary?.formatExecutionBar(summary);
+  if (!text) {
+    execPathBar.className = "run-execution-bar hidden";
+    execPathBar.textContent = "";
     return;
   }
-  const lines = [
-    data.routeLabel ? `route: ${data.routeLabel}` : null,
-    `regions: ${(arch.active_regions || []).join(", ")}`,
-    arch.pipeline_phases?.length
-      ? "pipeline: " + arch.pipeline_phases.map((p) => p.phase).join(" → ")
-      : null
-  ].filter(Boolean);
-  archPane.textContent = lines.join("\n");
+  execPathBar.className = `run-execution-bar ${executionPathClass(summary)}`;
+  execPathBar.textContent = text;
+}
+
+function renderArchitecture(data) {
+  const lines = window.NoeonArchitecturePanel?.formatArchitectureLines(data) || [];
+  archPane.textContent = lines.length ? lines.join("\n") : "No architecture payload";
+  updateExecPathBar(data?.executionSummary);
+}
+
+let archSyncTimer = null;
+let archSyncGen = 0;
+
+async function syncArchitecturePreview() {
+  if (!sourceEl.value.trim()) {
+    archPane.textContent = "—";
+    updateExecPathBar(null);
+    return;
+  }
+  const gen = ++archSyncGen;
+  try {
+    const data = await api("/api/brain", { with_protocol: "off" });
+    if (gen !== archSyncGen) return;
+    renderArchitecture(data);
+  } catch {
+    if (gen === archSyncGen) archPane.textContent = "—";
+  }
+}
+
+function scheduleArchitecturePreview() {
+  clearTimeout(archSyncTimer);
+  archSyncTimer = setTimeout(syncArchitecturePreview, 700);
 }
 
 async function loadExamples() {
@@ -115,7 +212,7 @@ async function loadExamples() {
     for (const ex of cachedExamples) {
       const opt = document.createElement("option");
       opt.value = ex.name;
-      opt.textContent = ex.title || ex.label || ex.name;
+      opt.textContent = formatExampleLabel(ex);
       exampleSelect.appendChild(opt);
     }
   } catch {
@@ -128,7 +225,10 @@ exampleSelect?.addEventListener("change", () => {
   const ex = cachedExamples.find((e) => e.name === exampleSelect.value);
   if (ex?.source) {
     sourceEl.value = ex.source;
+    applyExampleCanonicalPreference(ex);
+    updateExamplePathHint(ex);
     statusEl.textContent = `Loaded ${exampleSelect.value}`;
+    scheduleArchitecturePreview();
     return;
   }
   statusEl.textContent = `Example not found: ${exampleSelect.value}`;
@@ -141,10 +241,22 @@ document.getElementById("btn-compile").addEventListener("click", async () => {
     renderIrPanel(data);
     statusEl.textContent = `IR ready · ${data.compileMode || "cognitive-primary"}`;
   } catch (e) {
-    irPane.textContent = e.message;
+    if (irPrimaryEl) irPrimaryEl.textContent = e.message;
     statusEl.textContent = "Compile failed";
   }
 });
+
+function formatRunStatus(data) {
+  const summary = data?.executionSummary;
+  const parts = [
+    data.success ? "Run OK" : "Run finished with issues",
+    summary?.strategy || data.executionStrategy,
+    summary?.hybrid || data.hybridActExecution ? "hybrid" : null,
+    summary?.snapshotAct || data.snapshotActExecution ? "snapshot-act" : null,
+    (summary?.phases || data.executionPhases || data.phases || []).join("→") || null
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
 
 document.getElementById("btn-run").addEventListener("click", async () => {
   statusEl.textContent = "Running…";
@@ -160,7 +272,7 @@ document.getElementById("btn-run").addEventListener("click", async () => {
         canonicalIr: data.canonicalIr || data.canonical
       });
     }
-    statusEl.textContent = data.success ? "Run OK" : "Run finished with issues";
+    statusEl.textContent = formatRunStatus(data);
   } catch (e) {
     tracePane.textContent = e.message;
     statusEl.textContent = "Run failed";
@@ -174,4 +286,15 @@ sourceEl.addEventListener("keydown", (e) => {
   }
 });
 
-loadExamples();
+sourceEl.addEventListener("input", scheduleArchitecturePreview);
+
+loadExamples().then(() => scheduleArchitecturePreview());
+fetch("/api/status")
+  .then((r) => r.json())
+  .then((s) => {
+    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+      document.getElementById("golden-gate-badge"),
+      s.goldenGate
+    );
+  })
+  .catch(() => {});

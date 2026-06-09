@@ -11,10 +11,14 @@ function resolveCanonicalPhases(route, canonicalPrep, ast, options = {}, fusionP
   const canonical = canonicalPrep?.canonical;
   const surface = route.surface || canonical?.surface || 'general';
   const isGeneralHub = surface === 'general';
+  const snapshotPrimary = canonicalPrep?.canonicalPrimary === true;
+  const snapshotActs = canonical?.execution?.acts?.length ?? 0;
 
   return {
     engine: 'canonical',
     ir_first: true,
+    snapshot_primary: snapshotPrimary,
+    snapshot_act_count: snapshotPrimary ? snapshotActs : null,
     surface,
     triad: route.triad === true && isGeneralHub && options.triad !== false,
     fusion:
@@ -30,7 +34,9 @@ function resolveCanonicalPhases(route, canonicalPrep, ast, options = {}, fusionP
       canonical?.fusion?.coherence === true ||
       Boolean(ast.fusionCoherence?.enabled),
     alignment: route.alignment === true && options.alignment_gate !== false,
-    cognitive: route.cognitive === true,
+    cognitive:
+      route.cognitive === true ||
+      (snapshotPrimary && snapshotActs > 0),
     protocol: route.protocol === true,
     relay:
       route.relay === true ||

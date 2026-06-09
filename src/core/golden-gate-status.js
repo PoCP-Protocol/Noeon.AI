@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const { listGoldenGateDiffs } = require('./golden-gate-diff');
+const { buildReleaseManifest } = require('./release-version');
+const { DEFAULT_CANONICAL_PROBE_PROGRAMS } = require('./canonical-probes');
 
 const STUDIO_GOLDEN_SCHEMA = 'noeon.studio.golden-gate/v1';
 
@@ -13,6 +15,50 @@ function readJsonIfExists(filePath) {
   } catch {
     return null;
   }
+}
+
+function summarizeGoldenGateExecution(gate) {
+  if (!gate) {
+    return {
+      available: false,
+      ok: null,
+      generatedAt: null,
+      aiPath: null,
+      probes: null,
+      conform: null
+    };
+  }
+
+  const aiPrograms = gate.programs || [];
+  const tracked = aiPrograms.filter((p) => p.execution?.strategy);
+
+  return {
+    available: true,
+    ok: gate.ok,
+    generatedAt: gate.generatedAt,
+    aiPath: {
+      total: aiPrograms.length,
+      passed: aiPrograms.filter((p) => p.ok).length,
+      tracked: tracked.length,
+      hybrid: tracked.filter((p) => p.execution?.hybrid).length,
+      snapshotAct: tracked.filter((p) => p.execution?.snapshotAct).length,
+      strategies: [...new Set(tracked.map((p) => p.execution.strategy).filter(Boolean))]
+    },
+    probes: gate.canonicalProbes
+      ? {
+          ok: gate.canonicalProbes.ok,
+          passed: gate.canonicalProbes.summary?.passed ?? null,
+          total: gate.canonicalProbes.summary?.total ?? null
+        }
+      : null,
+    conform: gate.conform?.allValid ?? null
+  };
+}
+
+function buildGoldenGateStatusSummary(options = {}) {
+  const root = options.root || process.cwd();
+  const gate = readJsonIfExists(path.join(root, 'artifacts/golden-gate/golden-gate.latest.json'));
+  return summarizeGoldenGateExecution(gate);
 }
 
 function buildGoldenGateStudioStatus(options = {}) {
@@ -33,6 +79,7 @@ function buildGoldenGateStudioStatus(options = {}) {
     score: p.score,
     patches: p.selfImprove ?? p.selfImprovePayload?.patches?.length ?? 0,
     hasDiff: Boolean(p.patchPreview?.diff),
+    execution: p.execution || null,
     remediated: (remediate?.programs || []).find((r) => r.file === p.file) || null
   }));
 
@@ -52,7 +99,12 @@ function buildGoldenGateStudioStatus(options = {}) {
 
   return {
     schema: STUDIO_GOLDEN_SCHEMA,
+    era: buildReleaseManifest().era,
     generatedAt: new Date().toISOString(),
+    canonicalPath: summarizeCanonicalPath(gate, gate?.canonicalProbes),
+    canonicalProbes: gate?.canonicalProbes || null,
+    canonicalProbePrograms: DEFAULT_CANONICAL_PROBE_PROGRAMS,
+    goldenGateExecution: summarizeGoldenGateExecution(gate),
     gate: gate
       ? {
           ok: gate.ok,
@@ -79,6 +131,26 @@ function buildGoldenGateStudioStatus(options = {}) {
   };
 }
 
+function summarizeCanonicalPath(gate, probes) {
+  const programs = gate?.programs || [];
+  const withExecution = programs.filter((p) => p.execution);
+  const probePrograms = probes?.programs || [];
+  return {
+    tracked: withExecution.length + probePrograms.length,
+    snapshotAct: withExecution.filter((p) => p.execution?.snapshotAct).length +
+      probePrograms.filter((p) => p.execution?.snapshotAct).length,
+    hybrid: withExecution.filter((p) => p.execution?.hybrid).length +
+      probePrograms.filter((p) => p.execution?.hybrid).length,
+    canonicalPrimary: withExecution.filter((p) => p.execution?.canonicalPrimary).length +
+      probePrograms.filter((p) => p.execution?.canonicalPrimary).length,
+    probes: {
+      ok: probes?.ok ?? null,
+      passed: probes?.summary?.passed ?? null,
+      total: probes?.summary?.total ?? null
+    }
+  };
+}
+
 function buildStudioHints(gate, remediate) {
   const hints = [];
   if (!gate) {
@@ -101,6 +173,15 @@ function buildStudioHints(gate, remediate) {
         : 'Post-remediate gate still failing — manual patch required.'
     );
   }
+  const pathSummary = summarizeCanonicalPath(gate, gate?.canonicalProbes);
+  if (pathSummary.tracked > 0) {
+    hints.push(
+      `Canonical execution tracked on ${pathSummary.tracked} program(s) — snapshot=${pathSummary.snapshotAct} hybrid=${pathSummary.hybrid}`
+    );
+  }
+  if (gate?.canonicalProbes && gate.canonicalProbes.ok === false) {
+    hints.push('Canonical probes failed — run `npm run gate:alpha` or refresh golden gate with live probes.');
+  }
   return hints;
 }
 
@@ -120,6 +201,8 @@ async function refreshGoldenGateArtifacts(options = {}) {
 module.exports = {
   STUDIO_GOLDEN_SCHEMA,
   buildGoldenGateStudioStatus,
+  buildGoldenGateStatusSummary,
+  summarizeGoldenGateExecution,
   refreshGoldenGateArtifacts,
   readJsonIfExists
 };

@@ -30,7 +30,7 @@
     "test:v06": "node tests/cognitive-v06.test.js",
     "test:pkg": "node tests/pkg-phase5.test.js && node tests/cli-init.test.js",
     "test:vm": "node tests/unified-vm.test.js && node tests/consciousness-scheduler.test.js && node tests/grammar-phase3.test.js && node tests/stdlib-http.test.js && node tests/stdlib-fs.test.js && node tests/stdlib-github.test.js && node tests/stdlib-web.test.js",
-    "test:alpha": "node tests/release-version.test.js && node tests/stdlib-http.test.js && node tests/stdlib-fs.test.js && node tests/stdlib-web.test.js && node tests/general-canonical-mode.test.js && node tests/compile-presentation.test.js && node tests/playground-examples.test.js && node tests/examples-p0.test.js && node tests/surface-freeze.test.js && node tests/unified-vm.test.js",
+    "test:alpha": "node tests/release-version.test.js && node tests/stdlib-http.test.js && node tests/stdlib-fs.test.js && node tests/stdlib-web.test.js && node tests/general-canonical-mode.test.js && node tests/general-canonical-execution.test.js && node tests/canonical-act-runner.test.js && node tests/general-canonical-hybrid.test.js && node tests/compile-presentation.test.js && node tests/cli-compile-canonical.test.js && node tests/cli-run-trace.test.js && node tests/architecture-view.test.js && node tests/doctor-canonical.test.js && node tests/lsp-stdlib-hover.test.js && node tests/playground-examples.test.js && node tests/examples-p0.test.js && node tests/surface-freeze.test.js && node tests/unified-vm.test.js",
     "test:product": "node tests/run-suite.js product",
     "test:system": "node tests/run-suite.js system",
     "gate:alpha": "node scripts/alpha-gate.js",

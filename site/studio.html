@@ -48,6 +48,7 @@
 
       <div class="studio-actions">
         <button id="btn-refresh" class="btn primary">Refresh</button>
+        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
         <span id="studio-status" class="stats">Loading…</span>
       </div>
 
@@ -121,10 +122,17 @@
           <div class="studio-card"><strong>Programs</strong><span class="value" id="gg-programs">—</span></div>
           <div class="studio-card"><strong>Remediated</strong><span class="value" id="gg-remediated">—</span></div>
           <div class="studio-card"><strong>Post-Verify</strong><span class="value" id="gg-post-verify">—</span></div>
+          <div class="studio-card"><strong>Canonical Probes</strong><span class="value" id="gg-canonical-probes">—</span></div>
         </div>
+        <table class="studio-table" aria-label="Canonical probe programs" style="margin-top:0.75rem;">
+          <thead>
+            <tr><th>Probe</th><th>Strategy</th><th>Hybrid</th><th>Snapshot</th><th>Status</th></tr>
+          </thead>
+          <tbody id="gg-probe-rows"></tbody>
+        </table>
         <table class="studio-table" aria-label="Golden gate programs">
           <thead>
-            <tr><th>File</th><th>Grade</th><th>Verdict</th><th>Patches</th><th>Remediate</th><th></th></tr>
+            <tr><th>File</th><th>Grade</th><th>Verdict</th><th>Execution</th><th>Patches</th><th>Remediate</th><th></th></tr>
           </thead>
           <tbody id="gg-rows"></tbody>
         </table>
@@ -145,6 +153,8 @@
       </section>
     </main>
 
+    <script src="./golden-gate-badge.js"></script>
+    <script src="./execution-summary.js"></script>
     <script src="./studio.js"></script>
   </body>
 </html>

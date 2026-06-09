@@ -33,6 +33,7 @@
         <select id="example-select" aria-label="Load example">
           <option value="">Load example…</option>
         </select>
+        <span id="example-path-hint" class="example-path-hint hidden" aria-live="polite"></span>
         <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
           <input type="checkbox" id="canonical-mode" />
           Canonical IR primary
@@ -52,6 +53,7 @@
         <button id="btn-fusion" class="btn ghost">Fusion</button>
         <button id="btn-explain" class="btn ghost">Explain</button>
         <span id="fusion-badge" class="fusion-badge hidden" aria-live="polite"></span>
+        <span id="golden-gate-badge" class="gg-badge gg-badge-unknown" title="Golden Gate status">Golden Gate —</span>
         <span class="toolbar-hint">Load a .noeon demo or write .ael · Ctrl+Enter to run</span>
       </div>
 
@@ -66,6 +68,7 @@
         </div>
         <div class="panel">
           <h2>Output</h2>
+          <div id="run-execution-bar" class="run-execution-bar hidden" aria-live="polite"></div>
           <pre id="output" class="output-pane">Ready.</pre>
         </div>
       </div>
@@ -151,6 +154,9 @@
       </footer>
     </main>
 
+    <script src="./architecture-panel.js"></script>
+    <script src="./golden-gate-badge.js"></script>
+    <script src="./execution-summary.js"></script>
     <script src="./playground.js"></script>
   </body>
 </html>

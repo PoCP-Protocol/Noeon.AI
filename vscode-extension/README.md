@@ -4,10 +4,13 @@ Syntax highlighting, **LSP diagnostics & completion**, run command, snippets, an
 
 ## Features
 
-### Language Server (v0.8)
+### Language Server (v1.0-alpha)
 - Real-time diagnostics from parse + validate
 - Keyword completion for 50+ primitives
-- Command: **Noeon: Run Current File**
+- **Stdlib hover**: `import std.web`, `text()`, `profile` → plugin + canonical IR docs
+- Commands: **Noeon: Run Current File**, **Noeon: Compile Current File (JSON IR)**
+- Setting: `noeon.generalCanonicalPrimary` — canonical-primary compile/run presentation
+- Architecture panel shows compile mode + `last_fetch` after pipeline run
 
 Start server manually: `noeon lsp`
 

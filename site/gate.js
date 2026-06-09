@@ -61,6 +61,11 @@ async function loadGoldenGate() {
     const remEl = document.getElementById("gg-remediated");
     const appliedEl = document.getElementById("gg-applied");
 
+    window.NoeonGoldenGateBadge?.renderGoldenGateBadge(
+      document.getElementById("golden-gate-badge"),
+      data.goldenGateExecution
+    );
+
     if (gateEl) {
       gateEl.textContent = gate ? (gate.ok ? "PASS" : "FAIL") : "—";
       gateEl.className = gate?.ok ? "status-pass" : "status-fail";
@@ -69,8 +74,12 @@ async function loadGoldenGate() {
     if (appliedEl) appliedEl.textContent = String(data.remediate?.summary?.applied ?? 0);
 
     stats.textContent = gate
-      ? `Golden gate ${gate.ok ? "PASS" : "FAIL"} · ${data.programs?.length ?? 0} programs`
+      ? `Golden gate ${gate.ok ? "PASS" : "FAIL"} · ${data.programs?.length ?? 0} programs · probes ${data.canonicalPath?.probes?.passed ?? "—"}/${data.canonicalPath?.probes?.total ?? "—"}`
       : "No gate data — run npm run gate:golden";
+
+    function formatExecution(ex) {
+      return window.NoeonExecutionSummary?.formatExecutionSummary(ex) || "—";
+    }
 
     tbody.innerHTML = (data.programs || []).map((p) => {
       const rem = p.remediated;
@@ -81,13 +90,14 @@ async function loadGoldenGate() {
         <td><code>${p.file}</code></td>
         <td class="${p.ok ? "status-pass" : "status-fail"}">${p.grade || "—"}</td>
         <td>${p.verdict || "—"}</td>
+        <td>${formatExecution(p.execution)}</td>
         <td>${remTxt}${applied}</td>
         <td class="gate-actions">
           ${canAct ? `<button class="btn ghost gg-apply-one" data-file="${p.file}">Apply</button>` : ""}
           <a class="btn ghost" href="./studio.html">Diff</a>
         </td>
       </tr>`;
-    }).join("") || "<tr><td colspan=\"5\">No programs</td></tr>";
+    }).join("") || "<tr><td colspan=\"6\">No programs</td></tr>";
 
     tbody.querySelectorAll(".gg-apply-one").forEach((btn) => {
       btn.addEventListener("click", () => applyOne(btn.dataset.file));

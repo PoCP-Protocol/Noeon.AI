@@ -11,14 +11,38 @@ const ALPHA_GATE_TESTS = [
   'tests/stdlib-fs.test.js',
   'tests/stdlib-web.test.js',
   'tests/general-canonical-mode.test.js',
+  'tests/general-canonical-execution.test.js',
+  'tests/canonical-act-runner.test.js',
+  'tests/general-canonical-hybrid.test.js',
+  'tests/golden-gate-canonical-probes.test.js',
+  'tests/studio-golden-gate.test.js',
+  'tests/golden-gate-status-summary.test.js',
   'tests/compile-presentation.test.js',
+  'tests/cli-compile-canonical.test.js',
+  'tests/cli-run-trace.test.js',
+  'tests/architecture-view.test.js',
+  'tests/doctor-canonical.test.js',
+  'tests/lsp-canonical.test.js',
+  'tests/lsp-stdlib-hover.test.js',
   'tests/playground-examples.test.js',
   'tests/examples-p0.test.js',
   'tests/surface-freeze.test.js',
   'tests/unified-vm.test.js'
 ];
 
-const GATE_COMMANDS = Object.freeze(['gate:alpha', 'gate:strict', 'gate:golden']);
+const TEST_SUITES = Object.freeze({
+  alpha: ALPHA_GATE_TESTS,
+  product: 'tests/run-suite.js product',
+  system: 'tests/run-suite.js system',
+  vm: 'npm run test:vm',
+  golden: 'npm run test:golden'
+});
+
+const GATE_COMMANDS = Object.freeze([
+  'gate:alpha',
+  'gate:strict',
+  'gate:golden'
+]);
 
 function listCiWorkflows(root = process.cwd()) {
   const dir = path.join(root, '.github', 'workflows');
@@ -35,7 +59,7 @@ function buildEngineeringStatus(options = {}) {
       packageVersion: pkg.version,
       runtimeVersion: NOEON_VERSION,
       node: process.version,
-      testSuites: ['alpha', 'product', 'system', 'vm', 'golden'],
+      testSuites: Object.keys(TEST_SUITES),
       gates: [...GATE_COMMANDS],
       alphaGateTests: [...ALPHA_GATE_TESTS],
       ciWorkflows: listCiWorkflows(root),
@@ -47,6 +71,7 @@ function buildEngineeringStatus(options = {}) {
 
 module.exports = {
   ALPHA_GATE_TESTS,
+  TEST_SUITES,
   GATE_COMMANDS,
   buildEngineeringStatus,
   listCiWorkflows
