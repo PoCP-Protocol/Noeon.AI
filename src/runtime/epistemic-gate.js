@@ -26,30 +26,47 @@ function agentRequiresHumanApproval(ast) {
   });
 }
 
+// Count REAL evidence backing the run — genuine provenance, not the mere
+// appearance of the words "source"/"evidence" in serialized trace JSON (the
+// old heuristic counted the PERCEIVE `source=` field name itself, so every
+// agent trivially "had evidence"). Real evidence is: a structured citation on a
+// belief, an injected citation/evidence array, an executed source-retrieval ACT
+// (an external fetch that actually returned content), or reported citations.
 function countEvidence(result, ast) {
   let count = 0;
 
+  // 1) Beliefs carrying a structured source/citation (not a bare truthy field).
   const beliefs = result.cognitive?.beliefs || result.beliefs;
   if (beliefs && typeof beliefs === 'object') {
     for (const b of Object.values(beliefs)) {
-      if (b?.source || b?.citation || b?.evidence) count += 1;
+      if (!b || typeof b !== 'object') continue;
+      if (b.citation || (typeof b.source === 'string' && b.source) ||
+          (Array.isArray(b.evidence) && b.evidence.length > 0)) count += 1;
     }
   }
 
+  // 2) Citations / evidence explicitly injected into the program context.
   const ctx = ast?.cognition?.context || result.injectedContext || {};
   if (Array.isArray(ctx.citations)) count += ctx.citations.length;
   if (Array.isArray(ctx.evidence)) count += ctx.evidence.length;
 
-  const trace = result.cognitive?.trace || result.trace;
-  if (Array.isArray(trace)) {
-    for (const step of trace) {
-      const text = JSON.stringify(step).toLowerCase();
-      if (text.includes('citation') || text.includes('source') || text.includes('evidence')) {
-        count += 1;
-      }
+  // 3) Executed source-retrieval ACTs: an external fetch (http_call / web
+  //    channel) that ran and carries a URL is one piece of cited provenance.
+  const actBuckets = [
+    result.canonicalActs?.acts,
+    result.canonicalActs?.cognitive?.acts
+  ];
+  for (const acts of actBuckets) {
+    if (!Array.isArray(acts)) continue;
+    for (const a of acts) {
+      if (!a || typeof a !== 'object') continue;
+      const url = a.receipt?.pluginMeta?.url || a.url || a.params?.url;
+      const plugin = a.plugin || a.receipt?.plugin;
+      if (url && (plugin === 'http_call' || a.channel === 'web')) count += 1;
     }
   }
 
+  // 4) Observability-reported citation count.
   if (result.report?.observability?.citations) {
     count += Number(result.report.observability.citations) || 0;
   }
