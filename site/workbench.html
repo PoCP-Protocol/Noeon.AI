@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noeon Workbench — Code · IR · Trace · Architecture</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./playground.css" />
+    <style>
+      .workbench { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+      .workbench-toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; align-items: center; }
+      .workbench-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(220px, 1fr) minmax(220px, 1fr); gap: 0.75rem; min-height: 70vh; }
+      .wb-panel { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.28); overflow: hidden; }
+      .wb-panel h2 { font-size: 0.85rem; margin: 0; padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.04); color: #9fd4ff; text-transform: uppercase; letter-spacing: 0.04em; }
+      .wb-panel textarea, .wb-panel pre { flex: 1; margin: 0; border: none; border-radius: 0; min-height: 180px; }
+      .wb-panel textarea { resize: none; font-family: "IBM Plex Mono", monospace; font-size: 12px; padding: 0.75rem; background: rgba(0,0,0,0.35); color: #d8e8ff; }
+      .wb-panel pre { padding: 0.75rem; overflow: auto; font-size: 11px; color: #c8daf0; background: rgba(0,0,0,0.35); }
+      .ir-meta { font-size: 11px; padding: 0.35rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); font-family: "IBM Plex Mono", monospace; }
+      .ir-meta.primary-canonical { color: #ffd699; background: rgba(255, 214, 153, 0.06); }
+      .ir-meta.primary-cognitive { color: #9fd4ff; background: rgba(159, 212, 255, 0.06); }
+      .ir-block-label { color: #7a9bb8; font-size: 10px; letter-spacing: 0.06em; }
+      .ir-block-label.primary { color: #ffd699; }
+      .ir-block-label.primary.cognitive { color: #9fd4ff; }
+      @media (max-width: 900px) { .workbench-grid { grid-template-columns: 1fr; grid-template-rows: auto; min-height: auto; } }
+    </style>
+  </head>
+  <body class="playground-body">
+    <header class="topbar">
+      <div class="container nav-wrap">
+        <div class="brand"><a href="./index.html">Noeon</a> / Workbench</div>
+        <nav>
+          <a href="./playground.html">Playground</a>
+          <a href="./studio.html">Studio</a>
+          <a href="./workbench.html" aria-current="page">Workbench</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workbench container">
+      <h1>Noeon Workbench</h1>
+      <p>Four-panel developer loop: edit source, inspect IR, read execution trace, view architecture.</p>
+
+      <div class="workbench-toolbar">
+        <select id="example-select" aria-label="Load example">
+          <option value="">Load example…</option>
+        </select>
+        <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
+          <input type="checkbox" id="canonical-mode" />
+          Canonical IR primary
+        </label>
+        <button id="btn-run" class="btn primary">Run</button>
+        <button id="btn-compile" class="btn ghost">Compile IR</button>
+        <span id="status-bar" class="stats">Ready</span>
+      </div>
+
+      <div class="workbench-grid">
+        <section class="wb-panel">
+          <h2>Code</h2>
+          <textarea id="source" spellcheck="false" aria-label="Noeon source"></textarea>
+        </section>
+        <section class="wb-panel">
+          <h2>Cognitive / Canonical IR</h2>
+          <div id="ir-meta" class="ir-meta primary-cognitive">Run Compile IR or Run.</div>
+          <pre id="ir-pane">—</pre>
+        </section>
+        <section class="wb-panel">
+          <h2>Execution Trace</h2>
+          <pre id="trace-pane">—</pre>
+        </section>
+        <section class="wb-panel">
+          <h2>Architecture</h2>
+          <pre id="arch-pane">—</pre>
+        </section>
+      </div>
+    </main>
+    <script src="./workbench.js"></script>
+  </body>
+</html>

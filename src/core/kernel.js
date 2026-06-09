@@ -28,6 +28,8 @@
  */
 
 const { IRNodeType, ProcessMode, MemoryOp, CollabMode, AELtoIRCompiler } = require('./cognitive-ir');
+const { buildActBinding } = require('../runtime/act-binding');
+const { runActionStep } = require('../runtime/action-runner');
 
 // ============================================================
 // KERNEL STATE
@@ -582,6 +584,50 @@ class CognitiveKernel {
     this.handlers.set(IRNodeType.COLLABORATE, async (node, ctx, kernel) => {
       const mode = node.params.mode || CollabMode.DEBATE;
       const topic = node.params.topic || node.params.proposal || 'collaboration topic';
+
+      if (mode === CollabMode.DELEGATE || mode === 'delegate') {
+        const stepName = node.params.action || node.id || 'act';
+        const binding = buildActBinding(node.params);
+
+        if (binding?.plugin) {
+          const actionResult = await runActionStep(stepName, {
+            network: ctx.noeonAst?.network || 'noeon-local',
+            task: ctx.noeonAst?.task || stepName,
+            feedback: {},
+            actionBindings: { [stepName]: binding }
+          });
+
+          const result = {
+            mode: CollabMode.DELEGATE,
+            action: stepName,
+            channel: node.params.channel || 'runtime',
+            status: actionResult.status,
+            reason: actionResult.reason,
+            plugin: binding.plugin,
+            content: actionResult.receipt?.content || null,
+            receipt: actionResult.receipt,
+            pluginMeta: actionResult.receipt?.pluginMeta || null
+          };
+
+          ctx.results[stepName] = result;
+          ctx.broadcast('action', result, actionResult.status === 'done' ? 0.85 : 0.35);
+          ctx.workspace.set('last_action', result);
+          if (result.content) ctx.workspace.set('last_fetch', result.content);
+          return result;
+        }
+
+        const simulated = {
+          mode: CollabMode.DELEGATE,
+          action: stepName,
+          channel: node.params.channel || 'runtime',
+          outcome: `${stepName}_simulated`,
+          simulated: true
+        };
+        ctx.broadcast('action', simulated, 0.5);
+        ctx.workspace.set('last_action', simulated);
+        return simulated;
+      }
+
       let outcome = `${mode}_completed`;
 
       if (kernel.llm && (mode === CollabMode.DEBATE || mode === 'debate')) {

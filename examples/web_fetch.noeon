@@ -1,0 +1,10 @@
+profile "general"
+version "1.0.0-alpha.1"
+module web_fetch_demo
+
+import std.web
+
+@effect(external)
+fn main() {
+  text("https://example.com/docs", mock=true)
+}

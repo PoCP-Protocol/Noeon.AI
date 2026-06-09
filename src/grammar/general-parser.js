@@ -2,7 +2,7 @@
 
 const { parseEffectTags } = require('./effects');
 const { tryParseExpr } = require('./expr');
-const { isStdAiExport, isStdUniversalExport, buildImportContext } = require('../stdlib/registry');
+const { isStdAiExport, isStdUniversalExport, isStdHttpExport, isStdFsExport, isStdGithubExport, isStdWebExport, buildImportContext } = require('../stdlib/registry');
 const { tryParseDeclarationLine } = require('./declaration-parser');
 const { createDeclarationBundle, normalizeDeclarationEntry } = require('../core/declaration-ir');
 
@@ -86,6 +86,46 @@ function parseCallStatement(line, importContext = {}) {
     };
   }
 
+  const dottedGithub = line.match(/^std\.github\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dottedGithub) {
+    return {
+      kind: 'stdlib',
+      module: 'std.github',
+      exportName: dottedGithub[1],
+      args: parseCallArgs(dottedGithub[2])
+    };
+  }
+
+  const dottedWeb = line.match(/^std\.web\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dottedWeb) {
+    return {
+      kind: 'stdlib',
+      module: 'std.web',
+      exportName: dottedWeb[1],
+      args: parseCallArgs(dottedWeb[2])
+    };
+  }
+
+  const dottedFs = line.match(/^std\.fs\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dottedFs) {
+    return {
+      kind: 'stdlib',
+      module: 'std.fs',
+      exportName: dottedFs[1],
+      args: parseCallArgs(dottedFs[2])
+    };
+  }
+
+  const dottedHttp = line.match(/^std\.http\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dottedHttp) {
+    return {
+      kind: 'stdlib',
+      module: 'std.http',
+      exportName: dottedHttp[1],
+      args: parseCallArgs(dottedHttp[2])
+    };
+  }
+
   const dotted = line.match(/^std\.ai\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
   if (dotted) {
     return {
@@ -103,6 +143,42 @@ function parseCallStatement(line, importContext = {}) {
     return {
       kind: 'stdlib',
       module: 'std.universal',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
+
+  if (isStdGithubExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.github',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
+
+  if (isStdWebExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.web',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
+
+  if (isStdFsExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.fs',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
+
+  if (isStdHttpExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.http',
       exportName: m[1],
       args: parseCallArgs(m[2])
     };
@@ -411,6 +487,7 @@ function parseGeneralProgram(source, options = {}) {
         const entry = normalizeDeclarationEntry(decl.kind, decl.name, decl.params);
         if (decl.kind === 'model') program.declarations.models.push(entry);
         else if (decl.kind === 'tool') program.declarations.tools.push(entry);
+        else if (decl.kind === 'data') program.declarations.data.push(entry);
         else if (decl.kind === 'capability') program.declarations.capabilities.push({ ...entry, name: decl.name, params: decl.params });
         else if (decl.kind === 'effect') program.declarations.effects.push({ ...entry, name: decl.name, params: decl.params });
         i += 1;

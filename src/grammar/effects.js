@@ -28,6 +28,13 @@ const STDLIB_EFFECT = {
   ask: 'ai',
   embed: 'ai',
   think_with: 'ai',
+  get: 'external',
+  post: 'external',
+  fetch: 'external',
+  read: 'io',
+  write: 'io',
+  repo: 'external',
+  list: 'io',
   reason: 'ai',
   cognize: 'ai',
   intent: 'pure',
@@ -58,9 +65,19 @@ function parseEffectTags(line) {
 
 function classifyStatement(stmt, importContext = {}) {
   if (!stmt) return 'pure';
-  if (stmt.kind === 'stdlib') return STDLIB_EFFECT[stmt.exportName] || 'ai';
+  if (stmt.kind === 'stdlib') {
+    if (stmt.module === 'std.http') return STDLIB_EFFECT[stmt.exportName] || 'external';
+    if (stmt.module === 'std.fs') return STDLIB_EFFECT[stmt.exportName] || 'io';
+    if (stmt.module === 'std.github') return STDLIB_EFFECT[stmt.exportName] || 'external';
+    if (stmt.module === 'std.web') return STDLIB_EFFECT[stmt.exportName] || 'external';
+    return STDLIB_EFFECT[stmt.exportName] || 'ai';
+  }
   if (stmt.kind === 'call') {
     if (importContext.stdAi?.exports?.[stmt.callee]) return 'ai';
+    if (importContext.stdHttp?.exports?.[stmt.callee]) return 'external';
+    if (importContext.stdFs?.exports?.[stmt.callee]) return 'io';
+    if (importContext.stdGithub?.exports?.[stmt.callee]) return 'external';
+    if (importContext.stdWeb?.exports?.[stmt.callee]) return 'external';
     if (importContext.stdUniversal?.exports?.[stmt.callee]) {
       return STDLIB_EFFECT[stmt.callee] || 'ai';
     }

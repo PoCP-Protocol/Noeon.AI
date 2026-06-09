@@ -86,7 +86,7 @@ class McpStdioSession {
       this.request('initialize', {
         protocolVersion: DEFAULT_PROTOCOL,
         capabilities: {},
-        clientInfo: { name: 'noeon', version: '1.0.0-alpha' }
+        clientInfo: { name: 'noeon', version: require('../core/release-version').NOEON_VERSION }
       })
         .then((result) => {
           this.sendNotification('notifications/initialized', {});

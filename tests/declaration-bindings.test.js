@@ -16,7 +16,7 @@ function assert(cond, msg) {
   else { failed++; console.log(`  \x1b[31mFAIL\x1b[0m ${msg}`); }
 }
 
-console.log('\n\x1b[36m═══ Sprint A — MODEL/TOOL/CAPABILITY/EFFECT Declarations ═══\x1b[0m\n');
+console.log('\n\x1b[36m═══ Sprint A — MODEL/TOOL/DATA/CAPABILITY/EFFECT Declarations ═══\x1b[0m\n');
 
 const goodSrc = fs.readFileSync(
   path.join(__dirname, '../examples/declarations/agent_with_tools.noeon'),
@@ -26,9 +26,11 @@ const goodSrc = fs.readFileSync(
 const gp = parseGeneralProgram(goodSrc);
 assert(gp.declarations.models.length === 1, 'parses MODEL');
 assert(gp.declarations.tools.length === 1, 'parses TOOL');
+assert(gp.declarations.data.length === 1, 'parses DATA');
 assert(gp.declarations.capabilities.length === 1, 'parses CAPABILITY');
 assert(gp.declarations.effects.length === 1, 'parses EFFECT');
 assert(gp.declarations.tools[0].params.capability === 'web_search', 'TOOL capability param');
+assert(gp.declarations.data[0].params.vector === true, 'DATA typed params');
 assert(Array.isArray(gp.declarations.capabilities[0].params.effects), 'CAPABILITY effects array');
 
 const ast = parseGeneralSource(goodSrc, { filename: 'agent_with_tools.noeon' });
@@ -38,12 +40,17 @@ assert(valid.valid === true, 'declared agent validates');
 const canonical = lowerToCanonical(ast);
 assert(canonical.declarations.models[0].name === 'planner', 'canonical MODEL');
 assert(canonical.declarations.tools[0].name === 'search', 'canonical TOOL');
+assert(canonical.declarations.data[0].name === 'corpus', 'canonical DATA');
+assert(canonical.ai.resources.models[0].name === 'planner', 'AI resources MODEL');
+assert(canonical.ai.resources.tools[0].name === 'search', 'AI resources TOOL');
+assert(canonical.ai.resources.data[0].name === 'corpus', 'AI resources DATA');
 assert(buildDeclarationBrief(canonical.declarations).counts.tools === 1, 'declaration brief');
 
 const badToolSrc = `
 profile "general"
 TOOL search type=mcp capability=missing_cap
-export fn main() {}
+export fn main() {
+}
 `;
 const badAst = parseGeneralSource(badToolSrc);
 const badValid = validateAel(badAst);
@@ -71,6 +78,7 @@ assert(badCallValid.errors.some((e) => e.includes('without declared TOOL')), 'to
   });
   assert(run.success === true, 'declared agent executes');
   assert(run.report?.declarations?.tools?.includes('search'), 'report includes declarations');
+  assert(run.report?.ai?.resources?.data?.some((d) => d.name === 'corpus'), 'report includes AI resources');
 
   console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
   process.exit(failed > 0 ? 1 : 0);

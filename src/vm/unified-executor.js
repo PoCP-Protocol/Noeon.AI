@@ -17,7 +17,7 @@ const { resolveScheduler, runConsciousnessPhase } = require('./consciousness-sch
 const { CognitiveKernel } = require('../core/kernel');
 const { PHASE } = require('./phases');
 
-const VM_VERSION = '1.0.0-alpha';
+const VM_VERSION = require('../core/release-version').NOEON_VERSION;
 
 function finishExecution(result, ast, canonicalPrep, options) {
   if (canonicalPrep) {

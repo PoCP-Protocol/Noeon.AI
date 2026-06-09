@@ -13,7 +13,7 @@ const { parseAel } = require('../src/parser');
 const { runGovernancePreflight } = require('../src/core/governance');
 const { handlePlaygroundApi, sendJson } = require('../src/playground-api');
 const { LLMBridge } = require('../src/runtime/cognitive/llm-bridge');
-const { runDoctor } = require('../src/doctor');
+const { NOEON_VERSION } = require('../src/core/release-version');
 const { resolveStaticRequest } = require('../src/serve-site');
 
 let passed = 0;
@@ -29,7 +29,7 @@ console.log('\n\x1b[36m═══ Unified Runtime v0.8 Tests ═══\x1b[0m\n')
 const minimal = fs.readFileSync(path.join(__dirname, '../examples/cognitive_minimal.ael'), 'utf8');
 const ast = parseAel(minimal);
 
-assert(getRuntimeStatus().version === '1.0.0-alpha', 'runtime status reports v1.0.0-alpha');
+assert(getRuntimeStatus().version === NOEON_VERSION, `runtime status reports ${NOEON_VERSION}`);
 
 const ir = compileProgram(ast, 'ir');
 assert(ir.format === 'ir', 'compileProgram produces IR');

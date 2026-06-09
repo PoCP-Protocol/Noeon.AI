@@ -18,7 +18,8 @@ function assert(cond, msg) {
 
 console.log('\n\x1b[36m═══ Unified VM v1.0-alpha Tests ═══\x1b[0m\n');
 
-assert(VM_VERSION === '1.0.0-alpha', 'VM_VERSION is 1.0.0-alpha');
+const { NOEON_VERSION } = require('../src/core/release-version');
+assert(VM_VERSION === NOEON_VERSION, `VM_VERSION is ${NOEON_VERSION}`);
 
 const minimal = parseAel(fs.readFileSync(path.join(__dirname, '../examples/cognitive_minimal.ael'), 'utf8'));
 assert(detectProfile(minimal) === 'ael' || detectProfile(minimal) === 'cognitive', 'detectProfile for minimal');

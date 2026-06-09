@@ -27,9 +27,10 @@ const {
   getRuntimeStatus
 } = require('./runtime/unified-runtime');
 const { runDoctor, formatDoctorReport } = require('./doctor');
+const { buildReleaseManifest, NOEON_VERSION } = require('./core/release-version');
 const { buildCognitiveGraph, formatMermaidGraph } = require('./graph');
 
-const VERSION = '1.0.0-alpha';
+const VERSION = NOEON_VERSION;
 
 const args = process.argv.slice(2);
 const command = args[0];

@@ -12,6 +12,7 @@ const {
 const { parseFuseStatement } = require('./fuse-block');
 const { annotateFlowSteps } = require('../core/cognitive-architecture');
 const { syncAgentsToUnifiedStack, buildStackManifest } = require('../core/noeon-unified');
+const { NOEON_VERSION } = require('../core/release-version');
 
 const AGENT_GOVERNANCE_KEYWORDS = {
   CONSTITUTION: 'constitutions',
@@ -226,7 +227,7 @@ function promoteAgentToAst(ast, agent) {
 function createGeneralAgentAstShell() {
   return {
     language: 'Noeon Unified Language',
-    version: '1.0.0-alpha',
+    version: NOEON_VERSION,
     network: null,
     profile: 'general',
     languageProfile: 'general',

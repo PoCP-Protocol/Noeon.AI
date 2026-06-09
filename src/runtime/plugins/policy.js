@@ -1,4 +1,4 @@
-const DEFAULT_ALLOWED_PLUGINS = ["echo", "policy_guard", "http_call", "mcp_call"];
+const DEFAULT_ALLOWED_PLUGINS = ["echo", "policy_guard", "http_call", "fs_call", "mcp_call"];
 
 function parseCsvList(value, fallback) {
   if (!value) {

@@ -18,6 +18,7 @@ const { deriveExecutionRoute, routePhaseLabel } = require('./canonical-route');
 const { detectProfile, resolveExecutionMode } = require('./profile');
 const { buildStackManifest } = require('./noeon-unified');
 const { attachArchitecture, buildArchitectureMap, COGNITIVE_CYCLE } = require('./cognitive-architecture');
+const { extractActionTrace } = require('./action-trace');
 const { CORE_SURFACE } = require('./surfaces');
 
 function isAst(input) {
@@ -146,7 +147,8 @@ async function runNoeonPipeline(input, options = {}) {
     cognitiveCycle: plan.cognitiveCycle,
     prep: plan.prep,
     result,
-    report: result.report || result.unifiedReport || null
+    report: result.report || result.unifiedReport || null,
+    actionTrace: result ? extractActionTrace(result) : null
   };
 }
 

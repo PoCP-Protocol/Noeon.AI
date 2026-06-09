@@ -110,11 +110,42 @@ function checkMcpConfig(cwd = process.cwd()) {
   };
 }
 
+function checkVersionAlignment() {
+  const pkg = require('../package.json');
+  const { NOEON_VERSION } = require('./core/release-version');
+  const aligned = pkg.version === NOEON_VERSION;
+  return {
+    name: 'version_alignment',
+    ok: aligned,
+    detail: aligned
+      ? `package.json and runtime aligned at ${NOEON_VERSION}`
+      : `package.json=${pkg.version} runtime=${NOEON_VERSION}`,
+    recommendation: aligned ? null : 'Run release-version sync across package.json, CLI, and runtime.'
+  };
+}
+
+function checkEngineeringGate() {
+  const { ALPHA_GATE_TESTS } = require('./core/engineering-status');
+  const fs = require('fs');
+  const path = require('path');
+  const missing = ALPHA_GATE_TESTS.filter((rel) => !fs.existsSync(path.join(process.cwd(), rel)));
+  return {
+    name: 'engineering_gate',
+    ok: missing.length === 0,
+    detail: missing.length === 0
+      ? `${ALPHA_GATE_TESTS.length} alpha gate tests present`
+      : `Missing alpha gate tests: ${missing.join(', ')}`,
+    recommendation: missing.length ? 'Restore missing test files or update engineering-status.js' : 'Run npm run gate:alpha'
+  };
+}
+
 function runDoctor(options = {}) {
   const checks = [
     checkNode(),
     checkConfig(options.cwd),
     checkRuntime(),
+    checkVersionAlignment(),
+    checkEngineeringGate(),
     checkCanonicalRoute(),
     checkMcpConfig(options.cwd),
     checkExample(options.file)

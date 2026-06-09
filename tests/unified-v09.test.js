@@ -13,6 +13,7 @@ const {
 const { parseAel } = require('../src/parser');
 const { loadProjectConfig, resolveRunOptions } = require('../src/core/config');
 const { shouldEnrichProtocol } = require('../src/core/protocol-bridge');
+const { NOEON_VERSION } = require('../src/core/release-version');
 const {
   getHover,
   getDocumentSymbols,
@@ -29,7 +30,7 @@ function assert(cond, msg) {
 
 console.log('\n\x1b[36m═══ Unified Runtime v0.9 Tests ═══\x1b[0m\n');
 
-assert(RUNTIME_VERSION === '1.0.0-alpha', 'RUNTIME_VERSION is 1.0.0-alpha');
+assert(RUNTIME_VERSION === NOEON_VERSION, `RUNTIME_VERSION is ${NOEON_VERSION}`);
 
 const { ast } = parseFromSource('VERSION "0.9"\nNETWORK "t"\nTASK "x"\nBUDGET 1 msat\nDEADLINE 2026-01-01T00:00:00Z\n');
 assert(ast.task, 'parseFromSource parses minimal contract');

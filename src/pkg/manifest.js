@@ -12,7 +12,9 @@ const {
 
 const MANIFEST_FILE = 'noeon.json';
 const LOCK_FILE = '.noeon-lock.json';
-const RUNTIME_VERSION = '1.0.0-alpha';
+const { NOEON_VERSION } = require('../core/release-version');
+
+const RUNTIME_VERSION = NOEON_VERSION;
 
 const BUILTIN_PACKAGES = Object.keys(STDLIB_MODULES);
 

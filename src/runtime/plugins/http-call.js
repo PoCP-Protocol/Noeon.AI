@@ -231,7 +231,9 @@ function buildAuditMeta({
   bytes,
   durationMs,
   mocked,
-  endpoint
+  endpoint,
+  extract,
+  contentPreview
 }) {
   return {
     template: "http_call",
@@ -241,8 +243,35 @@ function buildAuditMeta({
     statusCode,
     bytes,
     durationMs,
-    mocked: !!mocked
+    mocked: !!mocked,
+    extract: extract || null,
+    contentPreview: contentPreview || null
   };
+}
+
+function extractWebContent(body, mode) {
+  if (body == null) return '';
+  const raw = String(body);
+  if (mode === 'title') {
+    const match = raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    return match ? match[1].replace(/\s+/g, ' ').trim() : '';
+  }
+  if (mode === 'text') {
+    return raw
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 4096);
+  }
+  return raw.slice(0, 4096);
+}
+
+function mockWebContent(binding) {
+  if (binding.extract === 'title') return 'Mock Page Title';
+  if (binding.extract === 'text') return 'Mock web page text content for research preview.';
+  return 'mock http body';
 }
 
 function executeMock({ stepName, binding, feedback, url, latencyMs, method }) {
@@ -271,6 +300,7 @@ function executeMock({ stepName, binding, feedback, url, latencyMs, method }) {
     reason: "http call succeeded",
     latencyMs,
     failureCategory: null,
+    content: extractWebContent(mockWebContent(binding), binding.extract),
     pluginMeta: buildAuditMeta({
       url,
       method,
@@ -278,7 +308,9 @@ function executeMock({ stepName, binding, feedback, url, latencyMs, method }) {
       bytes: 0,
       durationMs: latencyMs,
       mocked: true,
-      endpoint: url
+      endpoint: url,
+      extract: binding.extract,
+      contentPreview: extractWebContent(mockWebContent(binding), binding.extract)?.slice(0, 512)
     })
   };
 }
@@ -497,6 +529,7 @@ async function execute({ stepName, binding = {}, feedback = {} }) {
       reason: "http call succeeded",
       latencyMs: durationMs,
       failureCategory: null,
+      content: extractWebContent(response.body, binding.extract),
       pluginMeta: buildAuditMeta({
         url: response.url,
         method: response.method,
@@ -504,7 +537,9 @@ async function execute({ stepName, binding = {}, feedback = {} }) {
         bytes: response.bytes,
         durationMs,
         mocked: false,
-        endpoint: url
+        endpoint: url,
+        extract: binding.extract,
+        contentPreview: extractWebContent(response.body, binding.extract)?.slice(0, 512)
       })
     };
   } catch (err) {

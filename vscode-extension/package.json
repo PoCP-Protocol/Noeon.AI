@@ -2,7 +2,7 @@
   "name": "noeon-language",
   "displayName": "Noeon AI — Cognitive Programming Language",
   "description": "Syntax highlighting, LSP diagnostics, completion, and run command for Noeon (.noeon / .ael) including general profile syntax",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.1",
   "publisher": "PoCP-Protocol",
   "main": "./extension.js",
   "activationEvents": [

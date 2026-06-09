@@ -145,8 +145,85 @@ function lowerDeclarations(ast, canonical) {
   if (!decl) return;
   canonical.declarations.models = (decl.models || []).map((m) => ({ ...m }));
   canonical.declarations.tools = (decl.tools || []).map((t) => ({ ...t }));
+  canonical.declarations.data = (decl.data || []).map((d) => ({ ...d }));
   canonical.declarations.capabilities = (decl.capabilities || []).map((c) => ({ ...c }));
   canonical.declarations.effects = (decl.effects || []).map((e) => ({ ...e }));
+}
+
+function addAiResource(list, entry, source) {
+  if (!entry?.name) return;
+  if (list.some((item) => item.name === entry.name && item.source === source)) return;
+  list.push({
+    name: entry.name,
+    kind: entry.kind,
+    params: { ...(entry.params || {}) },
+    source
+  });
+}
+
+function lowerAiResources(ast, canonical) {
+  const resources = canonical.ai.resources;
+
+  for (const model of canonical.declarations.models || []) {
+    addAiResource(resources.models, model, model.source || 'general.declaration');
+  }
+  for (const tool of canonical.declarations.tools || []) {
+    addAiResource(resources.tools, tool, tool.source || 'general.declaration');
+  }
+  for (const data of canonical.declarations.data || []) {
+    addAiResource(resources.data, data, data.source || 'general.declaration');
+  }
+  for (const effect of canonical.declarations.effects || []) {
+    addAiResource(resources.effects, effect, effect.source || 'general.declaration');
+  }
+
+  for (const ask of ast.llm?.asks || []) {
+    if (ask.model) {
+      addAiResource(resources.models, {
+        kind: 'model',
+        name: ask.model,
+        params: { type: 'llm', context: ask.context || null }
+      }, 'stdlib.ai.ask');
+    }
+  }
+
+  for (const thinking of ast.llm?.thinkWiths || []) {
+    if (thinking.model) {
+      addAiResource(resources.models, {
+        kind: 'model',
+        name: thinking.model,
+        params: { type: 'llm', strategy: thinking.strategy || null }
+      }, 'stdlib.ai.think_with');
+    }
+  }
+
+  for (const embed of ast.llm?.embeds || []) {
+    if (embed.store_as) {
+      addAiResource(resources.data, {
+        kind: 'data',
+        name: embed.store_as,
+        params: { type: 'embedding', tags: embed.tags || [] }
+      }, 'stdlib.ai.embed');
+    }
+  }
+
+  for (const model of ast.next?.models || []) {
+    addAiResource(resources.models, {
+      kind: 'model',
+      name: model.name,
+      params: { ...model }
+    }, 'next.model');
+  }
+
+  for (const agent of ast.agents || []) {
+    for (const tool of agent.tools || []) {
+      addAiResource(resources.tools, {
+        kind: 'tool',
+        name: String(tool),
+        params: { agent: agent.name }
+      }, 'general.agent.tools');
+    }
+  }
 }
 
 function lowerToCanonical(ast, options = {}) {
@@ -200,6 +277,7 @@ function lowerToCanonical(ast, options = {}) {
   lowerNextDomain(ast, canonical);
   lowerObservability(ast, canonical.observability);
   lowerDeclarations(ast, canonical);
+  lowerAiResources(ast, canonical);
 
   if (ast.cognition?.context) {
     canonical.learning.context = { ...ast.cognition.context };
@@ -229,6 +307,7 @@ module.exports = {
   lowerNextDomain,
   lowerAgentGovernance,
   lowerDeclarations,
+  lowerAiResources,
   resolveIntentGoal,
   resolveProgramTask
 };

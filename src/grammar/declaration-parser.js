@@ -41,7 +41,7 @@ function parseNamedDeclaration(keyword, rest, lineNo) {
   return { kind: keyword.toLowerCase(), name, params };
 }
 
-const DECLARATION_KEYWORDS = new Set(['model', 'tool', 'capability', 'effect']);
+const DECLARATION_KEYWORDS = new Set(['model', 'tool', 'data', 'capability', 'effect']);
 
 function tryParseDeclarationLine(trimmed, lineNo) {
   const m = trimmed.match(/^([a-zA-Z_][\w]*)\s+(.+)$/);

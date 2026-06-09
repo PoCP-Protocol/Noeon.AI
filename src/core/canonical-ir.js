@@ -71,9 +71,18 @@ function createCanonicalProgram(meta = {}) {
       triad: false,
       bidirectional: false
     },
+    ai: {
+      resources: {
+        models: [],
+        tools: [],
+        data: [],
+        effects: []
+      }
+    },
     declarations: {
       models: [],
       tools: [],
+      data: [],
       capabilities: [],
       effects: []
     }

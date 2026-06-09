@@ -71,6 +71,8 @@ const MemoryOp = {
   ASSOCIATE: 'associate'
 };
 
+const { actCollaborateParams } = require('../runtime/act-binding');
+
 const CollabMode = {
   DEBATE: 'debate',
   CONSENSUS: 'consensus',
@@ -375,8 +377,20 @@ class AELtoIRCompiler {
     }
 
     // --- COGNITIVE PRIMITIVES (already cognitive, direct mapping) ---
-    if (ast.cognitive) {
-      this._compileCognitiveBlock(ast.cognitive, program);
+    if (ast.cognitive || ast.cognition) {
+      const cog = { ...(ast.cognitive || {}) };
+      if (ast.cognition) {
+        if (ast.cognition.understandings?.length) {
+          cog.understandings = [...(cog.understandings || []), ...ast.cognition.understandings];
+        }
+        if (ast.cognition.acts?.length) {
+          cog.acts = [...(cog.acts || []), ...ast.cognition.acts];
+        }
+        if (ast.cognition.feedback?.length) {
+          cog.feedback = [...(cog.feedback || []), ...ast.cognition.feedback];
+        }
+      }
+      this._compileCognitiveBlock(cog, program);
     }
 
     // --- GENERAL PROFILE AGENT BLOCKS ---
@@ -549,13 +563,7 @@ class AELtoIRCompiler {
     // ACT → COLLABORATE (tool/action boundary until Action IR is promoted)
     if (cog.acts) {
       for (const a of cog.acts) {
-        program.add(new IRNode(IRNodeType.COLLABORATE, {
-          mode: CollabMode.DELEGATE,
-          action: a.action || a.name || 'act',
-          channel: a.channel || 'runtime',
-          safety: a.safety || 'standard',
-          source: 'general'
-        }));
+        program.add(new IRNode(IRNodeType.COLLABORATE, actCollaborateParams(a, { source: 'general' })));
       }
     }
 
@@ -647,14 +655,10 @@ class AELtoIRCompiler {
             }));
             break;
           case 'act':
-            program.add(new IRNode(IRNodeType.COLLABORATE, {
-              mode: CollabMode.DELEGATE,
-              action: step.action || step.name || 'act',
-              channel: step.channel || 'runtime',
-              safety: step.safety || 'standard',
+            program.add(new IRNode(IRNodeType.COLLABORATE, actCollaborateParams(step, {
               agent: agent.name,
               source: 'general'
-            }));
+            })));
             break;
           case 'reflect':
             program.add(new IRNode(IRNodeType.VALIDATE, {

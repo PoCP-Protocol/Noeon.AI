@@ -8,6 +8,8 @@ const {
   formatPipelineJson
 } = require('../language-server/noeon-service');
 const { parseFromSource, validateProgram, compileProgram, runProgram, explainProgram, getRuntimeStatus } = require('./runtime/unified-runtime');
+const { loadCuratedExamples, loadAllExamples } = require('./core/playground-examples');
+const { resolveCompilePresentation } = require('./core/general-canonical-mode');
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -131,7 +133,9 @@ async function handlePlaygroundApi(req, res, pathname) {
       const body = await readBody(req);
       const ast = parseBodyAst(body);
       const format = body.format === 'ael' ? 'ael' : body.format === 'both' ? 'both' : 'ir';
-      const compiled = compileProgram(ast, format);
+      const compiled = compileProgram(ast, format, {
+        general_canonical: body.general_canonical ?? body.generalCanonical
+      });
       sendJson(res, 200, {
         format,
         output: format === 'ir'
@@ -139,6 +143,9 @@ async function handlePlaygroundApi(req, res, pathname) {
           : format === 'both'
             ? { ir: compiled.program.toJSON(), artifact: compiled.artifact }
             : compiled.artifact,
+        canonicalIr: compiled.canonicalIr || ast.general?.canonicalIr || null,
+        compileMode: compiled.compileMode || 'cognitive-primary',
+        primaryIr: compiled.primaryIr || 'cognitive',
         warnings: compiled.warnings || []
       });
     } catch (e) {
@@ -178,6 +185,11 @@ async function handlePlaygroundApi(req, res, pathname) {
       const out = await runNoeonPipeline(input, runOpts);
       const pipelineJson = formatPipelineJson(out);
       const brainView = sourceText ? mergePipelineBrainView(sourceText, filename, pipelineJson) : null;
+      const compileOpts = {
+        general_canonical: body.general_canonical ?? body.generalCanonical
+      };
+      const compiled = out.ast ? compileProgram(out.ast, 'ir', compileOpts) : null;
+      const presentation = compiled || resolveCompilePresentation(out.ast, null, compileOpts);
       const payload = attachArchitecturePayload({
         ...(out.result || {}),
         report: out.report || out.result?.report || null,
@@ -187,6 +199,11 @@ async function handlePlaygroundApi(req, res, pathname) {
         route: out.route,
         routeLabel: out.routeLabel,
         cognitiveCycle: out.cognitiveCycle,
+        actionTrace: out.actionTrace || (out.result ? require('./core/action-trace').extractActionTrace(out.result) : null),
+        cognitiveIr: compiled?.program?.toJSON?.() || null,
+        canonicalIr: presentation.canonicalIr || out.ast?.general?.canonicalIr || out.canonical || null,
+        compileMode: presentation.compileMode || 'cognitive-primary',
+        primaryIr: presentation.primaryIr || 'cognitive',
         pipeline: true,
         ...(brainView
           ? {
@@ -891,58 +908,9 @@ async function handlePlaygroundApi(req, res, pathname) {
   }
 
   if (pathname === '/api/examples' && req.method === 'GET') {
-    const fs = require('fs');
-    const path = require('path');
-    const examplesDir = path.resolve(__dirname, '..', 'examples');
     const url = new URL(req.url || '/api/examples', 'http://localhost');
     const listAll = url.searchParams.get('all') === '1';
-
-    if (listAll) {
-      const files = fs.readdirSync(examplesDir)
-        .filter((f) => f.endsWith('.noeon') || f.endsWith('.ael'))
-        .sort();
-      sendJson(res, 200, {
-        examples: files.map((name) => ({
-          name,
-          title: name,
-          description: '',
-          category: name.endsWith('.noeon') ? 'noeon' : 'ael',
-          profile: name.endsWith('.noeon') ? 'general' : 'ael',
-          source: fs.readFileSync(path.join(examplesDir, name), 'utf8')
-        }))
-      });
-      return true;
-    }
-
-    const curated = [
-      { name: 'hello.noeon', title: 'Hello World', description: 'Minimal cognitive cycle', category: 'getting-started' },
-      { name: 'fusion_triad.noeon', title: 'Triad Fusion', description: 'FUSE triad — cross-file Next+Liminal+General loop', category: 'fusion' },
-      { name: 'semantic_fusion.noeon', title: 'Semantic Fusion', description: 'FUSE coherence + relay + triad', category: 'fusion' },
-      { name: 'agent_field.noeon', title: 'Field Analyst', description: 'AGENT fused with Next field + Liminal observe', category: 'fusion' },
-      { name: 'agent_research.noeon', title: 'Research Analyst', description: 'Industry research with citations', category: 'agents' },
-      { name: 'agent_risk_review.noeon', title: 'Risk Reviewer', description: 'Payment approval with escalation', category: 'agents' },
-      { name: 'agent_customer_service.noeon', title: 'Support Agent', description: 'Customer issue resolution', category: 'agents' },
-      { name: 'universal/research_synth.noeon', title: 'Universal Research', description: 'Six-dimension AI research synthesizer', category: 'universal', profile: 'universal' },
-      { name: 'universal/code_agent.noeon', title: 'Universal Code Agent', description: 'Code weave with governance gates', category: 'universal', profile: 'universal' },
-      { name: 'universal/orchestrator.noeon', title: 'Universal Orchestrator', description: 'Multi-agent mesh coordinator', category: 'universal', profile: 'universal' },
-      { name: 'universal/inline_fn.noeon', title: 'Universal Inline fn', description: 'General fn with std.universal inline expansion', category: 'universal', profile: 'general' },
-      { name: 'universal/hybrid_weave.noeon', title: 'Hybrid Mesh Weave', description: 'General+Universal live mesh orchestration', category: 'universal', profile: 'general' }
-    ];
-
-    const examples = [];
-    for (const entry of curated) {
-      const filePath = path.join(examplesDir, entry.name);
-      if (!fs.existsSync(filePath)) continue;
-      examples.push({
-        name: entry.name,
-        title: entry.title,
-        description: entry.description,
-        category: entry.category,
-        profile: entry.profile || (entry.name.startsWith('universal/') ? 'universal' : 'general'),
-        source: fs.readFileSync(filePath, 'utf8')
-      });
-    }
-
+    const examples = listAll ? loadAllExamples() : loadCuratedExamples();
     sendJson(res, 200, { examples });
     return true;
   }

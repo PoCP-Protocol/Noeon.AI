@@ -6,6 +6,7 @@ import std.ai
 
 MODEL planner type=llm context=128k provider=openai
 TOOL search type=mcp capability=web_search risk=low
+DATA corpus type=document source=workspace modality=text vector=true retention=session
 CAPABILITY web_search effects=[io,external_send] budget_tokens=2000
 EFFECT external_send requires=human_gate
 

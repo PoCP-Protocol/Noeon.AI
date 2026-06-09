@@ -1,6 +1,7 @@
 'use strict';
 
 const { syncAgentsToUnifiedStack, buildStackManifest } = require('../core/noeon-unified');
+const { NOEON_VERSION } = require('../core/release-version');
 
 /**
  * Lower General Profile AST → legacy AEL AST (for Unified VM / Cognitive IR).
@@ -9,7 +10,7 @@ const { syncAgentsToUnifiedStack, buildStackManifest } = require('../core/noeon-
 function createLegacyAstShell(general) {
   return {
     language: 'Noeon General Language',
-    version: general.version || '1.0.0-alpha',
+    version: general.version || NOEON_VERSION,
     profile: general.profile || 'general',
     languageProfile: general.profile || 'general',
     module: general.module,
@@ -91,9 +92,204 @@ const { evalExprSource } = require('./expr');
 
 const { expandUniversalStdlibCall } = require('./universal-stdlib-inline');
 
+function extractStdCallParams(args = [], paramBindings = {}) {
+  const positional = [];
+  const params = {};
+  for (const raw of args) {
+    const arg = substValue(raw, paramBindings);
+    if (typeof arg === 'string') {
+      const m = arg.match(/^([a-zA-Z_][\w]*)=(.+)$/);
+      if (m) {
+        const val = m[2];
+        params[m[1]] = val === 'true' ? true : val === 'false' ? false : val.replace(/^"|"$/g, '');
+        continue;
+      }
+    }
+    positional.push(arg);
+  }
+  return { positional, params };
+}
+
+function applyStdHttpStatement(ast, stmt, paramBindings = {}) {
+  const { positional, params: argParams } = extractStdCallParams(stmt.args || [], paramBindings);
+  const p = { ...argParams, ...substParams(stmt.params || {}, paramBindings) };
+  const url = positional[0] || p.url || p.endpoint;
+  const step = p.step || `http_${stmt.exportName}_${(ast.cognition.acts.length || 0) + 1}`;
+  const method = stmt.exportName === 'post'
+    ? 'POST'
+    : stmt.exportName === 'fetch'
+      ? String(p.method || 'GET').toUpperCase()
+      : String(p.method || 'GET').toUpperCase();
+
+  ast.cognition.acts.push({
+    action: stmt.exportName,
+    channel: 'http',
+    plugin: 'http_call',
+    step,
+    url,
+    method,
+    body: p.body || null,
+    mock: p.mock,
+    timeout_ms: p.timeout_ms,
+    allow_hosts: p.allow_hosts,
+    allow_private: p.allow_private
+  });
+
+  ast.cognition.actions[step] = {
+    plugin: 'http_call',
+    endpoint: url,
+    url,
+    method,
+    body: p.body || null,
+    mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+    timeout_ms: p.timeout_ms != null ? Number(p.timeout_ms) : 5000,
+    allow_hosts: p.allow_hosts,
+    allow_private: p.allow_private
+  };
+}
+
+function resolveGithubUrl(rawPath) {
+  const pathValue = String(rawPath || '');
+  if (/^https?:\/\//i.test(pathValue)) return pathValue;
+  const normalized = pathValue.startsWith('/') ? pathValue : `/${pathValue}`;
+  return `https://api.github.com${normalized}`;
+}
+
+function githubHeaders() {
+  const token = process.env.GITHUB_TOKEN || process.env.NOEON_GITHUB_TOKEN;
+  if (!token) return 'Accept=application/vnd.github+json';
+  return `Accept=application/vnd.github+json,Authorization=Bearer ${token}`;
+}
+
+function applyStdGithubStatement(ast, stmt, paramBindings = {}) {
+  const { positional, params: argParams } = extractStdCallParams(stmt.args || [], paramBindings);
+  const p = { ...argParams, ...substParams(stmt.params || {}, paramBindings) };
+  const rawPath = positional[0] || p.path || p.repo;
+  const repoPath = stmt.exportName === 'repo' && rawPath && !String(rawPath).startsWith('/')
+    ? `/repos/${rawPath}`
+    : rawPath;
+  const url = resolveGithubUrl(repoPath);
+  const step = p.step || `github_${stmt.exportName}_${(ast.cognition.acts.length || 0) + 1}`;
+  const method = stmt.exportName === 'post' ? 'POST' : 'GET';
+  const body = positional[1] || p.body || null;
+
+  ast.cognition.acts.push({
+    action: stmt.exportName,
+    channel: 'http',
+    plugin: 'http_call',
+    step,
+    url,
+    method,
+    body,
+    mock: p.mock,
+    allow_hosts: 'api.github.com',
+    timeout_ms: p.timeout_ms
+  });
+
+  ast.cognition.actions[step] = {
+    plugin: 'http_call',
+    endpoint: url,
+    url,
+    method,
+    body,
+    headers: githubHeaders(),
+    mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+    timeout_ms: p.timeout_ms != null ? Number(p.timeout_ms) : 8000,
+    allow_hosts: 'api.github.com'
+  };
+}
+
+function applyStdWebStatement(ast, stmt, paramBindings = {}) {
+  const { positional, params: argParams } = extractStdCallParams(stmt.args || [], paramBindings);
+  const p = { ...argParams, ...substParams(stmt.params || {}, paramBindings) };
+  const url = positional[0] || p.url;
+  const step = p.step || `web_${stmt.exportName}_${(ast.cognition.acts.length || 0) + 1}`;
+  const extract = stmt.exportName === 'title'
+    ? 'title'
+    : stmt.exportName === 'text'
+      ? 'text'
+      : null;
+
+  ast.cognition.acts.push({
+    action: stmt.exportName,
+    channel: 'web',
+    plugin: 'http_call',
+    step,
+    url,
+    method: 'GET',
+    extract,
+    mock: p.mock,
+    timeout_ms: p.timeout_ms,
+    allow_hosts: p.allow_hosts,
+    allow_private: p.allow_private
+  });
+
+  ast.cognition.actions[step] = {
+    plugin: 'http_call',
+    endpoint: url,
+    url,
+    method: 'GET',
+    extract,
+    mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+    timeout_ms: p.timeout_ms != null ? Number(p.timeout_ms) : 8000,
+    allow_hosts: p.allow_hosts,
+    allow_private: p.allow_private
+  };
+}
+
+function applyStdFsStatement(ast, stmt, paramBindings = {}) {
+  const { positional, params: argParams } = extractStdCallParams(stmt.args || [], paramBindings);
+  const p = { ...argParams, ...substParams(stmt.params || {}, paramBindings) };
+  const filePath = positional[0] || p.path || p.file;
+  const step = p.step || `fs_${stmt.exportName}_${(ast.cognition.acts.length || 0) + 1}`;
+  const op = stmt.exportName === 'write' ? 'write' : stmt.exportName === 'list' ? 'list' : 'read';
+  const content = positional[1] || p.content || p.body || null;
+
+  ast.cognition.acts.push({
+    action: stmt.exportName,
+    channel: 'fs',
+    plugin: 'fs_call',
+    step,
+    path: filePath,
+    op,
+    content,
+    mock: p.mock,
+    allow_paths: p.allow_paths,
+    allow_write: p.allow_write,
+    root: p.root
+  });
+
+  ast.cognition.actions[step] = {
+    plugin: 'fs_call',
+    op,
+    path: filePath,
+    content,
+    mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+    allow_paths: p.allow_paths,
+    allow_write: p.allow_write,
+    root: p.root
+  };
+}
+
 function applyStdlibStatement(ast, stmt, paramBindings = {}) {
   if (stmt.module === 'std.universal') {
     applyStdUniversalStatement(ast, stmt, paramBindings);
+    return;
+  }
+  if (stmt.module === 'std.http') {
+    applyStdHttpStatement(ast, stmt, paramBindings);
+    return;
+  }
+  if (stmt.module === 'std.fs') {
+    applyStdFsStatement(ast, stmt, paramBindings);
+    return;
+  }
+  if (stmt.module === 'std.github') {
+    applyStdGithubStatement(ast, stmt, paramBindings);
+    return;
+  }
+  if (stmt.module === 'std.web') {
+    applyStdWebStatement(ast, stmt, paramBindings);
     return;
   }
 
@@ -229,9 +425,37 @@ function applyCognitiveStatement(ast, stmt, paramBindings = {}) {
         criteria: p.depth || p.criteria || 'coherence'
       });
       break;
-    case 'ACT':
-      ast.cognition.acts.push(p);
+    case 'ACT': {
+      const step = p.step || p.action || p.name || `act_${ast.cognition.acts.length + 1}`;
+      const actEntry = { ...p, step };
+      ast.cognition.acts.push(actEntry);
+      if (p.channel === 'http' || p.channel === 'web' || p.plugin === 'http_call') {
+        ast.cognition.actions[step] = {
+          plugin: p.plugin || 'http_call',
+          endpoint: p.url || p.endpoint,
+          url: p.url || p.endpoint,
+          method: p.method || (p.action === 'post' ? 'POST' : 'GET'),
+          body: p.body || null,
+          extract: p.extract || (p.channel === 'web' ? 'text' : null),
+          mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+          timeout_ms: p.timeout_ms != null ? Number(p.timeout_ms) : 5000,
+          allow_hosts: p.allow_hosts,
+          allow_private: p.allow_private
+        };
+      } else if (p.channel === 'fs' || p.plugin === 'fs_call') {
+        ast.cognition.actions[step] = {
+          plugin: p.plugin || 'fs_call',
+          op: p.op || p.operation || (p.action === 'write' ? 'write' : p.action === 'list' ? 'list' : 'read'),
+          path: p.path || p.file,
+          content: p.content ?? p.body ?? null,
+          mock: p.mock === true || String(p.mock).toLowerCase() === 'true',
+          allow_paths: p.allow_paths,
+          allow_write: p.allow_write,
+          root: p.root
+        };
+      }
       break;
+    }
     case 'FEEDBACK':
       ast.cognition.feedback.push(p);
       break;
@@ -372,12 +596,21 @@ function lowerGeneralProgram(general) {
     ast.general.declarations = general.declarations;
     ast.cognition.context._declarations = {
       models: general.declarations.models?.map((m) => m.name) || [],
-      tools: general.declarations.tools?.map((t) => t.name) || []
+      tools: general.declarations.tools?.map((t) => t.name) || [],
+      data: general.declarations.data?.map((d) => d.name) || []
     };
   }
 
   syncAgentsToUnifiedStack(ast);
   ast.noeonStack = buildStackManifest(ast);
+
+  try {
+    const { lowerToCanonical } = require('../core/canonical-lower');
+    ast.general = ast.general || {};
+    ast.general.canonicalIr = lowerToCanonical(ast);
+  } catch {
+    // non-fatal during alpha — legacy AST remains execution path
+  }
 
   return ast;
 }

@@ -26,6 +26,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
     surface: canonical?.surface || result.profile,
     capabilities: canonical?.capabilities || {},
     declarations: buildDeclarationBrief(canonical?.declarations) || buildDeclarationBrief(ast?.general?.declarations),
+    ai: canonical?.ai || null,
     intent: {
       goal: canonical?.intent?.goal || ast?.cognition?.goal || ast?.task || null,
       task: canonical?.task || ast?.task || null

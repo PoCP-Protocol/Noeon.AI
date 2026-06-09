@@ -1,11 +1,19 @@
 'use strict';
 
 const stdAi = require('./ai');
+const stdHttp = require('./http');
+const stdFs = require('./fs');
+const stdGithub = require('./github');
+const stdWeb = require('./web');
 const stdUniversal = require('./universal');
 const { loadProjectRegistryModules } = require('../pkg/registry');
 
 const STDLIB_MODULES = {
   'std.ai': stdAi,
+  'std.http': stdHttp,
+  'std.fs': stdFs,
+  'std.github': stdGithub,
+  'std.web': stdWeb,
   'std.universal': stdUniversal,
   'std.cognition': {
     module: 'std.cognition',
@@ -42,6 +50,30 @@ function buildImportContext(imports = [], options = {}) {
         context.exportNames.add(name);
       }
     }
+    if (imp === 'std.http') {
+      context.stdHttp = mod;
+      for (const name of Object.keys(mod.exports || {})) {
+        context.exportNames.add(name);
+      }
+    }
+    if (imp === 'std.fs') {
+      context.stdFs = mod;
+      for (const name of Object.keys(mod.exports || {})) {
+        context.exportNames.add(name);
+      }
+    }
+    if (imp === 'std.github') {
+      context.stdGithub = mod;
+      for (const name of Object.keys(mod.exports || {})) {
+        context.exportNames.add(name);
+      }
+    }
+    if (imp === 'std.web') {
+      context.stdWeb = mod;
+      for (const name of Object.keys(mod.exports || {})) {
+        context.exportNames.add(name);
+      }
+    }
     if (imp === 'std.cognition') {
       context.stdCognition = mod;
     }
@@ -53,7 +85,7 @@ function buildImportContext(imports = [], options = {}) {
     }
     for (const name of Object.keys(mod.exports || {})) {
       context.registryExports.set(name, imp);
-      if (imp !== 'std.ai') context.exportNames.add(name);
+      if (!['std.ai', 'std.http', 'std.fs', 'std.github', 'std.web'].includes(imp)) context.exportNames.add(name);
     }
   }
 
@@ -63,7 +95,7 @@ function buildImportContext(imports = [], options = {}) {
 function validateImports(imports = [], errors, options = {}) {
   for (const imp of imports) {
     if (!resolveImport(imp, options)) {
-      errors.push(`unknown import '${imp}'; supported: std.ai, std.universal, std.cognition, or registry packages from lockfile`);
+      errors.push(`unknown import '${imp}'; supported: std.ai, std.http, std.fs, std.github, std.web, std.universal, std.cognition, or registry packages from lockfile`);
     }
   }
 }
@@ -77,11 +109,31 @@ function isStdUniversalExport(name, importContext = {}) {
     (importContext.exportNames?.has(name) && importContext.modules?.some((m) => m.module === 'std.universal'));
 }
 
+function isStdHttpExport(name, importContext = {}) {
+  return Boolean(importContext.stdHttp?.exports?.[name]);
+}
+
+function isStdFsExport(name, importContext = {}) {
+  return Boolean(importContext.stdFs?.exports?.[name]);
+}
+
+function isStdGithubExport(name, importContext = {}) {
+  return Boolean(importContext.stdGithub?.exports?.[name]);
+}
+
+function isStdWebExport(name, importContext = {}) {
+  return Boolean(importContext.stdWeb?.exports?.[name]);
+}
+
 module.exports = {
   STDLIB_MODULES,
   resolveImport,
   buildImportContext,
   validateImports,
   isStdAiExport,
+  isStdHttpExport,
+  isStdFsExport,
+  isStdGithubExport,
+  isStdWebExport,
   isStdUniversalExport
 };

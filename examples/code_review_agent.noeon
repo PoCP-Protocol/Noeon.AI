@@ -1,0 +1,16 @@
+PROFILE "general"
+VERSION "1.0.0-alpha"
+
+AGENT "CodeReviewer"
+  GOAL "Review a GitHub pull request and produce actionable comments"
+  MEMORY type=episodic+semantic
+  TOOLS ["github", "file_reader", "test_runner"]
+  POLICY require_evidence=true human_approval=false trace_required=true
+  FLOW
+    PERCEIVE source=github_pr modality=diff
+    UNDERSTAND context=code_change method=semantic_summary confidence=0.72
+    REASON strategy=bug_risk_analysis depth=3
+    DECIDE action=approve_or_request_changes threshold=0.75
+    ACT action=emit_review channel=markdown safety=medium
+    FEEDBACK source=reviewer signal=quality window=1
+    REFLECT "review quality" depth=standard

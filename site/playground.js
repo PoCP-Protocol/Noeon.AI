@@ -34,6 +34,7 @@ const meshTracePanel = document.getElementById("mesh-trace-panel");
 const meshTraceSummary = document.getElementById("mesh-trace-summary");
 const meshTraceNodes = document.getElementById("mesh-trace-nodes");
 const meshTraceMermaid = document.getElementById("mesh-trace-mermaid");
+const actionTraceEl = document.getElementById("action-trace");
 
 let activeExampleName = null;
 let pendingGateApproval = null;
@@ -422,6 +423,38 @@ function renderGoldenOutput(payload) {
   return lines.join("\n") + "\n\n" + JSON.stringify(payload, null, 2);
 }
 
+function renderActionTrace(data) {
+  if (!actionTraceEl) return;
+  const trace = data?.actionTrace;
+  if (!trace?.actions?.length && !trace?.lastAction) {
+    actionTraceEl.textContent = "";
+    actionTraceEl.classList.add("hidden");
+    return;
+  }
+  actionTraceEl.classList.remove("hidden");
+  const lines = [`ACT trace · ${trace.count} action(s) · ${trace.succeeded} ok · ${trace.failed} fail`];
+  if (trace.lastAction) {
+    const last = trace.lastAction;
+    lines.push(
+      `last: ${last.action || "?"} · ${last.status || "?"} · ${last.plugin || (last.simulated ? "simulated" : "none")}`
+    );
+  }
+  if (trace.lastFetch) {
+    lines.push(`fetch: ${String(trace.lastFetch).slice(0, 160)}`);
+  }
+  for (const item of trace.actions) {
+    const mock = item.mocked ? " mock" : "";
+    const preview = item.content ? ` · ${String(item.content).slice(0, 72)}` : "";
+    lines.push(`  ${item.action} [${item.plugin || "sim"}] ${item.status}${mock}${preview}`);
+  }
+  actionTraceEl.textContent = lines.join("\n");
+}
+
+function compileExtras() {
+  const el = document.getElementById("canonical-mode");
+  return el?.checked ? { general_canonical: true } : {};
+}
+
 function renderBrainTraceCompact(data) {
   const arch = data?.architecture;
   if (!arch?.active_regions?.length) {
@@ -454,6 +487,7 @@ function renderBrainTraceCompact(data) {
   }
 
   if (data.architectureMermaid) renderBrainMermaid(data.architectureMermaid);
+  renderActionTrace(data);
   renderMeshTracePanel(data.meshTrace || data.report?.observability?.mesh_trace);
 }
 
@@ -486,6 +520,7 @@ function renderBrainTrace(data) {
   const arch = data?.architecture;
   if (!arch?.active_regions?.length) {
     brainPanel.classList.add("hidden");
+    renderActionTrace(data);
     renderMeshTracePanel(mesh);
     return;
   }
@@ -531,6 +566,7 @@ function renderBrainTrace(data) {
     }
   });
   updateSourceBrainGutter(data);
+  renderActionTrace(data);
   renderMeshTracePanel(mesh);
   setTimeout(() => { liveBrainEnabled = true; scheduleBrainSync(); }, 1500);
 }
@@ -663,8 +699,13 @@ document.getElementById("btn-validate").addEventListener("click", async () => {
 document.getElementById("btn-compile").addEventListener("click", async () => {
   setOutput("Compiling…");
   try {
-    const data = await api("/api/compile", { format: "ir" });
-    setOutput(JSON.stringify(data, null, 2));
+    const data = await api("/api/compile", { format: "ir", ...compileExtras() });
+    const summary = [
+      `compileMode: ${data.compileMode || "cognitive-primary"}`,
+      `primaryIr: ${data.primaryIr || "cognitive"}`,
+      ""
+    ].join("\n");
+    setOutput(summary + JSON.stringify(data, null, 2));
   } catch (e) {
     setOutput(e.message, true, e.line);
   }

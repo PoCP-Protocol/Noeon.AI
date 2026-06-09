@@ -4,8 +4,9 @@
 
 > *"Program by the way humans solve problems; let AI and runtime turn thought into executable systems."*
 
-[![Version](https://img.shields.io/badge/version-1.0.0--alpha-blue)]()
-[![Tests](https://img.shields.io/badge/tests-core%20%2B%20canonical%20%2B%20fusion-green)]()
+[![Version](https://img.shields.io/badge/version-1.0.0--alpha.1-blue)]()
+[![CI](https://github.com/PoCP-Protocol/Noeon.AI/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/PoCP-Protocol/Noeon.AI/actions/workflows/quality-gate.yml)
+[![Alpha Gate](https://github.com/PoCP-Protocol/Noeon.AI/actions/workflows/alpha-gate.yml/badge.svg)](https://github.com/PoCP-Protocol/Noeon.AI/actions/workflows/alpha-gate.yml)
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
 ---
@@ -30,19 +31,38 @@ This does **not** claim that software is conscious. Noeon **models cognitive wor
 
 ## Quick Start (30 seconds)
 
-```bash
-npm install -g noeon-ael
-noeon init my-agent --profile general
-cd my-agent && noeon run main.noeon --trace
-noeon playground     # from repo clone
-```
-
 From a local clone:
 
 ```bash
 git clone https://github.com/PoCP-Protocol/Noeon.AI.git
 cd Noeon.AI && npm install
+
+# Hello world
 node src/cli.js run examples/hello.noeon --trace
+
+# Research agent (AGENT block + cognitive cycle)
+node src/cli.js run examples/agent_research.noeon --trace
+
+# Real ACT → HTTP / FS plugins (mock mode, no network)
+node src/cli.js run examples/http_demo.noeon --trace
+node src/cli.js run examples/fs_demo.noeon --trace
+node src/cli.js run examples/github_demo.noeon --trace
+
+# Workbench — Code · IR · Trace · Architecture
+node src/cli.js playground
+# → http://localhost:8787/workbench.html
+
+# Engineering health check
+node src/cli.js doctor
+npm run gate:alpha
+```
+
+Published package (when available):
+
+```bash
+npm install -g noeon-ael
+noeon init my-agent --profile general
+cd my-agent && noeon run main.noeon --trace
 ```
 
 ---
@@ -53,7 +73,7 @@ The primary surface in v1.0 is the **AGENT** block — a declarative cognitive w
 
 ```noeon
 PROFILE "general"
-VERSION "1.0.0-alpha"
+VERSION "1.0.0-alpha.1"
 
 AGENT "ResearchAnalyst"
   GOAL "Complete industry research report"
@@ -71,7 +91,7 @@ General-profile programs can also use structured `program` blocks with the full 
 
 ```noeon
 profile "general"
-version "1.0.0-alpha"
+version "1.0.0-alpha.1"
 
 program hello_world {
   objective "Demonstrate general profile execution"
@@ -200,7 +220,7 @@ MCP: set `NOEON_MCP_MODE=live|stub|auto` and configure `mcp.servers` in `.noeonr
 
 ```bash
 npm install -g noeon-ael
-noeon --version    # 1.0.0-alpha
+noeon --version    # 1.0.0-alpha.1
 noeon doctor       # check environment and dependencies
 ```
 

@@ -1,0 +1,10 @@
+profile "general"
+version "1.0.0-alpha.1"
+module http_demo
+
+import std.http
+
+@effect(external)
+fn main() {
+  get("https://httpbin.org/get", mock=true)
+}

@@ -3,7 +3,7 @@
 const { evalExprSource, tryParseExpr } = require('./expr');
 const { validateGeneralTypes } = require('./types');
 const { validateGeneralEffects } = require('./effects');
-const { validateImports, buildImportContext, isStdAiExport, isStdUniversalExport } = require('../stdlib/registry');
+const { validateImports, buildImportContext, isStdAiExport, isStdHttpExport, isStdFsExport, isStdGithubExport, isStdWebExport, isStdUniversalExport } = require('../stdlib/registry');
 const { validateManifestImports } = require('../pkg/manifest');
 const { validateDeclarations } = require('./validate-declarations');
 
@@ -59,6 +59,22 @@ function validateGeneralExpressions(ast, errors) {
           if (!isStdUniversalExport(stmt.exportName, importContext)) {
             errors.push(`fn '${fn.name}': std.universal export '${stmt.exportName}' used without import std.universal`);
           }
+        } else if (stmt.module === 'std.http') {
+          if (!isStdHttpExport(stmt.exportName, importContext)) {
+            errors.push(`fn '${fn.name}': std.http export '${stmt.exportName}' used without import std.http`);
+          }
+        } else if (stmt.module === 'std.fs') {
+          if (!isStdFsExport(stmt.exportName, importContext)) {
+            errors.push(`fn '${fn.name}': std.fs export '${stmt.exportName}' used without import std.fs`);
+          }
+        } else if (stmt.module === 'std.github') {
+          if (!isStdGithubExport(stmt.exportName, importContext)) {
+            errors.push(`fn '${fn.name}': std.github export '${stmt.exportName}' used without import std.github`);
+          }
+        } else if (stmt.module === 'std.web') {
+          if (!isStdWebExport(stmt.exportName, importContext)) {
+            errors.push(`fn '${fn.name}': std.web export '${stmt.exportName}' used without import std.web`);
+          }
         } else if (!isStdAiExport(stmt.exportName, importContext)) {
           errors.push(`fn '${fn.name}': std.ai export '${stmt.exportName}' used without import std.ai`);
         }
@@ -90,6 +106,18 @@ function validateGeneralProfile(ast, errors, warnings, options = {}) {
   }
   if (ast.general.importContext.stdAi) {
     warnings.push('std.ai import resolved; LLM bindings active at lower time');
+  }
+  if (ast.general.importContext.stdHttp) {
+    warnings.push('std.http import resolved; HTTP plugin bindings active at lower time');
+  }
+  if (ast.general.importContext.stdFs) {
+    warnings.push('std.fs import resolved; FS plugin bindings active at lower time');
+  }
+  if (ast.general.importContext.stdGithub) {
+    warnings.push('std.github import resolved; GitHub API bindings active at lower time');
+  }
+  if (ast.general.importContext.stdWeb) {
+    warnings.push('std.web import resolved; web fetch bindings active at lower time');
   }
 }
 

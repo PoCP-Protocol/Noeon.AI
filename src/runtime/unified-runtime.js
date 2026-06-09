@@ -18,6 +18,7 @@ const { runGovernancePreflight } = require('../core/governance');
 const { loadProjectConfig, resolveRunOptions } = require('../core/config');
 const { prepareCanonicalExecution, finalizeCanonicalResult } = require('../core/canonical-runtime');
 const { planExecutionPhases } = require('../core/canonical-plan');
+const { resolveCompilePresentation } = require('../core/general-canonical-mode');
 const { loadConvergenceFromDir, buildConvergenceMatrix } = require('../core/canonical-convergence');
 const { deriveExecutionRoute } = require('../core/canonical-route');
 const { computeSemanticPulse } = require('../core/canonical-pulse');
@@ -31,6 +32,7 @@ const { loadState, saveState, rollbackState } = require('./state-store');
 const { generateReport } = require('./report');
 const { appendAuditEntries } = require('./audit-logger');
 const { VM_VERSION, executeProgram, executeCanonicalProgram } = require('../vm/unified-executor');
+const { buildEngineeringStatus } = require('../core/engineering-status');
 
 const RUNTIME_VERSION = VM_VERSION;
 
@@ -112,23 +114,26 @@ function validateProgram(ast, options = {}) {
   return validateAel(ast, options);
 }
 
-function compileProgram(ast, format = 'ir') {
+function compileProgram(ast, format = 'ir', options = {}) {
   if (format === 'ael' || format === 'artifact') {
     return { format: 'ael', artifact: compileAel(ast) };
   }
   if (format === 'both') {
     const compiler = new AELtoIRCompiler();
     const { program, warnings } = compiler.compile(ast);
+    const presentation = resolveCompilePresentation(ast, program, options);
     return {
       format: 'both',
       program,
       artifact: compileAel(ast),
-      warnings
+      warnings,
+      ...presentation
     };
   }
   const compiler = new AELtoIRCompiler();
   const { program, warnings } = compiler.compile(ast);
-  return { format: 'ir', program, warnings };
+  const presentation = resolveCompilePresentation(ast, program, options);
+  return { format: 'ir', program, warnings, ...presentation };
 }
 
 function createKernel(options = {}) {
@@ -537,7 +542,9 @@ function explainProgram(ast) {
 function getRuntimeStatus() {
   const kernel = createKernel({ enable_llm: false });
   const { configPath, config } = loadProjectConfig();
+  const engineering = buildEngineeringStatus();
   return {
+    ...engineering,
     version: RUNTIME_VERSION,
     vm: VM_VERSION,
     kernel: kernel.getStatus(),

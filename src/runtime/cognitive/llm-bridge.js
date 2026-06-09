@@ -488,7 +488,7 @@ class LLMBridge {
 4. Memory integration: You consider past experiences when reasoning
 
 Always be precise, evidence-based, and transparent about your confidence level.
-When uncertain, say so explicitly. When reasoning, show your chain of thought.`;
+When uncertain, say so explicitly. When reasoning, provide a concise summary: key evidence, uncertainty, and decision rationale — do not expose raw chain-of-thought.`;
   }
 
   /**

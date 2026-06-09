@@ -1,0 +1,11 @@
+profile "general"
+version "1.0.0-alpha.1"
+module fs_demo
+
+import std.fs
+
+@effect(external)
+fn main() {
+  read("examples/hello.noeon", mock=true)
+  act action=load channel=fs path="examples/hello.noeon" mock=true
+}

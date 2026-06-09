@@ -1,0 +1,10 @@
+profile "general"
+version "1.0.0-alpha.1"
+module github_demo
+
+import std.github
+
+@effect(external)
+fn main() {
+  repo("PoCP-Protocol/Noeon.AI", mock=true)
+}

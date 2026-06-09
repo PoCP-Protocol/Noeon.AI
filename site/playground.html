@@ -16,6 +16,7 @@
           <a href="./index.html">Home</a>
           <a href="./convergence.html">Convergence</a>
           <a href="./studio.html">Studio</a>
+          <a href="./workbench.html">Workbench</a>
           <a href="./gate.html">Human Gate</a>
           <a href="./fusion.html">Fusion</a>
         </nav>
@@ -32,6 +33,10 @@
         <select id="example-select" aria-label="Load example">
           <option value="">Load example…</option>
         </select>
+        <label class="toolbar-hint" style="display:inline-flex;align-items:center;gap:0.35rem;cursor:pointer;">
+          <input type="checkbox" id="canonical-mode" />
+          Canonical IR primary
+        </label>
         <button id="btn-validate" class="btn ghost">Validate</button>
         <button id="btn-compile" class="btn ghost">Compile IR</button>
         <button id="btn-run" class="btn primary">Run</button>
@@ -81,6 +86,7 @@
         </div>
         <div id="brain-regions" class="brain-regions"></div>
         <pre id="brain-flow" class="brain-flow"></pre>
+        <pre id="action-trace" class="brain-flow hidden" aria-label="ACT plugin trace"></pre>
         <div id="brain-mermaid" class="brain-mermaid"></div>
       </div>
 

@@ -102,7 +102,8 @@ function buildStepResult(stepName, context, actionType, userResult, pluginResult
       pluginVersion: pluginResult?.pluginVersion || null,
       signatureVerified: pluginResult?.signatureVerified || false,
       expectedSignature: pluginResult?.expectedSignature || null,
-      pluginMeta: pluginResult?.pluginMeta || null
+      pluginMeta: pluginResult?.pluginMeta || null,
+      content: pluginResult?.content || pluginResult?.pluginMeta?.contentPreview || null
     }
   };
 }

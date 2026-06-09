@@ -20,12 +20,21 @@ function assert(cond, msg) {
   }
 }
 
-const EXAMPLES = [
+const CORE_EXAMPLES = [
   'hello.noeon',
   'agent_research.noeon',
   'agent_risk_review.noeon',
   'agent_customer_service.noeon'
 ];
+
+const TOOL_EXAMPLES = [
+  'http_demo.noeon',
+  'fs_demo.noeon',
+  'github_demo.noeon',
+  'web_fetch.noeon'
+];
+
+const EXAMPLES = [...CORE_EXAMPLES, ...TOOL_EXAMPLES];
 
 console.log('\n\x1b[36m═══ P0 Example Demos ═══\x1b[0m\n');
 

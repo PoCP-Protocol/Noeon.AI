@@ -480,6 +480,7 @@ function formatPipelineJson(out) {
     architecture: out.architecture,
     phases: result.phases,
     scheduler: result.scheduler,
+    actionTrace: out.actionTrace || null,
     report: out.report,
     error: result.error || null
   };

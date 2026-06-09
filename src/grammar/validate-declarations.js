@@ -9,7 +9,7 @@ function validateDeclarations(ast, errors, warnings = []) {
   if (!bundle) return;
 
   const idx = indexDeclarations(bundle);
-  const names = { model: new Set(), tool: new Set(), capability: new Set(), effect: new Set() };
+  const names = { model: new Set(), tool: new Set(), data: new Set(), capability: new Set(), effect: new Set() };
 
   for (const m of bundle.models || []) {
     if (names.model.has(m.name)) errors.push(`duplicate MODEL declaration '${m.name}'`);
@@ -24,6 +24,12 @@ function validateDeclarations(ast, errors, warnings = []) {
     if (cap && !idx.capabilities.has(String(cap))) {
       errors.push(`TOOL '${t.name}' references undeclared CAPABILITY '${cap}'`);
     }
+  }
+
+  for (const d of bundle.data || []) {
+    if (names.data.has(d.name)) errors.push(`duplicate DATA declaration '${d.name}'`);
+    names.data.add(d.name);
+    if (!d.params?.type) warnings.push(`DATA '${d.name}' should declare type=document|table|vector|stream|memory`);
   }
 
   for (const c of bundle.capabilities || []) {
@@ -43,12 +49,13 @@ function validateDeclarations(ast, errors, warnings = []) {
   }
 
   const importContext = ast.general?.importContext || {};
+  const localFunctions = new Set((ast.general?.functions || []).map((fn) => fn.name));
   for (const fn of ast.general?.functions || []) {
     const bodyEffect = inferBodyEffect(fn.body, importContext);
     for (const stmt of fn.body || []) {
       if (stmt.kind === 'call' && !isStdAiExport(stmt.callee, importContext) &&
           !isStdUniversalExport(stmt.callee, importContext)) {
-        if (idx.tools.size > 0 && !idx.tools.has(stmt.callee)) {
+        if (idx.tools.size > 0 && !idx.tools.has(stmt.callee) && !localFunctions.has(stmt.callee)) {
           errors.push(`fn '${fn.name}': call '${stmt.callee}()' without declared TOOL`);
         }
       }
@@ -62,8 +69,8 @@ function validateDeclarations(ast, errors, warnings = []) {
     }
   }
 
-  if ((bundle.tools || []).length === 0 && (bundle.models || []).length === 0) {
-    warnings.push('program has declaration block but no MODEL or TOOL defined');
+  if ((bundle.tools || []).length === 0 && (bundle.models || []).length === 0 && (bundle.data || []).length === 0) {
+    warnings.push('program has declaration block but no MODEL, TOOL, or DATA defined');
   }
 }
 
