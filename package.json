@@ -34,6 +34,7 @@
     "test:product": "node tests/run-suite.js product",
     "test:system": "node tests/run-suite.js system",
     "gate:alpha": "node scripts/alpha-gate.js",
+    "gate:doctor": "node scripts/doctor-gate.js",
     "test:golden": "node tests/conformance/run.js",
     "test:ai-software": "node tests/declaration-bindings.test.js",
     "conformance": "node tests/conformance/run.js",

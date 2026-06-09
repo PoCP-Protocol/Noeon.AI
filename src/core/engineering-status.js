@@ -22,6 +22,9 @@ const ALPHA_GATE_TESTS = [
   'tests/cli-run-trace.test.js',
   'tests/architecture-view.test.js',
   'tests/doctor-canonical.test.js',
+  'tests/plugin-policy-config.test.js',
+  'tests/audit-export.test.js',
+  'tests/doctor-gate-script.test.js',
   'tests/lsp-canonical.test.js',
   'tests/lsp-stdlib-hover.test.js',
   'tests/playground-examples.test.js',
@@ -40,6 +43,7 @@ const TEST_SUITES = Object.freeze({
 
 const GATE_COMMANDS = Object.freeze([
   'gate:alpha',
+  'gate:doctor',
   'gate:strict',
   'gate:golden'
 ]);

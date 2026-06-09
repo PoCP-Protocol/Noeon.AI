@@ -5,6 +5,7 @@ const path = require('path');
 
 const REPORT_SCHEMA = 'noeon.canonical.report/v1';
 const AUDIT_SCHEMA = 'noeon.canonical.audit/v1';
+const AUDIT_EXPORT_SCHEMA = 'noeon.canonical.audit.export/v1';
 const { buildRuntimeTraceFromResult } = require('./cognitive-architecture');
 const { buildEcosystemSnapshot } = require('./canonical-ecosystem');
 const { evaluateAiNative } = require('./ai-native-lens');
@@ -134,10 +135,76 @@ function appendCanonicalAudit(report, options = {}) {
   return file;
 }
 
+function summarizeAuditEntries(entries) {
+  const summary = {
+    total: entries.length,
+    success: 0,
+    blocked: 0,
+    failed: 0,
+    bySurface: {},
+    byExecutor: {}
+  };
+
+  for (const entry of entries) {
+    if (entry.success === true) summary.success += 1;
+    else if (entry.blocked === true) summary.blocked += 1;
+    else summary.failed += 1;
+
+    const surface = entry.surface || 'unknown';
+    summary.bySurface[surface] = (summary.bySurface[surface] || 0) + 1;
+
+    const executor = entry.executor || 'unknown';
+    summary.byExecutor[executor] = (summary.byExecutor[executor] || 0) + 1;
+  }
+
+  return summary;
+}
+
+function exportCanonicalAudit(options = {}) {
+  const dir = options.dir || options.canonical_audit_dir || path.join(process.cwd(), 'artifacts', 'canonical');
+  const file = path.join(dir, 'audit.jsonl');
+  const ts = new Date().toISOString();
+
+  if (!fs.existsSync(file)) {
+    return {
+      schema: AUDIT_EXPORT_SCHEMA,
+      generatedAt: ts,
+      source: file,
+      exists: false,
+      summary: summarizeAuditEntries([]),
+      entries: []
+    };
+  }
+
+  const lines = fs.readFileSync(file, 'utf8').trim().split('\n').filter(Boolean);
+  const entries = lines.map((line) => {
+    try {
+      return JSON.parse(line);
+    } catch {
+      return { schema: 'parse_error', raw: line.slice(0, 120) };
+    }
+  });
+
+  const limit = options.limit != null ? Number(options.limit) : null;
+  const exported = limit != null && limit > 0 ? entries.slice(-limit) : entries;
+
+  return {
+    schema: AUDIT_EXPORT_SCHEMA,
+    generatedAt: ts,
+    source: file,
+    exists: true,
+    summary: summarizeAuditEntries(entries),
+    entries: exported
+  };
+}
+
 module.exports = {
   REPORT_SCHEMA,
   AUDIT_SCHEMA,
+  AUDIT_EXPORT_SCHEMA,
   buildCanonicalReport,
   buildCanonicalAuditEntry,
-  appendCanonicalAudit
+  appendCanonicalAudit,
+  exportCanonicalAudit,
+  summarizeAuditEntries
 };

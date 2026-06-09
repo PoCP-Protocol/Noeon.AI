@@ -407,7 +407,27 @@ function cmdConverge(targetPath) {
   process.exit(matrix.aligned ? 0 : 1);
 }
 
-function cmdReport() {
+function cmdReport(sub) {
+  if (sub === 'export') {
+    const { exportCanonicalAudit } = require('./core/canonical-report');
+    const bundle = exportCanonicalAudit({
+      dir: flags.dir,
+      limit: flags.limit ? Number(flags.limit) : undefined
+    });
+    if (flags.out) {
+      fs.writeFileSync(resolveFile(flags.out), JSON.stringify(bundle, null, 2), 'utf8');
+      console.log(`Written: ${resolveFile(flags.out)}`);
+    } else if (flags.json) {
+      console.log(JSON.stringify(bundle, null, 2));
+    } else {
+      console.log(`Canonical audit export (${bundle.summary.total} entries)`);
+      console.log(`  source: ${bundle.source}`);
+      console.log(`  success: ${bundle.summary.success} | blocked: ${bundle.summary.blocked} | failed: ${bundle.summary.failed}`);
+    }
+    process.exit(0);
+    return;
+  }
+
   const { readCanonicalAudit, formatAuditReport } = require('./core/canonical-audit-read');
   const report = readCanonicalAudit({
     dir: flags.dir,
@@ -419,6 +439,15 @@ function cmdReport() {
     console.log(formatAuditReport(report));
   }
   process.exit(0);
+}
+
+function cmdAudit(sub) {
+  if (sub === 'export') {
+    cmdReport('export');
+    return;
+  }
+  console.error('Usage: noeon audit export [--json] [--out file] [--dir path] [--limit N]');
+  process.exit(1);
 }
 
 async function cmdConform(targetPath) {
@@ -1569,7 +1598,7 @@ function cmdHelp() {
 \x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
 \x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
 \x1b[1mFusion:\x1b[0m     fuse | triad | converge | relay | gate
-\x1b[1mCanonical:\x1b[0m report | conform
+\x1b[1mCanonical:\x1b[0m report | report export | audit export | conform
 \x1b[1mNext:\x1b[0m       epoch | diff | merge | mycelium | field-memory
 \x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | studio | lsp
 
@@ -1602,6 +1631,8 @@ function cmdHelp() {
   noeon converge parity --graph
   noeon converge examples/parity --json --out artifacts/convergence.json
   noeon report --limit 20
+  noeon report export --json --out artifacts/audit-export.json
+  noeon audit export --json
   noeon conform parity --json
   noeon graph examples/genesis.next --memory
   noeon graph examples/hello.noeon --out hello.mmd
@@ -1642,7 +1673,8 @@ async function main() {
     case 'converge': cmdConverge(target); break;
     case 'relay': await cmdRelay(target); break;
     case 'gate': cmdGate(target); break;
-    case 'report': cmdReport(); break;
+    case 'report': cmdReport(target); break;
+    case 'audit': cmdAudit(target); break;
     case 'conform': await cmdConform(target); break;
     case 'parse': cmdParse(target); break;
     case 'compile': cmdCompile(target); break;

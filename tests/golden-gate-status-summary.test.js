@@ -3,7 +3,9 @@
 const path = require('path');
 const {
   summarizeGoldenGateExecution,
-  buildGoldenGateStatusSummary
+  buildGoldenGateStatusSummary,
+  buildExecutionPathStatusSummary,
+  formatExecutionPathStatusLine
 } = require('../src/core/golden-gate-status');
 
 let passed = 0;
@@ -40,9 +42,25 @@ const fromDisk = buildGoldenGateStatusSummary({ root: path.join(__dirname, '..')
 assert(typeof fromDisk.available === 'boolean', 'buildGoldenGateStatusSummary returns summary');
 
 const { formatRuntimeStatusText, getRuntimeStatus } = require('../src/runtime/unified-runtime');
-const statusText = formatRuntimeStatusText(getRuntimeStatus());
+const status = getRuntimeStatus();
+const statusText = formatRuntimeStatusText(status);
 assert(statusText.includes('Noeon'), 'formatRuntimeStatusText includes version line');
 assert(statusText.includes('Golden Gate'), 'formatRuntimeStatusText includes golden gate line');
+assert(statusText.includes('Execution path:'), 'formatRuntimeStatusText includes execution path line');
+
+const execPath = buildExecutionPathStatusSummary({ root: path.join(__dirname, '..') });
+assert(execPath.schema === 'noeon.execution.path.status/v1', 'execution path schema');
+assert(execPath.tracked === 4, 'execution path tracks 4 probes');
+assert(execPath.hybrid === 1, 'execution path counts hybrid');
+assert(execPath.snapshotAct === 2, 'execution path counts snapshot-act');
+assert(execPath.cognitive === 1, 'execution path counts cognitive');
+assert(execPath.probes.length === 4, 'execution path includes probe list');
+assert(execPath.probes.every((p) => p.ok), 'all execution path probes ok');
+assert(status.executionPath?.schema === 'noeon.execution.path.status/v1', 'getRuntimeStatus includes executionPath');
+assert(
+  formatExecutionPathStatusLine(execPath) === 'Execution path: hybrid=1 snapshot=2 cognitive=1 (4 tracked)',
+  'formatExecutionPathStatusLine compact'
+);
 
 console.log(`\n${failed === 0 ? '\x1b[32m' : '\x1b[31m'}${passed} passed, ${failed} failed\x1b[0m\n`);
 process.exit(failed > 0 ? 1 : 0);

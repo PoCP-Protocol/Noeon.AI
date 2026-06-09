@@ -14,5 +14,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install --no-audit --no-fund
-      - run: npm run gate:alpha
-      - run: node src/cli.js doctor --json
+      - name: Alpha gate (test suite)
+        run: npm run gate:alpha
+      - name: Doctor gate (execution_path_probes)
+        run: npm run gate:doctor -- --json

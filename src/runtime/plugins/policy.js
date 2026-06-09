@@ -1,8 +1,12 @@
 const DEFAULT_ALLOWED_PLUGINS = ["echo", "policy_guard", "http_call", "fs_call", "mcp_call"];
+const DEFAULT_ALLOWED_ACTION_TYPES = ["sense", "validate", "reason", "safety", "commit", "generic"];
 
 function parseCsvList(value, fallback) {
   if (!value) {
     return [...fallback];
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim().toLowerCase()).filter(Boolean);
   }
   return String(value)
     .split(",")
@@ -20,7 +24,7 @@ function resolvePluginPolicy(binding, context) {
 
   const allowedActionTypes = parseCsvList(
     globalPolicy.allowedActionTypes || process.env.NOEON_ALLOWED_ACTION_TYPES,
-    ["sense", "validate", "reason", "safety", "commit", "generic"]
+    DEFAULT_ALLOWED_ACTION_TYPES
   );
 
   const plugin = String(binding?.plugin || "").toLowerCase();
@@ -50,5 +54,7 @@ function resolvePluginPolicy(binding, context) {
 }
 
 module.exports = {
+  DEFAULT_ALLOWED_PLUGINS,
+  DEFAULT_ALLOWED_ACTION_TYPES,
   resolvePluginPolicy
 };

@@ -198,10 +198,17 @@ async function refreshGoldenGateArtifacts(options = {}) {
   return gate;
 }
 
+const {
+  buildExecutionPathStatusSummary,
+  formatExecutionPathStatusLine
+} = require('./execution-path-status');
+
 module.exports = {
   STUDIO_GOLDEN_SCHEMA,
   buildGoldenGateStudioStatus,
   buildGoldenGateStatusSummary,
+  buildExecutionPathStatusSummary,
+  formatExecutionPathStatusLine,
   summarizeGoldenGateExecution,
   refreshGoldenGateArtifacts,
   readJsonIfExists

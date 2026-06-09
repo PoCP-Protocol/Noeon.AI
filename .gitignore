@@ -25,6 +25,9 @@ artifacts/field-memory-test-*/
 # Debug scratch
 tmp_debug_*
 
+# Local patch archives
+patches/
+
 # Editor
 .vscode/
 .idea/

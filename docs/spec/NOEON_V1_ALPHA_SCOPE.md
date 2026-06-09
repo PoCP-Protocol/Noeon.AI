@@ -34,7 +34,7 @@ Capability entry modes remain: `.noeon`, `.next`, `.lim`, `.ael`.
 - 3 vertical demos: `examples/hello.noeon`, `agent_research`, `agent_risk_review`, `agent_customer_service`
 - Tool demos: `http_demo`, `fs_demo`, `github_demo`, `web_fetch` (stdlib + ACT plugins, mock mode)
 - 4-surface parity: `examples/parity/risk_assess.*`
-- Gate: `npm run gate:alpha` (22 tests), `npm run test:golden`, `npm run gate:golden` (when configured)
+- Gate: `npm run gate:alpha` (25 tests), `npm run test:golden`, `npm run gate:golden` (when configured)
 
 ## Alpha engineering surface (shipped)
 
@@ -46,8 +46,9 @@ Capability entry modes remain: `.noeon`, `.next`, `.lim`, `.ael`.
 | `cognition.general_canonical_tools` (default **true**) | Auto canonical act path for tool-only General programs |
 | Era | `canonical-primary-era` (`NOEON_ERA` in release manifest) |
 | Playground + Workbench | Code · IR · Trace · Architecture (`/workbench.html`) |
-| `noeon doctor` | stdlib, canonical mode, tool demos, engineering gate |
-| CI | `alpha-gate.yml` badge (22 tests) |
+| `noeon doctor` | stdlib, canonical mode, tool demos, **execution_path_probes**, **plugin_policy_defaults**, engineering gate |
+| Plugin allowlist + audit export | `plugins.allowedPlugins` in `.noeonrc.json`; `noeon report export` / `noeon audit export` (`noeon.canonical.audit.export/v1`); Playground `GET /api/audit/export` |
+| CI | `alpha-gate.yml` badge (25 tests) |
 | LSP / VS Code | stdlib hover, execution path CodeLens/symbols, `generalCanonicalPrimary`, compile command |
 
 ## Execution summary (`noeon.execution.summary/v1`)
@@ -70,4 +71,4 @@ Static file analysis (Workbench `/api/brain`, LSP document symbols) uses the sam
 2. ~~General `.noeon` parallel `canonicalIr` snapshot~~ — **done (alpha)**
 3. General AST → Canonical IR without permanent legacy-only execution path — **tool snapshot-primary + hybrid canonical-act + kernel (beta-in-alpha)**
 4. ~~VS Code / LSP: canonical hover + compile/run parity~~ — **done (alpha)**
-5. Production hardening: allowlists, audit export, plugin policy defaults
+5. ~~Production hardening: allowlists, audit export, plugin policy defaults~~ — **done (beta slice)**

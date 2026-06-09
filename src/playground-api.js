@@ -672,6 +672,21 @@ async function handlePlaygroundApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/audit/export' && req.method === 'GET') {
+    try {
+      const { exportCanonicalAudit } = require('./core/canonical-report');
+      const url = new URL(req.url || '/api/audit/export', 'http://localhost');
+      const bundle = exportCanonicalAudit({
+        dir: url.searchParams.get('dir') || undefined,
+        limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : undefined
+      });
+      sendJson(res, 200, bundle);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
   if (pathname === '/api/conform/parity' && req.method === 'GET') {
     try {
       const { runParityConformance } = require('./core/canonical-conform');

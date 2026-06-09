@@ -28,6 +28,7 @@ const agentHybridCheck = report.checks.find((c) => c.name === 'agent_canonical_h
 const executionPathCheck = report.checks.find((c) => c.name === 'execution_path_probes');
 const goldenGateCheck = report.checks.find((c) => c.name === 'golden_gate');
 const toolDemosCheck = report.checks.find((c) => c.name === 'tool_demos');
+const pluginPolicyCheck = report.checks.find((c) => c.name === 'plugin_policy_defaults');
 
 assert(canonicalCheck?.ok === true, 'canonical_route ok when legacy unset');
 assert(canonicalCheck?.detail?.includes('IR-first'), 'canonical_route detail');
@@ -50,6 +51,8 @@ assert(goldenGateCheck?.ok === true, 'golden_gate check passes (optional artifac
 assert(goldenGateCheck?.detail?.includes('Golden gate') || goldenGateCheck?.detail?.includes('golden-gate'), 'golden_gate detail');
 assert(toolDemosCheck?.ok === true, 'tool_demos check passes');
 assert(toolDemosCheck?.detail?.includes('tool demos'), 'tool_demos detail mentions tool demos');
+assert(pluginPolicyCheck?.ok === true, 'plugin_policy_defaults check passes');
+assert(pluginPolicyCheck?.detail?.includes('plugin'), 'plugin_policy_defaults detail mentions plugins');
 
 process.env.NOEON_LEGACY_PROFILE = '1';
 const legacyReport = runDoctor({ file: 'examples/hello.noeon' });

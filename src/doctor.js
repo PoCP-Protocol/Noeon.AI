@@ -96,6 +96,23 @@ function checkCanonicalRoute() {
   };
 }
 
+function checkPluginPolicyDefaults(cwd = process.cwd()) {
+  const { config } = loadProjectConfig({ cwd });
+  const { DEFAULT_ALLOWED_PLUGINS } = require('./runtime/plugins/policy');
+  const allowed = config.plugins?.allowedPlugins;
+  const ok = Array.isArray(allowed)
+    && allowed.length > 0
+    && DEFAULT_ALLOWED_PLUGINS.every((plugin) => allowed.map((p) => String(p).toLowerCase()).includes(plugin));
+  return {
+    name: 'plugin_policy_defaults',
+    ok,
+    detail: ok
+      ? `${allowed.length} plugin(s) in config allowlist`
+      : 'plugins.allowedPlugins missing or incomplete in project config',
+    recommendation: ok ? null : 'Set plugins.allowedPlugins in .noeonrc.json or rely on DEFAULT_CONFIG defaults'
+  };
+}
+
 function checkMcpConfig(cwd = process.cwd()) {
   const { config } = loadProjectConfig({ cwd });
   const { getMcpStatus } = require('./runtime/mcp-bridge');
@@ -344,45 +361,11 @@ function checkAgentCanonicalHybrid() {
 }
 
 function checkExecutionPathProbes() {
-  const { loadProjectConfig } = require('./core/config');
-  const { resolveExecutionStrategy } = require('./core/general-canonical-mode');
-  const { buildExecutionSummary } = require('./core/action-trace');
-  const { config } = loadProjectConfig({ cwd: process.cwd() });
-  const probes = [
-    { file: 'examples/agent_research.noeon', strategy: 'hybrid-canonical-acts', path: 'hybrid' },
-    { file: 'examples/web_fetch.noeon', strategy: 'tool-snapshot-primary', path: 'snapshot-act' },
-    { file: 'examples/http_demo.noeon', strategy: 'tool-snapshot-primary', path: 'snapshot-act' },
-    { file: 'examples/hello.noeon', strategy: 'cognitive-primary', path: 'cognitive' }
-  ];
-  const failures = [];
-
-  for (const probe of probes) {
-    const resolved = path.join(process.cwd(), probe.file);
-    if (!fs.existsSync(resolved)) {
-      failures.push(`${probe.file} missing`);
-      continue;
-    }
-    try {
-      const { ast } = parseProgram(resolved);
-      const strategy = resolveExecutionStrategy(ast, { projectConfig: config, general_canonical: true });
-      const summary = buildExecutionSummary({
-        executionStrategy: strategy,
-        hybridActExecution: strategy === 'hybrid-canonical-acts',
-        snapshotActExecution: strategy === 'tool-snapshot-primary'
-      });
-      if (summary.schema !== 'noeon.execution.summary/v1') {
-        failures.push(`${probe.file} schema=${summary.schema}`);
-      }
-      if (strategy !== probe.strategy) {
-        failures.push(`${probe.file} strategy=${strategy} expected=${probe.strategy}`);
-      }
-      if (summary.path !== probe.path) {
-        failures.push(`${probe.file} path=${summary.path} expected=${probe.path}`);
-      }
-    } catch (error) {
-      failures.push(`${probe.file}: ${error.message}`);
-    }
-  }
+  const { runExecutionPathProbes } = require('./core/execution-path-status');
+  const probes = runExecutionPathProbes({ root: process.cwd() });
+  const failures = probes
+    .filter((p) => !p.ok)
+    .map((p) => (p.strategy ? `${p.file} strategy=${p.strategy} path=${p.path}` : `${p.file} missing`));
 
   return {
     name: 'execution_path_probes',
@@ -470,6 +453,7 @@ function runDoctor(options = {}) {
     checkGoldenGateArtifact(),
     checkToolDemos(),
     checkCanonicalRoute(),
+    checkPluginPolicyDefaults(options.cwd),
     checkMcpConfig(options.cwd),
     checkExample(options.file)
   ];

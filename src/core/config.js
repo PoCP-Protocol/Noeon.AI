@@ -2,9 +2,17 @@
 
 const fs = require('fs');
 const path = require('path');
+const {
+  DEFAULT_ALLOWED_PLUGINS,
+  DEFAULT_ALLOWED_ACTION_TYPES
+} = require('../runtime/plugins/policy');
 
 const DEFAULT_CONFIG = {
   environment: 'development',
+  plugins: {
+    allowedPlugins: [...DEFAULT_ALLOWED_PLUGINS],
+    allowedActionTypes: [...DEFAULT_ALLOWED_ACTION_TYPES]
+  },
   cognition: {
     exploration_factor: 0.5,
     enable_llm: true,
@@ -71,6 +79,21 @@ function deepMerge(base, override) {
   return out;
 }
 
+function resolvePluginPolicyFromConfig(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
+  const plugins = projectConfig.plugins || {};
+  const override = userOptions.pluginPolicy || {};
+  const envPlugins = process.env.NOEON_ALLOWED_PLUGINS;
+  const envActionTypes = process.env.NOEON_ALLOWED_ACTION_TYPES;
+
+  return {
+    allowedPlugins: override.allowedPlugins ?? (envPlugins || plugins.allowedPlugins),
+    allowedActionTypes: override.allowedActionTypes ?? (envActionTypes || plugins.allowedActionTypes),
+    requireVersion: override.requireVersion ?? plugins.requireVersion,
+    requireSignature: override.requireSignature ?? plugins.requireSignature,
+    signingKey: override.signingKey ?? plugins.signingKey
+  };
+}
+
 function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
   const cog = projectConfig.cognition || {};
   const obs = projectConfig.observability || {};
@@ -103,7 +126,8 @@ function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
     llm: {
       mode: userOptions.llm?.mode || llm.mode || process.env.NOEON_LLM_MODE || 'auto',
       model: userOptions.llm?.model || llm.model || process.env.NOEON_LLM_MODEL
-    }
+    },
+    pluginPolicy: resolvePluginPolicyFromConfig(userOptions, projectConfig)
   };
 }
 
@@ -111,5 +135,6 @@ module.exports = {
   DEFAULT_CONFIG,
   findConfigFile,
   loadProjectConfig,
+  resolvePluginPolicyFromConfig,
   resolveRunOptions
 };

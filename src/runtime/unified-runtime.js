@@ -558,6 +558,7 @@ function getRuntimeStatus() {
   const engineering = buildEngineeringStatus();
   const { isGeneralCanonicalEnabled } = require('../core/general-canonical-mode');
   const { buildGoldenGateStatusSummary } = require('../core/golden-gate-status');
+  const { buildExecutionPathStatusSummary } = require('../core/execution-path-status');
   return {
     ...engineering,
     version: RUNTIME_VERSION,
@@ -567,6 +568,7 @@ function getRuntimeStatus() {
     generalCanonicalAgentsAuto: config.cognition?.general_canonical_agents === true,
     generalCanonicalToolsEnv: process.env.NOEON_GENERAL_CANONICAL_TOOLS != null,
     goldenGate: buildGoldenGateStatusSummary(),
+    executionPath: buildExecutionPathStatusSummary(),
     kernel: kernel.getStatus(),
     config: { path: configPath, environment: config.environment },
     llm: {
@@ -590,6 +592,8 @@ function formatRuntimeStatusText(status = getRuntimeStatus()) {
   } else {
     lines.push('Golden Gate: — (run npm run gate:golden)');
   }
+  const { formatExecutionPathStatusLine } = require('../core/execution-path-status');
+  lines.push(formatExecutionPathStatusLine(status.executionPath));
   lines.push(`LLM: ${status.llm?.mode || 'auto'} · configured=${status.llm?.configured ? 'yes' : 'no'}`);
   return lines.join('\n');
 }

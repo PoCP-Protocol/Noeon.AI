@@ -61,6 +61,7 @@ node src/cli.js playground
 # Engineering health check
 node src/cli.js doctor
 npm run gate:alpha
+npm run gate:doctor   # explicit execution_path_probes validation
 ```
 
 Published package (when available):
@@ -342,7 +343,8 @@ Mock mode (default in demos): `mock=true` or `NOEON_HTTP_MOCK=1`. Run output inc
 ## Test Results
 
 ```
-Alpha gate (CI):       npm run gate:alpha     # 22 checks — hybrid + golden gate + LSP execution
+Alpha gate (CI):       npm run gate:alpha     # 25 checks — hybrid + golden gate + LSP execution
+Doctor gate (CI):      npm run gate:doctor    # noeon doctor + execution_path_probes
 Product suite:         npm run test:product
 Core runtime:          npm run test:core
 Canonical pipeline:    npm run test:canonical
