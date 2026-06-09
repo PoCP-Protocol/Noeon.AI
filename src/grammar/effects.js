@@ -19,6 +19,7 @@ const COGNITIVE_EFFECT = {
   ADAPT: 'io',
   EMOTION: 'io',
   SPAWN: 'external',
+  DELEGATE: 'external',
   DEBATE: 'external',
   EVOLVE: 'ai'
 };
@@ -27,7 +28,14 @@ const STDLIB_EFFECT = {
   ask: 'ai',
   embed: 'ai',
   think_with: 'ai',
-  reason: 'ai'
+  reason: 'ai',
+  cognize: 'ai',
+  intent: 'pure',
+  epistemic: 'pure',
+  equip: 'io',
+  govern: 'external',
+  evolve: 'ai',
+  scaffold: 'pure'
 };
 
 function maxEffect(a, b) {
@@ -53,6 +61,9 @@ function classifyStatement(stmt, importContext = {}) {
   if (stmt.kind === 'stdlib') return STDLIB_EFFECT[stmt.exportName] || 'ai';
   if (stmt.kind === 'call') {
     if (importContext.stdAi?.exports?.[stmt.callee]) return 'ai';
+    if (importContext.stdUniversal?.exports?.[stmt.callee]) {
+      return STDLIB_EFFECT[stmt.callee] || 'ai';
+    }
     return 'pure';
   }
   if (stmt.kind === 'cognitive') {

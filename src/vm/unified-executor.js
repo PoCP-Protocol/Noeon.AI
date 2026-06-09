@@ -1,24 +1,20 @@
 'use strict';
 
 /**
- * Unified VM Executor — Phase 1 single execution pipeline
+ * Unified VM Executor — canonical-first with legacy fallback
  */
 
-const { compileAel } = require('../compiler');
 const { validateAel } = require('../validator');
-const { CognitiveKernel } = require('../core/kernel');
 const { runGovernancePreflight } = require('../core/governance');
-const { detectProfile, resolveExecutionMode, PROFILES, getProfileInfo } = require('../core/profile');
-const { shouldEnrichProtocol } = require('../core/protocol-bridge');
-const { runProtocolCycle } = require('./protocol-phase');
-const { runResonanceGate } = require('../runtime/liminal/resonance-gate');
-const { buildTranscript } = require('../runtime/liminal/transcript');
-const { detectFusionPlan, runUnifiedFusion } = require('../runtime/fusion/unified-fusion');
+const { detectProfile, resolveExecutionMode, getProfileInfo } = require('../core/profile');
+const { detectFusionPlan } = require('../runtime/fusion/unified-fusion');
 const { prepareCanonicalExecution, mergeCanonicalIntoResult, finalizeCanonicalResult } = require('../core/canonical-runtime');
 const { deriveExecutionRoute } = require('../core/canonical-route');
-const { computeSemanticPulse, injectSemanticPulse } = require('../core/canonical-pulse');
+const { resolveCanonicalPhases } = require('./canonical-phase-resolver');
+const { executeCanonicalProgram } = require('./canonical-executor');
+const { executeLegacyProgram } = require('./legacy-executor');
 const { resolveScheduler, runConsciousnessPhase } = require('./consciousness-scheduler');
-const { attachExecutionArchitecture } = require('../core/cognitive-architecture');
+const { CognitiveKernel } = require('../core/kernel');
 const { PHASE } = require('./phases');
 
 const VM_VERSION = '1.0.0-alpha';
@@ -46,6 +42,10 @@ function buildKernel(options = {}) {
 }
 
 async function executeProgram(ast, options = {}) {
+  if (options.legacy_profile == null && process.env.NOEON_LEGACY_PROFILE === '1') {
+    options = { ...options, legacy_profile: true };
+  }
+
   const profile = detectProfile(ast, options);
   const mode = resolveExecutionMode(profile, options);
   const profileInfo = getProfileInfo(profile);
@@ -102,207 +102,33 @@ async function executeProgram(ast, options = {}) {
   const route = deriveExecutionRoute(canonicalPrep, profile, mode, options);
   if (route) result.executionRoute = route;
 
-  // Phase 0: Triad cross-file orchestrator or standard fusion
   const fusionPlan = detectFusionPlan(ast, options);
   const plan = canonicalPrep?.plan;
-  const useTriadOrchestrator = route
-    ? route.triad === true
-    : (ast.fusionTriad?.enabled || fusionPlan.triad) && options.triad !== false;
-
-  const fusionActive = route
-    ? route.fusion === true || route.next_field === true || route.forward_fusion === true
-    : profile === PROFILES.NEXT ||
-      (fusionPlan.layers.length > 0 || options.fuse_next || options.fuse_liminal);
-
-  if (useTriadOrchestrator) {
-    const { runFusionTriad } = require('../runtime/fusion/fusion-triad');
-    const triadOut = await runFusionTriad(ast, { ...options, feedback });
-    result.triad = triadOut;
-    result.phases.push(PHASE.TRIAD);
-    result.fusionMeta = {
-      triad: true,
-      cross_file: triadOut.cross_file,
-      coherence: triadOut.coherence,
-      relay: triadOut.relay,
-      plan: triadOut.plan
-    };
-    if (triadOut.reverse?.context) {
-      result.injectedContext = { ...triadOut.reverse.context };
-    }
-    if (triadOut.blocked || triadOut.success === false) {
-      result.success = false;
-      result.blocked = triadOut.blocked || false;
-      result.error = triadOut.error || `Triad fusion failed (${triadOut.blockReason || 'triad'})`;
-      return finishExecution(result, ast, canonicalPrep, options);
-    }
-  } else if (fusionActive) {
-    const fusionOut = await runUnifiedFusion(ast, {
-      ...options,
-      feedback,
-      canonicalPlan: plan || null
-    });
-
-    if (profile === PROFILES.NEXT || fusionOut.next) {
-      result.next = fusionOut.next;
-      result.phases.push(PHASE.NEXT);
-      if (fusionOut.fusion) {
-        result.fusion = fusionOut.fusion;
-        result.phases.push(PHASE.FUSION);
-      }
-    }
-
-    if (fusionOut.nextField) {
-      result.nextField = fusionOut.nextField;
-      result.phases.push(PHASE.NEXT_FIELD);
-    }
-
-    if (fusionOut.liminalField) {
-      result.liminalField = fusionOut.liminalField;
-      result.phases.push(PHASE.LIMINAL_FIELD);
-    }
-
-    if (fusionOut.triad || fusionOut.bidirectional) {
-      result.fusionMeta = {
-        triad: fusionOut.triad,
-        bidirectional: fusionOut.bidirectional,
-        plan: fusionOut.plan
-      };
-    }
-
-    if (fusionOut.blocked) {
-      result.success = false;
-      result.blocked = true;
-      result.error = fusionOut.blockReason
-        ? `Fusion blocked (${fusionOut.blockReason})`
-        : profile === PROFILES.NEXT
-          ? `Next/fusion blocked (${fusionOut.blockReason || 'next'})`
-          : `Liminal fusion blocked (${fusionOut.blockReason || 'liminal'})`;
-      if (fusionOut.transcript) result.transcript = fusionOut.transcript;
-      return finishExecution(result, ast, canonicalPrep, options);
-    }
-  }
-
-  // Liminal resonance gate — profile-native or canonical alignment route
-  const needsAlignmentGate = route
-    ? route.alignment
-    : profile === PROFILES.LIMINAL ||
-      (canonicalPrep?.plan?.alignment_gate && options.alignment_gate !== false);
-
-  if (needsAlignmentGate) {
-    const resonance = runResonanceGate(ast, { ...options, feedback });
-    const alignment = {
-      layer: 'liminal',
-      gate: 'resonance',
-      ...resonance
-    };
-    result.resonance = resonance;
-    result.alignment = alignment;
-    result.phases.push(PHASE.ALIGNMENT);
-
-    if (resonance.blocked) {
-      result.success = false;
-      result.blocked = true;
-      result.error = `Alignment ${resonance.blockReason || 'resonance'} gate blocked execution`;
-      result.transcript = buildTranscript(result, ast, options);
-      if (options.transcript === true || options.export_transcript) {
-        result.transcriptExport = result.transcript;
-      }
-      return finishExecution(result, ast, canonicalPrep, options);
-    }
-  }
-
-  // Phase 1: Cognitive Kernel (consciousness scheduler by default)
-  const runCognitive = route
-    ? route.cognitive
-    : (mode === 'full' || mode === 'cognitive') &&
-      canonicalPrep?.plan?.cognitive !== false;
-
-  if (runCognitive) {
-    const kernel = buildKernel(options);
-    const scheduler = resolveScheduler(options, profile, mode);
-    result.scheduler = scheduler;
-
-    if (scheduler === 'consciousness') {
-      const conscious = await runConsciousnessPhase(ast, kernel, options);
-      result.consciousness = conscious;
-      result.cognitive = conscious.cognitive;
-      result.phases.push(PHASE.CONSCIOUSNESS);
-    } else {
-      result.cognitive = await kernel.execute(ast, { verbose: options.verbose });
-    }
-
-    if (ast.cognition?.context && Object.keys(ast.cognition.context).length) {
-      result.injectedContext = { ...ast.cognition.context };
-    }
-    result.llm = kernel.llm ? kernel.llm.getStats() : null;
-    result.phases.push(PHASE.COGNITIVE);
-    result.program = result.cognitive.program;
-    result.trace = result.cognitive.trace;
-    result.decisions = result.cognitive.decisions;
-    result.beliefs = result.cognitive.beliefs;
-    result.stats = result.cognitive.stats;
-    if (!result.cognitive.success) result.success = false;
-  }
-
-  // Phase 2: Protocol — canonical route or legacy auto-detection
-  const wantsProtocol = route
-    ? route.protocol
-    : mode === 'protocol' ||
-      (mode === 'full' &&
-        (canonicalPrep?.plan?.protocol ??
-          shouldEnrichProtocol(ast, { with_protocol: options.with_protocol ?? 'auto' })));
-
-  if (wantsProtocol) {
-    const compiled = options.compiled || compileAel(ast);
-    const protocolOut = await runProtocolCycle(compiled, feedback, {
-      pluginPolicy: options.pluginPolicy
-    });
-
-    result.protocol = protocolOut;
-    result.cycle = protocolOut;
-    result.protocolSuccess = protocolOut.protocolSuccess;
-    result.phases.push(PHASE.PROTOCOL);
-
-    if (options.strict_protocol && result.protocolSuccess === false) {
-      result.success = false;
-      result.error = 'Protocol phase failed';
-    }
-  }
-
-  if (profile === PROFILES.LIMINAL || route?.alignment || canonicalPrep?.plan?.alignment_gate) {
-    result.transcript = buildTranscript(result, ast, options);
-    if (options.transcript === true || options.export_transcript) {
-      result.transcriptExport = result.transcript;
-    }
-  }
-
-  const pulse = computeSemanticPulse(options.convergence || null, {
-    triadCoherence: result.triad?.coherence?.score,
-    fusionLayers: route?.fusion_layers || canonicalPrep?.plan?.fusion_layers || [],
-    unanimousGoal: options.convergence?.coherence?.unanimous_goal,
-    canonicalRoute: Boolean(route),
-    hasCanonicalGoal: Boolean(canonicalPrep?.canonical?.intent?.goal)
-  });
-  if (pulse.triggered) {
-    injectSemanticPulse(ast, pulse);
-    result.semanticPulse = pulse;
-    result.injectedContext = {
-      ...(result.injectedContext || {}),
-      _semantic_pulse: {
-        action: pulse.action,
-        score: pulse.score,
-        message: pulse.message
-      }
-    };
-  }
-
-  attachExecutionArchitecture(result, ast, {
-    plan: canonicalPrep?.plan,
+  const irPhases = resolveCanonicalPhases(route, canonicalPrep, ast, options, fusionPlan);
+  const execCtx = {
+    result,
+    ast,
+    canonicalPrep,
     route,
-    governance: canonicalPrep?.governance
-  });
+    profile,
+    mode,
+    options,
+    feedback,
+    fusionPlan,
+    plan,
+    finishExecution,
+    buildKernel,
+    resolveScheduler,
+    runConsciousnessPhase
+  };
 
-  return finishExecution(result, ast, canonicalPrep, options);
+  if (irPhases) {
+    result.irFirst = true;
+    result.canonicalPhases = irPhases;
+    return executeCanonicalProgram({ ...execCtx, irPhases });
+  }
+
+  return executeLegacyProgram(execCtx);
 }
 
 module.exports = {
@@ -310,5 +136,7 @@ module.exports = {
   executeProgram,
   buildKernel,
   resolveScheduler,
-  runConsciousnessPhase
+  runConsciousnessPhase,
+  executeCanonicalProgram,
+  executeLegacyProgram
 };

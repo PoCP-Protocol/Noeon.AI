@@ -1,0 +1,12 @@
+PROFILE "general"
+VERSION "1.0.0"
+
+AGENT "McpIntegrator"
+  GOAL "Integrate external MCP tools into cognitive workflow"
+  TOOLS ["echo/search_pages"]
+  POLICY require_citation=false
+  FLOW
+    PERCEIVE source=mcp_field modality=tool
+    REASON strategy=tool_augmented
+    ACT action=fetch_context channel=mcp
+    REFLECT

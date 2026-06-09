@@ -30,7 +30,10 @@ assert(regionForPrimitive('DECIDE') === 'basal_ganglia', 'DECIDE → basal_gangl
 assert(regionForPrimitive('REFLECT') === 'cerebellum', 'REFLECT → cerebellum');
 assert(regionForPrimitive('PREDICT') === 'default_mode_network', 'PREDICT → default mode network');
 assert(BRAIN_REGIONS.default_mode_network.noeon.includes('FIELD'), 'Next field maps to default mode network');
-assert(COGNITIVE_CYCLE.length >= 6, 'cognitive cycle has perceive→consolidate phases');
+assert(
+  COGNITIVE_CYCLE.map((x) => x.phase).join('->') === 'perceive->attend->reason->decide->act->reflect->learn',
+  'cognitive cycle has perceive→attend→reason→decide→act→reflect→learn phases'
+);
 
 const agentFile = path.join(__dirname, '../examples/agent_research.noeon');
 const { ast } = parseNoeonInput(agentFile);

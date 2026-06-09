@@ -1,15 +1,15 @@
 
-> noeon-ael@1.0.0-alpha metrics
+> noeon-ael@0.7.0-unified metrics
 > node scripts/quality-metrics.js
 
 {
-  "timestamp": "2026-06-07T21:53:45.934Z",
+  "timestamp": "2026-06-08T22:46:54.810Z",
   "status": "HEALTHY",
   "metrics": {
-    "conformanceTests": 32,
+    "conformanceTests": 33,
     "passRate": "100.00%",
-    "passed": 32,
+    "passed": 33,
     "failed": 0,
-    "total": 32
+    "total": 33
   }
 }

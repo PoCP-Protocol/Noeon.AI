@@ -1,14 +1,26 @@
 profile "next"
-version "0.8.0"
+version "1.0.0"
 program "genesis"
 module dream_weaver
 
 GOAL "Let narratives emerge from competing hypotheses — no approval, only evolution"
 
+FUSE liminal {
+  mode: observe
+  resonance_floor: 0.55
+}
+
+FUSE general {
+  mode: bridge
+}
+
 FIELD signals {
   ingest: [web, code, memory, latent]
   decay: 1h
   resonance: adaptive
+  recall: true
+  recall_depth: 4
+  consolidate_after: 3
 }
 
 AUTOBOND {
@@ -98,7 +110,7 @@ FLUX syntax {
 ACT action=emit_narrative capability=runtime channel=synthesis
 REFLECT target=dominant_cell method=divergent
 
-# --- noeon hot-reload 2026-06-07T22:33:26.614Z ---
+# --- noeon hot-reload 2026-06-08T15:27:13.456Z ---
 # source: genesis.next
 # flux crystallize from syntax
 # crystallized @cycle({{threshold}})
@@ -115,9 +127,16 @@ CELL hypothesis_risk_off__hypothesis_risk_on_hybrid {
   when energy > 0.55 { emit narrative.hybrid } # auto-spawn
 }
 
+CELL analyst_thread {
+  energy: 0.48
+  claim: "Deep-dive the dominant cell after weave"
+  tags: ["spawn", "declared"]
+  when energy > 0.52 { emit narrative.spawn } # declared-spawn
+}
+
 BOND hypothesis_risk_off <-> hypothesis_risk_on strength=0.32 kind=resonates # auto-generated
 
-# --- noeon hot-reload 2026-06-07T22:33:26.629Z ---
+# --- noeon hot-reload 2026-06-08T15:27:13.470Z ---
 # source: genesis.next
 # flux crystallize from syntax
 # crystallized @cycle({{threshold}})
@@ -127,11 +146,9 @@ CELL cycle_gate {
   when energy > 0.5 { emit narrative.cycle }
 }
 
-CELL cycle_gate__hypothesis_risk_off_hybrid {
-  energy: 0.60
-  claim: "Hybrid(cycle_gate, hypothesis_risk_off): Crystallized observe-reason-decide cycle ⊗ Markets entering risk-off regime"
-  tags: ["hybrid", "auto-spawn"]
-  when energy > 0.55 { emit narrative.hybrid } # auto-spawn
+CELL analyst_thread {
+  energy: 0.47
+  claim: "Deep-dive the dominant cell after weave"
+  tags: ["spawn", "declared"]
+  when energy > 0.52 { emit narrative.spawn } # declared-spawn
 }
-
-BOND cycle_gate <-> hypothesis_risk_off strength=0.32 kind=resonates # auto-generated

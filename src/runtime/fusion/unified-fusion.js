@@ -46,13 +46,15 @@ function detectFusionPlan(ast, options = {}) {
   const targets = new Set(plan.map((p) => p.target));
   const triad = targets.has('next') && targets.has('liminal') && targets.has('general');
   const bidirectional = profile === PROFILES.GENERAL && targets.has('next') && targets.has('liminal') && !triad;
+  const coherence = targets.has('coherence') || Boolean(ast.fusionCoherence?.enabled);
 
   return {
     profile,
     plan,
-    layers: [...targets],
+    layers: [...targets].filter((t) => t !== 'coherence'),
     triad,
-    bidirectional
+    bidirectional,
+    coherence
   };
 }
 

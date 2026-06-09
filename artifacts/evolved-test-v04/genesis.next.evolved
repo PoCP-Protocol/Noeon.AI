@@ -110,14 +110,14 @@ FLUX syntax {
 ACT action=emit_narrative capability=runtime channel=synthesis
 REFLECT target=dominant_cell method=divergent
 
-# --- noeon hot-reload 2026-06-07T23:06:36.851Z ---
+# --- noeon hot-reload 2026-06-08T15:27:12.915Z ---
 # source: genesis.next
 # flux crystallize from syntax
 CELL hot_test { energy: 0.9 claim: "test" }
 
 BOND hypothesis_risk_off <-> hypothesis_risk_on strength=0.32 kind=resonates # auto-generated
 
-# --- noeon hot-reload 2026-06-07T23:06:36.866Z ---
+# --- noeon hot-reload 2026-06-08T15:27:12.928Z ---
 # source: genesis.next
 # flux crystallize from syntax
 # crystallized @cycle({{threshold}})

@@ -1,0 +1,39 @@
+PROFILE "universal"
+VERSION "1.0.0"
+
+FUSE relay {
+  threshold: 0.65
+  enforce: false
+  human_must_approve: [external_send, dominant_shift]
+}
+
+import std.universal
+
+UNIVERSAL "ResearchSynth"
+  INTENT "Synthesize research answers with cited evidence and explicit uncertainty"
+    success_metric citation_rate>=0.9
+
+  EPISTEMIC
+    require_citation true
+    confidence_floor 0.72
+    evidence_sources ["web", "papers", "memory"]
+
+  COGNITION
+    FLOW
+      PERCEIVE source=query modality=text
+      REASON strategy=evidence_first depth=4
+      DECIDE action=synthesize threshold=0.75
+      ACT action=write_report channel=document
+      REFLECT depth=deep
+
+  CAPABILITY
+    TOOLS ["web_search", "file_reader", "echo/echo"]
+    MEMORY type=episodic+semantic
+
+  GOVERNANCE
+    POLICY audit=true require_citation=true
+    BUDGET tokens=8000
+
+  EVOLUTION
+    LEARN signal=feedback rate=0.1
+    SELF improve=true dream=true

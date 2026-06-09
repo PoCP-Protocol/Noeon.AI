@@ -15,6 +15,8 @@
         <nav>
           <a href="./index.html">Home</a>
           <a href="./convergence.html">Convergence</a>
+          <a href="./studio.html">Studio</a>
+          <a href="./gate.html">Human Gate</a>
           <a href="./fusion.html">Fusion</a>
         </nav>
       </div>
@@ -35,6 +37,13 @@
         <button id="btn-run" class="btn primary">Run</button>
         <button id="btn-plan" class="btn ghost">Plan</button>
         <button id="btn-brain" class="btn ghost">Brain</button>
+        <button id="btn-ai-eval" class="btn ghost">AI Lens</button>
+        <button id="btn-golden" class="btn ghost">Golden</button>
+        <button id="btn-dream" class="btn ghost">Dream</button>
+        <button id="btn-reflect" class="btn ghost">Reflect</button>
+        <button id="btn-patch" class="btn ghost">Patch</button>
+        <button id="btn-universal" class="btn ghost">Universal</button>
+        <button id="btn-universal-scaffold" class="btn ghost">+ Universal</button>
         <button id="btn-fusion" class="btn ghost">Fusion</button>
         <button id="btn-explain" class="btn ghost">Explain</button>
         <span id="fusion-badge" class="fusion-badge hidden" aria-live="polite"></span>
@@ -73,6 +82,55 @@
         <div id="brain-regions" class="brain-regions"></div>
         <pre id="brain-flow" class="brain-flow"></pre>
         <div id="brain-mermaid" class="brain-mermaid"></div>
+      </div>
+
+      <div id="ai-native-panel" class="brain-panel hidden" aria-label="AI-Native design lens">
+        <div class="brain-panel-head">
+          <strong>AI-Native Lens</strong>
+          <span id="ai-native-grade"></span>
+        </div>
+        <p id="ai-native-verdict" class="stats"></p>
+        <div id="ai-native-dims" class="brain-regions"></div>
+        <ul id="ai-native-suggestions" class="stats"></ul>
+      </div>
+
+      <div id="universal-panel" class="brain-panel hidden" aria-label="Universal program dimensions">
+        <div class="brain-panel-head">
+          <strong>Universal Formula</strong>
+          <span id="universal-score"></span>
+        </div>
+        <p id="universal-formula" class="stats"></p>
+        <div id="universal-dims" class="brain-regions"></div>
+      </div>
+
+      <div id="patch-diff-panel" class="fusion-panel hidden" aria-label="Patch diff preview">
+        <div class="fusion-panel-head">
+          <strong>Patch Diff</strong>
+          <span id="patch-diff-summary"></span>
+        </div>
+        <pre id="patch-diff" class="fusion-detail"></pre>
+      </div>
+
+      <div id="mesh-trace-panel" class="fusion-panel hidden" aria-label="Universal mesh trace">
+        <div class="fusion-panel-head">
+          <strong>Mesh Trace</strong>
+          <span id="mesh-trace-summary"></span>
+        </div>
+        <div id="mesh-trace-nodes" class="brain-regions"></div>
+        <pre id="mesh-trace-mermaid" class="fusion-detail"></pre>
+      </div>
+
+      <div id="human-gate-panel" class="fusion-panel hidden" aria-label="Human gate approval">
+        <div class="fusion-panel-head">
+          <strong>Human Gate</strong>
+          <span id="gate-action-label"></span>
+        </div>
+        <p id="gate-message" class="stats"></p>
+        <div class="fusion-controls">
+          <button id="btn-gate-approve" class="btn primary">Approve &amp; Re-run</button>
+          <button id="btn-gate-dismiss" class="btn ghost">Dismiss</button>
+          <a href="./gate.html" class="btn ghost">Open Gate Dashboard</a>
+        </div>
       </div>
 
       <p class="playground-note">

@@ -6,6 +6,8 @@ const { parseAel } = require('../../parser');
 const { runUnifiedFusion, detectFusionPlan } = require('./unified-fusion');
 const { recordFusionRun } = require('./fusion-history');
 const { buildFusionGraph, formatFusionMermaid } = require('./fusion-graph');
+const { runFusionCoherence } = require('./fusion-coherence');
+const { buildSemanticRelay } = require('./semantic-relay');
 
 function expandTriadFusionBlocks(cfg = {}) {
   const nextFile = cfg.next || cfg.file || cfg.next_file || 'genesis.next';
@@ -178,6 +180,24 @@ async function runFusionTriad(hubAst, options = {}) {
   const relay = computeFusionRelay(forward, reverse, options);
   injectTriadContext(hubAst, { coherence, relay, forward });
 
+  let convergence = null;
+  let semanticRelay = null;
+  if (options.coherence !== false && (hubAst.fusionCoherence?.enabled ||
+      (hubAst.fusion || []).some((f) => f.target === 'coherence'))) {
+    const coherenceOut = runFusionCoherence(hubAst, { ...options, filename: hubPath });
+    if (coherenceOut.enabled) {
+      convergence = coherenceOut.matrix;
+      semanticRelay = buildSemanticRelay(
+        { coherence, relay },
+        coherenceOut.matrix,
+        coherenceOut.pulse,
+        options
+      );
+    }
+  } else if (options.coherence !== false) {
+    semanticRelay = buildSemanticRelay({ coherence, relay }, null, null, options);
+  }
+
   const result = {
     triad: true,
     cross_file: true,
@@ -209,9 +229,11 @@ async function runFusionTriad(hubAst, options = {}) {
     },
     coherence,
     relay,
-    summary: coherence.aligned
+    convergence,
+    semanticRelay,
+    summary: semanticRelay?.message || (coherence.aligned
       ? `Triad aligned on ${coherence.forward} (coherence ${coherence.score})`
-      : `Triad drift: ${coherence.forward} → ${coherence.reverse} (ΔE ${coherence.energy_delta})`
+      : `Triad drift: ${coherence.forward} → ${coherence.reverse} (ΔE ${coherence.energy_delta})`)
   };
 
   if (options.record || options.save) {
@@ -268,6 +290,17 @@ function buildTriadGraph(triadResult) {
   if (triadResult.relay?.triggered) {
     add('relay', `Relay: ${triadResult.relay.action}`, 'resonance_pass');
     link('coherence', 'relay', 'pulse');
+  }
+
+  if (triadResult.convergence?.coherence?.score != null) {
+    add('convergence', `Convergence: ${triadResult.convergence.coherence.score}`, 'bridge');
+    link('hub_general', 'convergence', 'FUSE coherence');
+  }
+
+  if (triadResult.semanticRelay?.triggered) {
+    add('semantic_relay', `Relay: ${triadResult.semanticRelay.action}`, 'resonance_pass');
+    const from = triadResult.convergence ? 'convergence' : 'coherence';
+    link(from, 'semantic_relay', triadResult.semanticRelay.action);
   }
 
   return {

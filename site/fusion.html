@@ -30,6 +30,8 @@
       <div class="container nav-wrap">
         <div class="brand"><a href="./index.html">Noeon</a> / Fusion</div>
         <nav>
+          <a href="./studio.html">Studio</a>
+          <a href="./gate.html">Human Gate</a>
           <a href="./playground.html">Playground</a>
           <a href="./mycelium.html">Mycelium</a>
           <a href="./memory.html">Memory</a>
@@ -43,6 +45,7 @@
 
       <div class="fusion-controls">
         <select id="example-select" aria-label="Example program">
+          <option value="examples/semantic_fusion.noeon">semantic_fusion.noeon (coherence + relay + triad)</option>
           <option value="examples/fusion_triad.noeon">fusion_triad.noeon (FUSE triad — full loop)</option>
           <option value="examples/agent_field.noeon">agent_field.noeon (General ← Next + Liminal)</option>
           <option value="examples/genesis.next">genesis.next (Next → Liminal + General)</option>
@@ -69,8 +72,11 @@
           <div class="card"><strong>Pulse</strong><span id="conv-pulse">—</span></div>
           <div class="card"><strong>Aligned</strong><span id="conv-aligned">—</span></div>
           <div class="card"><strong>Drift</strong><span id="conv-drift">—</span></div>
+          <div class="card"><strong>Relay</strong><span id="conv-relay">—</span></div>
         </div>
         <div id="conv-graph" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:1rem;min-height:280px;margin:1rem 0;overflow:auto;"></div>
+        <p class="stats" id="conv-stream-status">Live stream: off</p>
+        <pre id="conv-stream-log" style="font-size:11px;max-height:120px;overflow:auto;background:rgba(0,0,0,0.35);padding:0.75rem;border-radius:8px;"></pre>
       </section>
 
       <section id="fusion-history">
@@ -112,6 +118,36 @@
         }
       }
 
+      let convStream = null;
+
+      function startConvergenceStream() {
+        if (convStream) convStream.close();
+        const logEl = document.getElementById('conv-stream-log');
+        const statusEl = document.getElementById('conv-stream-status');
+        if (!window.EventSource) {
+          statusEl.textContent = 'Live stream: EventSource unavailable';
+          return;
+        }
+        convStream = new EventSource('/api/convergence/stream?interval=5000&limit=8');
+        statusEl.textContent = 'Live stream: connecting…';
+        convStream.onmessage = (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            statusEl.textContent = `Live stream: ${data.events?.length || 0} events · ${data.ts?.slice(11, 19) || ''}`;
+            if (data.latest) {
+              document.getElementById('conv-score').textContent = data.latest.coherence ?? '—';
+              document.getElementById('conv-relay').textContent = data.latest.relay?.action || data.latest.relay || '—';
+            }
+            logEl.textContent = (data.events || []).slice().reverse().map((e) =>
+              `${e.ts?.slice(11, 19) || '—'}  coh=${e.coherence ?? '—'}  relay=${e.relay?.action || e.relay || '—'}`
+            ).join('\n');
+          } catch {
+            statusEl.textContent = 'Live stream: parse error';
+          }
+        };
+        convStream.onerror = () => { statusEl.textContent = 'Live stream: reconnecting…'; };
+      }
+
       async function loadConvergence() {
         try {
           const res = await fetch('/api/convergence/matrix');
@@ -121,6 +157,7 @@
           document.getElementById('conv-pulse').textContent = data.pulse?.action ?? '—';
           document.getElementById('conv-aligned').textContent = data.aligned ? 'yes' : 'no';
           document.getElementById('conv-drift').textContent = (data.drift?.length ?? 0) + ' signals';
+          document.getElementById('conv-relay').textContent = data.relay?.action || data.pulse?.action || '—';
           const convEl = document.getElementById('conv-graph');
           convEl.innerHTML = '';
           if (data.mermaid) {
@@ -184,6 +221,7 @@
       autoEl.addEventListener('change', schedule);
       loadGraph();
       loadConvergence();
+      startConvergenceStream();
     </script>
   </body>
 </html>

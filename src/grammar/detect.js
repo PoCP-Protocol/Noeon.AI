@@ -3,6 +3,10 @@
 const { SURFACES } = require('../core/surfaces');
 const { assertFrozenFilename } = require('../core/canonical-architecture');
 
+function hasUniversalSyntax(source) {
+  return /^\s*UNIVERSAL\s+"/im.test(source) || /^\s*profile\s+"universal"/im.test(source);
+}
+
 function hasGeneralBlockSyntax(source) {
   return (
     /^\s*fn\s+[a-zA-Z_][\w]*\s*\(/m.test(source) ||
@@ -83,17 +87,41 @@ function isLiminalSyntaxQuick(source, options = {}) {
  * Unified surface detection — parse dispatch order: liminal → next → general → ael.
  */
 function detectSurface(source, options = {}) {
-  if (!source || typeof source !== 'string') return SURFACES.AEL;
   if (options.filename) assertFrozenFilename(options.filename, options);
-  if (isLiminalFilename(options.filename)) return SURFACES.LIMINAL;
-  if (options.filename && String(options.filename).endsWith('.next')) return SURFACES.NEXT;
+  const filename = String(options.filename || '');
+  const isNextFile = filename.endsWith('.next');
+  const isNoeonFile = filename.endsWith('.noeon');
+  const isAelFile = filename.endsWith('.ael');
+
+  if (isLiminalFilename(filename)) return SURFACES.LIMINAL;
+  if (isNextFile) return SURFACES.NEXT;
+
+  if (!source || typeof source !== 'string') return SURFACES.AEL;
+
+  // .noeon is a unified container: detect concrete surface by syntax first.
+  if (isNoeonFile) {
+    if (isLiminalSyntaxQuick(source, options)) return SURFACES.LIMINAL;
+    if (hasUniversalSyntax(source)) return SURFACES.UNIVERSAL;
+    if (
+      isGeneralSyntax(source, options) ||
+      hasGeneralBlockSyntax(source) ||
+      hasGeneralProfileHeader(source)
+    ) {
+      return SURFACES.GENERAL;
+    }
+    if (isNextSyntax(source, options)) return SURFACES.NEXT;
+    if (hasAgentSyntax(source)) return SURFACES.GENERAL;
+    return SURFACES.GENERAL;
+  }
+
+  if (isAelFile) return SURFACES.AEL;
+
   if (isLiminalSyntaxQuick(source, options)) return SURFACES.LIMINAL;
+  if (hasUniversalSyntax(source)) return SURFACES.UNIVERSAL;
   if (isNextSyntax(source, options)) return SURFACES.NEXT;
   if (hasAgentSyntax(source)) return SURFACES.GENERAL;
   if (isGeneralSyntax(source, options)) return SURFACES.GENERAL;
   if (hasGeneralProfileHeader(source)) return SURFACES.GENERAL;
-  if (options.filename && String(options.filename).endsWith('.noeon')) return SURFACES.GENERAL;
-  if (options.filename && String(options.filename).endsWith('.ael')) return SURFACES.AEL;
   return SURFACES.AEL;
 }
 
@@ -105,5 +133,6 @@ module.exports = {
   isLiminalFilename,
   detectSurface,
   hasAgentSyntax,
+  hasUniversalSyntax,
   hasGeneralBlockSyntax
 };

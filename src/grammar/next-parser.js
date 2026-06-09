@@ -24,6 +24,13 @@ function parseKeyValuePairs(input, lineNo) {
   return out;
 }
 
+function normalizeGovernanceExpr(entry) {
+  if (!entry.expr) {
+    entry.expr = entry.rule || entry.pledge || entry.objective || null;
+  }
+  return entry;
+}
+
 function parseList(value, lineNo) {
   const m = String(value || '').trim().match(/^\[(.*)\]$/);
   if (!m) throw new Error(`Line ${lineNo}: expected [a, b, ...] list`);
@@ -439,13 +446,13 @@ function parseNextProgram(source, options = {}) {
         program.strategies.push(parseKeyValuePairs(rest, lineNo));
         break;
       case 'guarantee':
-        program.guarantees.push(parseKeyValuePairs(rest, lineNo));
+        program.guarantees.push(normalizeGovernanceExpr(parseKeyValuePairs(rest, lineNo)));
         break;
       case 'vow':
-        program.vows.push(parseKeyValuePairs(rest, lineNo));
+        program.vows.push(normalizeGovernanceExpr(parseKeyValuePairs(rest, lineNo)));
         break;
       case 'constitution':
-        program.constitutions.push(parseKeyValuePairs(rest, lineNo));
+        program.constitutions.push(normalizeGovernanceExpr(parseKeyValuePairs(rest, lineNo)));
         break;
       case 'ritual':
         program.rituals.push(parseKeyValuePairs(rest, lineNo));

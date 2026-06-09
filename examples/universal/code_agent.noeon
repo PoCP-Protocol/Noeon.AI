@@ -1,0 +1,32 @@
+PROFILE "universal"
+VERSION "1.0.0"
+
+UNIVERSAL "CodeWeaver"
+  INTENT "Generate, review, and safely refactor code with traceable reasoning"
+    success_metric test_pass_rate>=0.95
+
+  EPISTEMIC
+    require_citation true
+    confidence_floor 0.68
+    evidence_sources ["repo", "tests", "docs"]
+
+  COGNITION
+    FLOW
+      PERCEIVE source=codebase modality=text
+      UNDERSTAND context=architecture method=semantic confidence=0.7
+      REASON strategy=deductive depth=3
+      DECIDE action=propose_patch threshold=0.7
+      ACT action=apply_patch channel=workspace
+      REFLECT depth=standard
+
+  CAPABILITY
+    TOOLS ["file_reader", "echo/echo", "mcp_call"]
+    COMPUTE enabled=true
+
+  GOVERNANCE
+    POLICY audit=true
+    human_must_approve ["apply_patch", "external_send"]
+
+  EVOLUTION
+    LEARN signal=reward rate=0.15
+    SELF improve=true

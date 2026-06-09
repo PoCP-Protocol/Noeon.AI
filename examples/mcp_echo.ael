@@ -1,0 +1,5 @@
+TASK "mcp_echo_demo"
+NETWORK "NoeonNet"
+GOAL "Demonstrate MCP tool integration via mcp_call plugin"
+
+ACTION "fetch_context" plugin=mcp_call server=echo tool=echo latencyMs=50

@@ -7,6 +7,7 @@
 
 const SURFACES = {
   GENERAL: 'general',
+  UNIVERSAL: 'universal',
   NEXT: 'next',
   LIMINAL: 'liminal',
   AEL: 'ael',
@@ -17,6 +18,7 @@ const SURFACES = {
 const CORE_SURFACE = SURFACES.NEXT;
 
 const SURFACE_ROLES = {
+  [SURFACES.UNIVERSAL]: 'universal-native',
   [SURFACES.GENERAL]: 'authoring',
   [SURFACES.NEXT]: 'core',
   [SURFACES.LIMINAL]: 'alignment',
@@ -25,6 +27,8 @@ const SURFACE_ROLES = {
 };
 
 const SURFACE_DESCRIPTIONS = {
+  [SURFACES.UNIVERSAL]:
+    'Universal native layer — six-dimension AI general programming: INTENT·EPISTEMIC·COGNITION·CAPABILITY·GOVERNANCE·EVOLUTION.',
   [SURFACES.GENERAL]:
     'Authoring layer — AGENT blocks, program blocks, cognitive FLOW for human-written workflows.',
   [SURFACES.NEXT]:
@@ -39,6 +43,7 @@ const SURFACE_DESCRIPTIONS = {
 
 /** Organizational metaphor — see docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md */
 const SURFACE_METAPHORS = {
+  [SURFACES.UNIVERSAL]: 'mind',
   [SURFACES.GENERAL]: 'hand',
   [SURFACES.NEXT]: 'will',
   [SURFACES.AEL]: 'contract',
@@ -51,6 +56,7 @@ const SURFACE_METAPHORS = {
  * `task` is program id, never intent.
  */
 function resolveIntentGoal(ast) {
+  if (ast?.universal?.dimensions?.intent?.goal) return ast.universal.dimensions.intent.goal;
   if (ast?.next?.goal?.text) return ast.next.goal.text;
   if (ast?.agents?.[0]?.goal) return ast.agents[0].goal;
   if (ast?.cognition?.goal) return ast.cognition.goal;

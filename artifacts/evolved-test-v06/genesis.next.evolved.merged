@@ -1,14 +1,26 @@
 profile "next"
-version "0.7.0"
+version "1.0.0"
 program "genesis"
 module dream_weaver
 
 GOAL "Let narratives emerge from competing hypotheses — no approval, only evolution"
 
+FUSE liminal {
+  mode: observe
+  resonance_floor: 0.55
+}
+
+FUSE general {
+  mode: bridge
+}
+
 FIELD signals {
   ingest: [web, code, memory, latent]
   decay: 1h
   resonance: adaptive
+  recall: true
+  recall_depth: 4
+  consolidate_after: 3
 }
 
 AUTOBOND {
@@ -98,7 +110,7 @@ FLUX syntax {
 ACT action=emit_narrative capability=runtime channel=synthesis
 REFLECT target=dominant_cell method=divergent
 
-# --- noeon hot-reload 2026-06-07T22:32:05.381Z ---
+# --- noeon hot-reload 2026-06-08T15:27:13.187Z ---
 # source: genesis.next
 CELL v06_marker { energy: 0.5 claim: "v06" }
 

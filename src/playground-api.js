@@ -161,7 +161,8 @@ async function handlePlaygroundApi(req, res, pathname) {
         strict_protocol: Boolean(body.strict_protocol),
         feedback: body.feedback || {},
         filename,
-        canonical_audit: body.canonical_audit !== false
+        canonical_audit: body.canonical_audit !== false,
+        approval_token: body.approval_token || body.approvalToken || undefined
       };
 
       if (body.pipeline === false) {
@@ -283,6 +284,141 @@ async function handlePlaygroundApi(req, res, pathname) {
     return true;
   }
 
+  if (pathname === '/api/ai/evaluate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { parseNoeonInput } = require('./core/pipeline');
+      const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+      const { evaluateAiNative } = require('./core/ai-native-lens');
+      const { ast } = parseNoeonInput(body.source, { filename });
+      const prep = prepareCanonicalExecution(ast, { filename });
+      let result = null;
+      if (body.run) {
+        const { executeProgram } = require('./vm/unified-executor');
+        result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename });
+      }
+      sendJson(res, 200, evaluateAiNative(ast, prep, result));
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/golden' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { runGoldenPath } = require('./core/golden-path');
+      const payload = await runGoldenPath(body.source, {
+        filename,
+        min_grade: body.min_grade || 'B',
+        dream: body.dream !== false,
+        with_protocol: body.with_protocol || 'off',
+        human_gate_dir: body.human_gate_dir,
+        approval_token: body.approval_token
+      });
+      sendJson(res, 200, payload);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/ai/dream' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { parseNoeonInput } = require('./core/pipeline');
+      const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+      const { imagineProgram } = require('./core/ai-imagination');
+      const { ast } = parseNoeonInput(body.source, { filename });
+      const prep = prepareCanonicalExecution(ast, { filename });
+      sendJson(res, 200, imagineProgram(ast, prep, null));
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/ai/reflect' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { parseNoeonInput } = require('./core/pipeline');
+      const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+      const { executeProgram } = require('./vm/unified-executor');
+      const { ast } = parseNoeonInput(body.source, { filename });
+      prepareCanonicalExecution(ast, { filename });
+      const result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename, source: body.source });
+      sendJson(res, 200, {
+        selfImprove: result.selfImprove || result.report?.selfImprove,
+        aiNative: result.report?.aiNative,
+        self: result.self || result.report?.self,
+        patchPreview: result.selfImprove?.patchPreview || result.report?.patchPreview
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/ai/patch' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { parseNoeonInput } = require('./core/pipeline');
+      const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+      const { runPostRunSelfImprove } = require('./core/self-improve');
+      const { buildPatchPreview } = require('./core/patch-preview');
+      const { executeProgram } = require('./vm/unified-executor');
+      const { ast } = parseNoeonInput(body.source, { filename });
+      const prep = prepareCanonicalExecution(ast, { filename });
+      const result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename, source: body.source });
+      const improve = result.selfImprove || runPostRunSelfImprove(ast, prep, result, { source: body.source, filename });
+      const preview = improve.patchPreview || buildPatchPreview(body.source, improve, { filename });
+      sendJson(res, 200, preview);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/ai/remediate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'playground.noeon';
+      const { runAutoRemediate } = require('./core/auto-remediate');
+      const payload = await runAutoRemediate(body.source, {
+        filename,
+        min_grade: body.min_grade || 'B',
+        max_rounds: body.max_rounds ?? 2
+      });
+      sendJson(res, 200, payload);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
   if (pathname === '/api/fusion/triad' && req.method === 'POST') {
     try {
       const body = await readBody(req);
@@ -380,15 +516,93 @@ async function handlePlaygroundApi(req, res, pathname) {
       const path = require('path');
       const { loadConvergenceFromDir, DEFAULT_PARITY } = require('./core/canonical-convergence');
       const { computeSemanticPulse } = require('./core/canonical-pulse');
+      const { buildSemanticRelay } = require('./runtime/fusion/semantic-relay');
+      const { recordConvergenceEvent } = require('./runtime/fusion/convergence-stream');
       const url = new URL(req.url || '/api/convergence/matrix', 'http://localhost');
       const dir = url.searchParams.get('dir') ||
         path.join(__dirname, '..', 'examples', 'parity');
       const matrix = loadConvergenceFromDir(dir, DEFAULT_PARITY);
       matrix.pulse = computeSemanticPulse(matrix);
+      matrix.relay = buildSemanticRelay(null, matrix, matrix.pulse, { threshold: 0.6 });
+      recordConvergenceEvent({ matrix, pulse: matrix.pulse, relay: matrix.relay, source: 'api.matrix' });
       sendJson(res, 200, matrix);
     } catch (e) {
       sendJson(res, 400, { error: e.message });
     }
+    return true;
+  }
+
+  if (pathname === '/api/human-gate/pending' && req.method === 'GET') {
+    try {
+      const { listPendingGates } = require('./runtime/human-gate-store');
+      const url = new URL(req.url || '/api/human-gate/pending', 'http://localhost');
+      const pending = listPendingGates({
+        human_gate_dir: url.searchParams.get('dir') || undefined,
+        limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : 30
+      });
+      sendJson(res, 200, { pending, count: pending.length });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/human-gate/approve' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const { approveGate } = require('./runtime/human-gate-store');
+      const gate = approveGate(body.id, { human_gate_dir: body.dir });
+      if (!gate) {
+        sendJson(res, 404, { error: 'Gate not found' });
+        return true;
+      }
+      sendJson(res, 200, { gate });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/human-gate/reject' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const { rejectGate } = require('./runtime/human-gate-store');
+      const gate = rejectGate(body.id, { human_gate_dir: body.dir });
+      if (!gate) {
+        sendJson(res, 404, { error: 'Gate not found' });
+        return true;
+      }
+      sendJson(res, 200, { gate });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/convergence/stream' && req.method === 'GET') {
+    const { getConvergenceStream, getLatestConvergenceEvent } = require('./runtime/fusion/convergence-stream');
+    const url = new URL(req.url || '/api/convergence/stream', 'http://localhost');
+    const intervalMs = Math.max(2000, Math.min(Number(url.searchParams.get('interval') || 5000), 30000));
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+
+    const push = () => {
+      const payload = {
+        ts: new Date().toISOString(),
+        latest: getLatestConvergenceEvent(),
+        events: getConvergenceStream(Number(url.searchParams.get('limit') || 10))
+      };
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    };
+
+    push();
+    const timer = setInterval(push, intervalMs);
+    req.on('close', () => clearInterval(timer));
     return true;
   }
 
@@ -401,6 +615,242 @@ async function handlePlaygroundApi(req, res, pathname) {
         limit: url.searchParams.get('limit') ? Number(url.searchParams.get('limit')) : 30
       });
       sendJson(res, 200, report);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/conform/parity' && req.method === 'GET') {
+    try {
+      const { runParityConformance } = require('./core/canonical-conform');
+      const payload = await runParityConformance();
+      sendJson(res, 200, payload);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/mcp/status' && req.method === 'GET') {
+    try {
+      const { loadProjectConfig } = require('./core/config');
+      const { getMcpStatus } = require('./runtime/mcp-bridge');
+      const { config } = loadProjectConfig({ cwd: process.cwd() });
+      sendJson(res, 200, getMcpStatus(config));
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/ecosystem/status' && req.method === 'GET') {
+    try {
+      const { buildEcosystemStatus } = require('./core/canonical-ecosystem');
+      const payload = await buildEcosystemStatus({ cwd: process.cwd() });
+      sendJson(res, 200, payload);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/universal/evaluate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      if (!body.source || typeof body.source !== 'string') {
+        throw new Error('Request body must include "source" string');
+      }
+      const filename = body.filename || 'universal.noeon';
+      const { parseUniversalSource } = require('./grammar/universal-lower');
+      const { validateUniversalProgram, buildUniversalBrief, UNIVERSAL_FORMULA } = require('./core/universal-kernel');
+      const { evaluateAiNative } = require('./core/ai-native-lens');
+      const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+      const ast = parseUniversalSource(body.source, { filename });
+      const validation = validateUniversalProgram(ast.universal);
+      const prep = prepareCanonicalExecution(ast, { filename, source: body.source });
+      sendJson(res, 200, {
+        formula: UNIVERSAL_FORMULA,
+        validation,
+        brief: buildUniversalBrief(ast.universal, validation),
+        aiNative: evaluateAiNative(ast, prep, null)
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/universal/scaffold' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const { buildUniversalTemplate, UNIVERSAL_FORMULA } = require('./core/universal-scaffold');
+      const source = buildUniversalTemplate({
+        name: body.name || 'MyUniversalAgent',
+        intent: body.intent || 'Declare a measurable AI-native outcome',
+        tools: body.tools,
+        confidence_floor: body.confidence_floor
+      });
+      sendJson(res, 200, {
+        schema: 'noeon.universal.scaffold/v1',
+        formula: UNIVERSAL_FORMULA,
+        source
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/universal/status' && req.method === 'GET') {
+    try {
+      const { buildUniversalStudioStatus } = require('./core/universal-studio');
+      sendJson(res, 200, buildUniversalStudioStatus({ root: process.cwd() }));
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/universal/mesh' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const filename = body.filename || 'mesh.noeon';
+      const { parseNoeonInput } = require('./grammar/parse-dispatch');
+      const { buildUniversalMeshTrace } = require('./runtime/universal-mesh-trace');
+      const { runUniversalMeshRuntime } = require('./runtime/universal-mesh-runtime');
+      const { ast } = parseNoeonInput(body.source || body.ast, { filename });
+      const mockResult = body.result || { success: true, phases: body.phases || ['cognitive'] };
+      const meshRuntime = body.live !== false ? runUniversalMeshRuntime(ast, mockResult) : null;
+      const trace = buildUniversalMeshTrace(ast, { ...mockResult, meshRuntime });
+      sendJson(res, 200, {
+        schema: 'noeon.universal.mesh/v1',
+        trace,
+        meshRuntime,
+        program: ast?.task || ast?.universal?.name || null
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message, line: extractLine(e.message) });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/golden-gate/status' && req.method === 'GET') {
+    try {
+      const { buildGoldenGateStudioStatus, refreshGoldenGateArtifacts } = require('./core/golden-gate-status');
+      const url = new URL(req.url || '/api/golden-gate/status', 'http://localhost');
+      let payload = buildGoldenGateStudioStatus({ root: process.cwd() });
+      if (url.searchParams.get('live') === '1') {
+        await refreshGoldenGateArtifacts({ root: process.cwd() });
+        payload = buildGoldenGateStudioStatus({ root: process.cwd() });
+      }
+      sendJson(res, 200, payload);
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/golden-gate/diff' && req.method === 'GET') {
+    try {
+      const url = new URL(req.url || '/api/golden-gate/diff', 'http://localhost');
+      const file = url.searchParams.get('file');
+      const { buildGoldenGateDiff, listGoldenGateDiffs } = require('./core/golden-gate-diff');
+      if (!file) {
+        sendJson(res, 200, { schema: 'noeon.golden.diff/v1', files: listGoldenGateDiffs({ root: process.cwd() }) });
+        return true;
+      }
+      sendJson(res, 200, buildGoldenGateDiff({ root: process.cwd(), file }));
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/diff/preview' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const { formatUnifiedDiff } = require('./core/patch-preview');
+      if (!body.before || !body.after) throw new Error('before and after required');
+      const diff = formatUnifiedDiff(body.before, body.after, body.filename || 'program.noeon');
+      sendJson(res, 200, {
+        schema: 'noeon.diff.preview/v1',
+        diff,
+        previewBrief: diff ? ['```diff', diff, '```'].join('\n') : 'No changes'
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/golden-gate/remediate' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const { runGoldenGateRemediate, postRemediateVerify } = require('../scripts/golden-gate-remediate');
+      const { buildGoldenGateStudioStatus } = require('./core/golden-gate-status');
+      const payload = await runGoldenGateRemediate({
+        root: process.cwd(),
+        applyToWorktree: body.apply === true,
+        forceAll: Boolean(body.force_all),
+        forceFiles: body.force_files,
+        max_rounds: body.max_rounds ?? 2
+      });
+      let verify = null;
+      if (body.verify !== false && payload.summary?.improved > 0) {
+        verify = await postRemediateVerify(process.cwd());
+        payload.postRemediateGate = verify;
+      }
+      sendJson(res, 200, {
+        remediate: payload,
+        verify,
+        studio: buildGoldenGateStudioStatus({ root: process.cwd() })
+      });
+    } catch (e) {
+      sendJson(res, 400, { error: e.message });
+    }
+    return true;
+  }
+
+  if (pathname === '/api/golden-gate/apply' && req.method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => ({}));
+      const { applyRemediatedPrograms, applySourceToWorktree } = require('./core/golden-gate-apply');
+      const { buildGoldenGateStudioStatus } = require('./core/golden-gate-status');
+      const { postRemediateVerify } = require('../scripts/golden-gate-remediate');
+
+      const result = body.file
+        ? { applied: [applySourceToWorktree({
+          root: process.cwd(),
+          file: body.file,
+          backup: body.backup !== false,
+          force: body.force === true
+        })], skipped: [], failed: [], summary: {} }
+        : applyRemediatedPrograms({
+          root: process.cwd(),
+          all: body.all === true,
+          backup: body.backup !== false,
+          force: body.force === true
+        });
+
+      result.summary = result.summary || {
+        attempted: (result.applied?.length || 0) + (result.skipped?.length || 0) + (result.failed?.length || 0),
+        applied: result.applied?.filter((r) => r.ok).length || 0,
+        skipped: result.skipped?.length || 0,
+        failed: result.failed?.length || 0
+      };
+      result.ok = result.applied?.some((r) => r.ok) || result.ok === true;
+
+      let verify = null;
+      if (body.verify !== false && result.ok) {
+        verify = await postRemediateVerify(process.cwd());
+      }
+
+      sendJson(res, 200, {
+        apply: result,
+        verify,
+        studio: buildGoldenGateStudioStatus({ root: process.cwd() })
+      });
     } catch (e) {
       sendJson(res, 400, { error: e.message });
     }
@@ -467,10 +917,16 @@ async function handlePlaygroundApi(req, res, pathname) {
     const curated = [
       { name: 'hello.noeon', title: 'Hello World', description: 'Minimal cognitive cycle', category: 'getting-started' },
       { name: 'fusion_triad.noeon', title: 'Triad Fusion', description: 'FUSE triad — cross-file Next+Liminal+General loop', category: 'fusion' },
+      { name: 'semantic_fusion.noeon', title: 'Semantic Fusion', description: 'FUSE coherence + relay + triad', category: 'fusion' },
       { name: 'agent_field.noeon', title: 'Field Analyst', description: 'AGENT fused with Next field + Liminal observe', category: 'fusion' },
       { name: 'agent_research.noeon', title: 'Research Analyst', description: 'Industry research with citations', category: 'agents' },
       { name: 'agent_risk_review.noeon', title: 'Risk Reviewer', description: 'Payment approval with escalation', category: 'agents' },
-      { name: 'agent_customer_service.noeon', title: 'Support Agent', description: 'Customer issue resolution', category: 'agents' }
+      { name: 'agent_customer_service.noeon', title: 'Support Agent', description: 'Customer issue resolution', category: 'agents' },
+      { name: 'universal/research_synth.noeon', title: 'Universal Research', description: 'Six-dimension AI research synthesizer', category: 'universal', profile: 'universal' },
+      { name: 'universal/code_agent.noeon', title: 'Universal Code Agent', description: 'Code weave with governance gates', category: 'universal', profile: 'universal' },
+      { name: 'universal/orchestrator.noeon', title: 'Universal Orchestrator', description: 'Multi-agent mesh coordinator', category: 'universal', profile: 'universal' },
+      { name: 'universal/inline_fn.noeon', title: 'Universal Inline fn', description: 'General fn with std.universal inline expansion', category: 'universal', profile: 'general' },
+      { name: 'universal/hybrid_weave.noeon', title: 'Hybrid Mesh Weave', description: 'General+Universal live mesh orchestration', category: 'universal', profile: 'general' }
     ];
 
     const examples = [];
@@ -482,7 +938,7 @@ async function handlePlaygroundApi(req, res, pathname) {
         title: entry.title,
         description: entry.description,
         category: entry.category,
-        profile: 'general',
+        profile: entry.profile || (entry.name.startsWith('universal/') ? 'universal' : 'general'),
         source: fs.readFileSync(filePath, 'utf8')
       });
     }

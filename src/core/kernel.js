@@ -192,6 +192,9 @@ class CognitiveKernel {
 
     // Step 2: Create execution context
     const ctx = new ExecutionContext(program);
+    if (input && typeof input === 'object' && !input.intents) {
+      ctx.noeonAst = input;
+    }
 
     // Step 3: Run the cognitive cycle
     const result = await this._runCognitiveCycle(program, ctx, options);
@@ -476,6 +479,19 @@ class CognitiveKernel {
         } else {
           passed = avgConfidence >= (node.params.threshold || 0.5);
           details = { belief_count: beliefCount, avg_confidence: avgConfidence };
+        }
+
+        if (ctx.noeonAst?.cognition?.context?.SELF) {
+          try {
+            const { runInlineSelfReflect } = require('./self-improve');
+            const selfImprove = runInlineSelfReflect(ctx.noeonAst, ctx);
+            details.self_improve = selfImprove;
+            details.self_ai = ctx.noeonAst.cognition.context.SELF.read('summary');
+            ctx.workspace.set('self_improve', selfImprove);
+            ctx.broadcast('self_reflect', selfImprove, 0.9);
+          } catch {
+            // non-fatal metacognition
+          }
         }
       } else if (type === 'verification') {
         passed = ctx.confidence >= (node.params.threshold || 0.8);

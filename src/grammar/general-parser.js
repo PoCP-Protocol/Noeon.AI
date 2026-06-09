@@ -2,7 +2,9 @@
 
 const { parseEffectTags } = require('./effects');
 const { tryParseExpr } = require('./expr');
-const { isStdAiExport, buildImportContext } = require('../stdlib/registry');
+const { isStdAiExport, isStdUniversalExport, buildImportContext } = require('../stdlib/registry');
+const { tryParseDeclarationLine } = require('./declaration-parser');
+const { createDeclarationBundle, normalizeDeclarationEntry } = require('../core/declaration-ir');
 
 const COGNITIVE_KEYWORDS = {
   observe: 'PERCEIVE',
@@ -23,6 +25,7 @@ const COGNITIVE_KEYWORDS = {
   emotion: 'EMOTION',
   remember: 'CONSOLIDATE',
   spawn: 'SPAWN',
+  delegate: 'DELEGATE',
   debate: 'DEBATE',
   evolve: 'EVOLVE'
 };
@@ -73,6 +76,16 @@ function parseFunctionHeader(line, lineNo) {
 }
 
 function parseCallStatement(line, importContext = {}) {
+  const dottedUni = line.match(/^std\.universal\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
+  if (dottedUni) {
+    return {
+      kind: 'stdlib',
+      module: 'std.universal',
+      exportName: dottedUni[1],
+      args: parseCallArgs(dottedUni[2])
+    };
+  }
+
   const dotted = line.match(/^std\.ai\.([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
   if (dotted) {
     return {
@@ -85,6 +98,15 @@ function parseCallStatement(line, importContext = {}) {
 
   const m = line.match(/^([a-zA-Z_][\w]*)\s*\((.*)\)\s*;?\s*$/);
   if (!m) return null;
+
+  if (isStdUniversalExport(m[1], importContext)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.universal',
+      exportName: m[1],
+      args: parseCallArgs(m[2])
+    };
+  }
 
   if (isStdAiExport(m[1], importContext)) {
     return {
@@ -138,6 +160,10 @@ function parseCognitiveStatement(line, lineNo, importContext = {}) {
   const kw = trimmed.slice(0, space).toLowerCase();
   const rest = trimmed.slice(space + 1).trim();
 
+  if (isStdUniversalExport(kw, importContext)) {
+    return parseStdUniversalStatement(kw, rest, lineNo);
+  }
+
   if (isStdAiExport(kw, importContext)) {
     return parseStdAiStatement(kw, rest, lineNo);
   }
@@ -170,6 +196,23 @@ function parseCognitiveStatement(line, lineNo, importContext = {}) {
   }
 
   return { kind: 'cognitive', keyword: canonical, params: parseKeyValuePairs(rest, lineNo) };
+}
+
+function parseStdUniversalStatement(exportName, rest, lineNo) {
+  if (!rest.trim()) {
+    return { kind: 'stdlib', module: 'std.universal', exportName, args: [], params: {} };
+  }
+  if (/^"[\s\S]*"$/.test(rest)) {
+    return {
+      kind: 'stdlib',
+      module: 'std.universal',
+      exportName,
+      args: [parseQuoted(rest, lineNo)],
+      params: {}
+    };
+  }
+  const params = parseKeyValuePairs(rest, lineNo);
+  return { kind: 'stdlib', module: 'std.universal', exportName, args: [], params };
 }
 
 function parseStdAiStatement(exportName, rest, lineNo) {
@@ -236,6 +279,14 @@ function parseFusionBlock(body, target, lineNo) {
     return expandTriadFusionBlocks(fusion);
   }
 
+  if (fusion.target === 'coherence') {
+    return { target: 'coherence', enabled: true, ...fusion };
+  }
+
+  if (fusion.target === 'relay') {
+    return { target: 'relay', enabled: true, ...fusion };
+  }
+
   return fusion;
 }
 
@@ -253,6 +304,7 @@ function parseGeneralProgram(source, options = {}) {
     version: '1.0.0',
     module: null,
     imports: [],
+    declarations: createDeclarationBundle(),
     functions: [],
     exports: [],
     effects: {},
@@ -318,6 +370,8 @@ function parseGeneralProgram(source, options = {}) {
         if (fuseMatch[1].toLowerCase() === 'triad') program.fusionTriad = { enabled: true };
       } else {
         program.fusion.push(parsed);
+        if (parsed.target === 'coherence') program.fusionCoherence = { enabled: true, ...parsed };
+        if (parsed.target === 'relay') program.fusionRelay = { enabled: true, ...parsed };
       }
       continue;
     }
@@ -352,6 +406,17 @@ function parseGeneralProgram(source, options = {}) {
 
     const headerMatch = trimmed.match(/^([a-zA-Z_][\w]*)\s+(.+)$/);
     if (headerMatch) {
+      const decl = tryParseDeclarationLine(trimmed, lineNo);
+      if (decl) {
+        const entry = normalizeDeclarationEntry(decl.kind, decl.name, decl.params);
+        if (decl.kind === 'model') program.declarations.models.push(entry);
+        else if (decl.kind === 'tool') program.declarations.tools.push(entry);
+        else if (decl.kind === 'capability') program.declarations.capabilities.push({ ...entry, name: decl.name, params: decl.params });
+        else if (decl.kind === 'effect') program.declarations.effects.push({ ...entry, name: decl.name, params: decl.params });
+        i += 1;
+        continue;
+      }
+
       const key = headerMatch[1].toLowerCase();
       const value = headerMatch[2].trim();
       switch (key) {

@@ -1019,6 +1019,8 @@ function parseAel(source, options = {}) {
       const rawValue = raw.slice(firstSpace + 1).trim();
       const fuseResult = parseFuseStatement(lines, i, lineNo, rawLine, rawValue);
       if (fuseResult.fusionTriad) ast.fusionTriad = fuseResult.fusionTriad;
+      if (fuseResult.fusionCoherence) ast.fusionCoherence = fuseResult.fusionCoherence;
+      if (fuseResult.fusionRelay) ast.fusionRelay = fuseResult.fusionRelay;
       ast.fusion.push(...fuseResult.fusionEntries);
       if (fuseResult.nextIndex > i) {
         i = fuseResult.nextIndex;
@@ -1072,7 +1074,13 @@ function parseAel(source, options = {}) {
         ast.task = parseQuoted(value, lineNo);
         break;
       case "GOAL":
-        ast.cognition.goal = parseQuoted(value, lineNo);
+        {
+          const goalMatch = value.match(/^"([\s\S]*?)"(?:\s+.*)?$/);
+          if (!goalMatch) {
+            throw new Error(`Line ${lineNo}: expected quoted string`);
+          }
+          ast.cognition.goal = goalMatch[1];
+        }
         break;
       case "UNDERSTAND":
         ast.cognition.understandings.push(parseKeyValuePairs(value, lineNo));

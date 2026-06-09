@@ -35,7 +35,10 @@ const HOVER_DOCS = {
   ACT: 'Action boundary for tool, runtime, or human-visible effects.',
   FEEDBACK: 'Measured result signal used for learning.',
   FUSE: 'Cross-surface fusion bridge (corpus callosum integration layer).',
-  MEMORY: 'Episodic/semantic memory binding (hippocampus).'
+  MEMORY: 'Episodic/semantic memory binding (hippocampus).',
+  PROFILE: 'Authoring surface — general | next | liminal | ael. All surfaces lower to Canonical Semantic IR.',
+  CONSTITUTION: 'Next governance tier — highest precedence rule (constitution > vow > ritual > strategy).',
+  VOW: 'Strong commitment tier — enforced after constitution, before ritual/strategy.'
 };
 
 const GENERAL_KEYWORDS = [
@@ -224,6 +227,29 @@ function getDocumentSymbols(source, filename = '') {
   return symbols;
 }
 
+function buildCanonicalPlanSummary(plan) {
+  if (!plan || plan.error) return null;
+  const route = plan.route;
+  const canonical = plan.canonical;
+  const gov = plan.governance;
+  return {
+    schema: 'noeon.canonical.summary/v1',
+    surface: canonical?.surface || plan.profile || null,
+    coreSurface: plan.coreSurface || null,
+    goal: canonical?.intent?.goal || null,
+    task: canonical?.task || null,
+    engine: route?.engine || (route ? 'canonical' : 'legacy'),
+    ir_first: route?.ir_first === true,
+    governance: {
+      winner_tier: gov?.winner?.tier || null,
+      rule_count: gov?.rule_count ?? null,
+      precedence: gov?.precedence || []
+    },
+    capabilities: canonical?.capabilities || {},
+    routeLabel: plan.routeLabel || null
+  };
+}
+
 function getArchitectureSummary(source, filename = 'buffer.noeon') {
   try {
     const { ast } = parseNoeonInput(source, { filename });
@@ -233,7 +259,8 @@ function getArchitectureSummary(source, filename = 'buffer.noeon') {
       agent_flows: plan.architecture?.agent_flows || [],
       stack: plan.stack,
       routeLabel: plan.routeLabel,
-      architecture: plan.architecture
+      architecture: plan.architecture,
+      canonical: buildCanonicalPlanSummary(plan)
     };
   } catch (e) {
     return { error: e.message };
@@ -283,9 +310,10 @@ function getCodeLenses(source, filename = 'buffer.noeon') {
     if (/^AGENT\s+"/i.test(trimmed)) {
       const regionCount = summary.error ? '?' : String((summary.active_regions || []).length);
       const route = summary.error ? 'unavailable' : (summary.routeLabel || 'plan');
+      const surface = summary.canonical?.surface ? ` | ${summary.canonical.surface}` : '';
       lenses.push({
         line: i + 1,
-        title: `▸ route: ${route} | ${regionCount} regions`,
+        title: `▸ route: ${route}${surface} | ${regionCount} regions`,
         command: 'noeon.brainMap'
       });
       break;
@@ -351,6 +379,7 @@ function buildArchitectureViewModel(source, filename = 'buffer.noeon') {
     active_regions: architecture.active_regions,
     agent_flows: architecture.agent_flows,
     stack: summary.stack,
+    canonical: summary.canonical || null,
     architecture,
     cognitive_cycle: arch.cognitive_cycle || [],
     pipeline_phases: arch.pipeline_phases || null,
@@ -418,6 +447,7 @@ function buildBrainApiPayload(source, filename = 'buffer.noeon', options = {}) {
     ...model,
     model: arch.model || 'functional-cognitive-map',
     disclaimer: arch.disclaimer || 'Organizational metaphor — not biological simulation',
+    canonical: model.canonical || null,
     architecture: options.runtime?.architecture || arch,
     stack: model.stack?.architecture || model.stack,
     regions: (model.active_regions || []).map((id) => ({
@@ -435,6 +465,16 @@ function formatPipelineJson(out) {
     profile: out.profile,
     coreSurface: out.coreSurface,
     routeLabel: out.routeLabel,
+    canonical: out.canonical
+      ? buildCanonicalPlanSummary({
+          canonical: out.canonical,
+          governance: out.governance,
+          route: out.route,
+          routeLabel: out.routeLabel,
+          coreSurface: out.coreSurface,
+          profile: out.profile
+        })
+      : null,
     stack: out.stack,
     plan: out.plan,
     architecture: out.architecture,
@@ -487,6 +527,7 @@ module.exports = {
   getCodeLenses,
   buildArchitectureViewModel,
   mergeRuntimeIntoViewModel,
+  buildCanonicalPlanSummary,
   BRAIN_REGION_COLORS,
   KEYWORDS,
   HOVER_DOCS,

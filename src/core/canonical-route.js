@@ -32,6 +32,7 @@ function deriveExecutionRoute(canonicalPrep, profile, mode, options = {}) {
 
   return {
     engine: 'canonical',
+    ir_first: true,
     surface: canonical.surface || profile,
     core_surface: SURFACES.NEXT,
     profile_hint: profile,
@@ -40,6 +41,8 @@ function deriveExecutionRoute(canonicalPrep, profile, mode, options = {}) {
     fusion: needsFusion && !needsTriad,
     next_field: nextField,
     forward_fusion: forwardFusion,
+    coherence: plan.coherence === true && options.coherence !== false,
+    relay: plan.relay === true,
     alignment: plan.alignment_gate === true && options.alignment_gate !== false,
     cognitive:
       plan.cognitive !== false &&
@@ -61,12 +64,14 @@ function routePhaseLabel(route) {
     if (route.next_field) phases.push(PHASE.NEXT_FIELD);
     if (route.forward_fusion) phases.push(PHASE.LIMINAL_FIELD);
   }
+  if (route.coherence) phases.push(PHASE.COHERENCE);
   if (route.alignment) phases.push(PHASE.ALIGNMENT);
   if (route.cognitive) {
     phases.push(PHASE.CONSCIOUSNESS);
     phases.push(PHASE.COGNITIVE);
   }
   if (route.protocol) phases.push(PHASE.PROTOCOL);
+  if (route.relay) phases.push(PHASE.RELAY);
   return phases.join(' → ');
 }
 

@@ -37,6 +37,8 @@ function planExecutionPhases(canonical, options = {}) {
       canonical.alignment?.covenant ||
       (canonical.alignment?.beliefs?.length ?? 0) > 0
     ),
+    coherence: fusion.coherence === true,
+    relay: fusion.relay === true,
     fusion_layers: [...layers],
     governance_tier: null
   };

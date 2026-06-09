@@ -1,11 +1,3 @@
-#!/usr/bin/env node
-'use strict';
-
-/**
- * General Profile — Customer service vertical demo
- * SupportAgent: resolve, refund, or escalate customer issues
- */
-
 PROFILE "general"
 VERSION "1.0.0-alpha"
 

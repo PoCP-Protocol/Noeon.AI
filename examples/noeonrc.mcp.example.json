@@ -1,0 +1,14 @@
+{
+  "environment": "development",
+  "cognition": {
+    "with_protocol": "auto"
+  },
+  "mcp": {
+    "servers": [{
+      "name": "echo",
+      "command": "node",
+      "args": ["tests/fixtures/mcp-echo-server.js"],
+      "discover": true
+    }]
+  }
+}

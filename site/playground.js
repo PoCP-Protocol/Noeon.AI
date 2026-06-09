@@ -15,8 +15,28 @@ const brainFlow = document.getElementById("brain-flow");
 const brainMermaid = document.getElementById("brain-mermaid");
 const sourceGutter = document.getElementById("source-gutter");
 const sourceRouteBar = document.getElementById("source-route-bar");
+const humanGatePanel = document.getElementById("human-gate-panel");
+const gateActionLabel = document.getElementById("gate-action-label");
+const gateMessage = document.getElementById("gate-message");
+const aiNativePanel = document.getElementById("ai-native-panel");
+const aiNativeGrade = document.getElementById("ai-native-grade");
+const aiNativeVerdict = document.getElementById("ai-native-verdict");
+const aiNativeDims = document.getElementById("ai-native-dims");
+const aiNativeSuggestions = document.getElementById("ai-native-suggestions");
+const patchDiffPanel = document.getElementById("patch-diff-panel");
+const patchDiffSummary = document.getElementById("patch-diff-summary");
+const patchDiffEl = document.getElementById("patch-diff");
+const universalPanel = document.getElementById("universal-panel");
+const universalScore = document.getElementById("universal-score");
+const universalFormula = document.getElementById("universal-formula");
+const universalDims = document.getElementById("universal-dims");
+const meshTracePanel = document.getElementById("mesh-trace-panel");
+const meshTraceSummary = document.getElementById("mesh-trace-summary");
+const meshTraceNodes = document.getElementById("mesh-trace-nodes");
+const meshTraceMermaid = document.getElementById("mesh-trace-mermaid");
 
 let activeExampleName = null;
+let pendingGateApproval = null;
 let mermaidReady = false;
 
 if (window.mermaid) {
@@ -280,6 +300,128 @@ let brainSyncTimer = null;
 let brainSyncGen = 0;
 let liveBrainEnabled = true;
 
+async function renderAiNativePanel(evaluation) {
+  if (!aiNativePanel || !evaluation) {
+    aiNativePanel?.classList.add("hidden");
+    return;
+  }
+  aiNativePanel.classList.remove("hidden");
+  if (aiNativeGrade) {
+    aiNativeGrade.textContent = `${evaluation.grade} · ${Math.round((evaluation.score || 0) * 100)}%`;
+  }
+  if (aiNativeVerdict) aiNativeVerdict.textContent = evaluation.verdict || "";
+  if (aiNativeDims) {
+    aiNativeDims.innerHTML = "";
+    for (const [key, dim] of Object.entries(evaluation.dimensions || {})) {
+      const chip = document.createElement("span");
+      chip.className = "brain-region-chip";
+      chip.title = (dim.notes || []).join(", ");
+      chip.textContent = `${key.replace(/_/g, " ")} ${Math.round((dim.score || 0) * 100)}%`;
+      aiNativeDims.appendChild(chip);
+    }
+  }
+  if (aiNativeSuggestions) {
+    aiNativeSuggestions.innerHTML = "";
+    for (const s of evaluation.suggestions || []) {
+      const li = document.createElement("li");
+      li.textContent = `[${s.priority}] ${s.action}`;
+      aiNativeSuggestions.appendChild(li);
+    }
+  }
+}
+
+function renderMeshTracePanel(trace) {
+  if (!meshTracePanel) return;
+  if (!trace) {
+    meshTracePanel.classList.add("hidden");
+    return;
+  }
+  meshTracePanel.classList.remove("hidden");
+  const s = trace.summary || {};
+  if (meshTraceSummary) {
+    const live = trace.live ? 'live' : 'simulated';
+    meshTraceSummary.textContent = `${live} · ${s.spawns || 0} spawns · ${s.delegations || 0} delegations · ${s.completed || 0} completed`;
+  }
+  if (meshTraceNodes) {
+    meshTraceNodes.innerHTML = "";
+    for (const n of trace.nodes || []) {
+      const chip = document.createElement("span");
+      chip.className = "brain-region-chip";
+      chip.textContent = `${n.type}:${n.name} (${n.status})`;
+      meshTraceNodes.appendChild(chip);
+    }
+    for (const e of trace.edges || []) {
+      const chip = document.createElement("span");
+      chip.className = "brain-region-chip";
+      chip.textContent = `→ ${e.strategy || e.type} (${e.status})`;
+      meshTraceNodes.appendChild(chip);
+    }
+  }
+  if (meshTraceMermaid) meshTraceMermaid.textContent = trace.mermaid || "";
+}
+
+function renderPatchDiffPanel(diff, summary) {
+  if (!patchDiffPanel || !patchDiffEl) return;
+  if (!diff) {
+    patchDiffPanel.classList.add("hidden");
+    return;
+  }
+  patchDiffPanel.classList.remove("hidden");
+  if (patchDiffSummary) patchDiffSummary.textContent = summary || "";
+  patchDiffEl.textContent = diff;
+}
+
+function renderUniversalPanel(payload) {
+  if (!universalPanel || !payload?.validation) {
+    universalPanel?.classList.add("hidden");
+    return;
+  }
+  universalPanel.classList.remove("hidden");
+  if (universalScore) {
+    universalScore.textContent = `${Math.round((payload.validation.score || 0) * 100)}% · ${payload.aiNative?.grade || "—"}`;
+  }
+  if (universalFormula) universalFormula.textContent = payload.formula || "";
+  if (universalDims) {
+    universalDims.innerHTML = "";
+    for (const [key, ok] of Object.entries(payload.validation.checks || {})) {
+      const chip = document.createElement("span");
+      chip.className = "brain-region-chip";
+      chip.textContent = `${ok ? "✓" : "○"} ${key}`;
+      universalDims.appendChild(chip);
+    }
+  }
+}
+
+async function fetchAiEvaluate(run = false) {
+  return api("/api/ai/evaluate", { run }, { silent: !run });
+}
+
+async function fetchGoldenPath() {
+  return api("/api/golden", { min_grade: "C", dream: true }, { silent: true });
+}
+
+async function fetchAiDream() {
+  return api("/api/ai/dream", {}, { silent: true });
+}
+
+function renderGoldenOutput(payload) {
+  renderAiNativePanel(payload.aiNative?.post || payload.aiNative?.pre);
+  if (payload.run?.pendingApproval) {
+    renderHumanGate({
+      pendingApproval: payload.run.pendingApproval,
+      humanGate: true,
+      awaitingHuman: true
+    });
+  }
+  const lines = [
+    `Golden Path: ${payload.verdict}`,
+    `AI-Native: ${payload.aiNative?.pre?.grade} → ${payload.aiNative?.post?.grade}`,
+    payload.dream?.imagination?.title || "",
+    ...(payload.hints || [])
+  ].filter(Boolean);
+  return lines.join("\n") + "\n\n" + JSON.stringify(payload, null, 2);
+}
+
 function renderBrainTraceCompact(data) {
   const arch = data?.architecture;
   if (!arch?.active_regions?.length) {
@@ -312,6 +454,7 @@ function renderBrainTraceCompact(data) {
   }
 
   if (data.architectureMermaid) renderBrainMermaid(data.architectureMermaid);
+  renderMeshTracePanel(data.meshTrace || data.report?.observability?.mesh_trace);
 }
 
 async function syncBrainFromApi({ silent = true } = {}) {
@@ -339,9 +482,11 @@ function scheduleBrainSync() {
 function renderBrainTrace(data) {
   liveBrainEnabled = false;
   clearTimeout(brainSyncTimer);
+  const mesh = data?.meshTrace || data?.report?.observability?.mesh_trace;
   const arch = data?.architecture;
   if (!arch?.active_regions?.length) {
     brainPanel.classList.add("hidden");
+    renderMeshTracePanel(mesh);
     return;
   }
 
@@ -386,6 +531,7 @@ function renderBrainTrace(data) {
     }
   });
   updateSourceBrainGutter(data);
+  renderMeshTracePanel(mesh);
   setTimeout(() => { liveBrainEnabled = true; scheduleBrainSync(); }, 1500);
 }
 
@@ -537,6 +683,10 @@ function formatCanonicalReportSummary(report) {
   const runtimeLine = runtimeTrace?.phases?.length
     ? `trace: ${runtimeTrace.phases.join("→")}${runtimeTrace.scheduler ? ` (${runtimeTrace.scheduler})` : ""}`
     : null;
+  const relay = report.semantic?.relay?.action || report.semantic?.pulse?.action;
+  const semanticLine = relay
+    ? `semantic: ${relay}${report.semantic?.convergence != null ? ` | convergence: ${report.semantic.convergence}` : ""}`
+    : null;
   return [
     "── Canonical Report ──",
     `surface: ${report.surface} | success: ${report.success} | blocked: ${report.blocked}`,
@@ -545,22 +695,76 @@ function formatCanonicalReportSummary(report) {
     `governance: ${gov} | fusion: ${fusion}`,
     archLine,
     runtimeLine,
+    semanticLine,
     report.fusion?.coherence != null ? `coherence: ${report.fusion.coherence}` : null,
     ""
   ].filter(Boolean).join("\n");
 }
+
+function renderHumanGate(data) {
+  if (!humanGatePanel) return;
+  const pending = data?.pendingApproval;
+  if (!data?.awaitingHuman || !pending?.id) {
+    humanGatePanel.classList.add("hidden");
+    pendingGateApproval = null;
+    return;
+  }
+  pendingGateApproval = pending;
+  humanGatePanel.classList.remove("hidden");
+  if (gateActionLabel) gateActionLabel.textContent = pending.action ? `· ${pending.action}` : "";
+  if (gateMessage) {
+    gateMessage.textContent = pending.message || pending.approve_hint || "Human approval required before execution continues.";
+  }
+}
+
+async function approveAndRerun() {
+  if (!pendingGateApproval?.id) return;
+  setOutput("Approving human gate…");
+  try {
+    await fetch("/api/human-gate/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: pendingGateApproval.id })
+    });
+    const token = pendingGateApproval.token;
+    humanGatePanel.classList.add("hidden");
+    setOutput("Re-running with approval token…");
+    const isNoeon = activeExampleName?.endsWith(".noeon");
+    const data = await api("/api/run", {
+      trace: true,
+      with_protocol: isNoeon ? "off" : "auto",
+      approval_token: token
+    });
+    pendingGateApproval = null;
+    renderHumanGate(data);
+    renderBrainTrace(data);
+    const summary = formatCanonicalReportSummary(data.report || data.unifiedReport);
+    setOutput(`${summary}${JSON.stringify(data, null, 2)}`, !data.success);
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+}
+
+document.getElementById("btn-gate-approve")?.addEventListener("click", approveAndRerun);
+document.getElementById("btn-gate-dismiss")?.addEventListener("click", () => {
+  humanGatePanel?.classList.add("hidden");
+});
 
 document.getElementById("btn-run").addEventListener("click", async () => {
   const isNoeon = activeExampleName?.endsWith(".noeon");
   setOutput(isNoeon ? "Running (cognitive workflow)…" : "Running (kernel + protocol auto)…");
   try {
     const withProtocol = isNoeon ? "off" : "auto";
-    const data = await api("/api/run", { trace: true, with_protocol: withProtocol });
+    const payload = { trace: true, with_protocol: withProtocol };
+    if (pendingGateApproval?.token) payload.approval_token = pendingGateApproval.token;
+    const data = await api("/api/run", payload);
+    renderHumanGate(data);
     renderBrainTrace(data);
     const summary = formatCanonicalReportSummary(data.report || data.unifiedReport);
     const body = JSON.stringify(data, null, 2);
     setOutput(summary ? `${summary}${body}` : body, !data.success);
   } catch (e) {
+    renderHumanGate(null);
     setOutput(e.message, true, e.line);
   }
 });
@@ -593,6 +797,141 @@ document.getElementById("btn-brain").addEventListener("click", async () => {
   } catch (e) {
     brainPanel.classList.add("hidden");
     setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-ai-eval").addEventListener("click", async () => {
+  setOutput("Evaluating AI-native design…");
+  try {
+    const evaluation = await fetchAiEvaluate(false);
+    await renderAiNativePanel(evaluation);
+    setOutput(JSON.stringify(evaluation, null, 2));
+  } catch (e) {
+    aiNativePanel?.classList.add("hidden");
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-golden").addEventListener("click", async () => {
+  setOutput("Running Golden Path (evaluate → run → self → dream)…");
+  try {
+    const payload = await fetchGoldenPath();
+    setOutput(renderGoldenOutput(payload), payload.verdict === "blocked");
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-dream").addEventListener("click", async () => {
+  setOutput("Imagining next epoch…");
+  try {
+    const dream = await fetchAiDream();
+    await renderAiNativePanel({ grade: dream.current?.grade, score: dream.current?.score, verdict: dream.current?.verdict, dimensions: {}, suggestions: dream.imagination?.priorities || [] });
+    setOutput((dream.prompt_brief || JSON.stringify(dream, null, 2)));
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-reflect").addEventListener("click", async () => {
+  setOutput("Running SELF-improve reflect loop…");
+  try {
+    const data = await api("/api/ai/reflect", {}, { silent: true });
+    await renderAiNativePanel(data.aiNative);
+    const improve = data.selfImprove;
+    let text = improve?.brief || JSON.stringify(data, null, 2);
+    const diff = data.patchPreview?.diff;
+    if (diff) {
+      renderPatchDiffPanel(diff, "Reflect patch preview");
+      text += `\n\n--- diff ---\n${diff}`;
+    }
+    setOutput(text);
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-patch").addEventListener("click", async () => {
+  setOutput("Building patch preview…");
+  try {
+    const preview = await api("/api/ai/patch", {}, { silent: true });
+    if (preview.suggestedSource && confirm("Apply suggested patch to editor?")) {
+      sourceEl.value = preview.suggestedSource;
+      updateSourceBrainGutter();
+    }
+    renderPatchDiffPanel(preview.diff, preview.primaryPatch?.action || "Patch preview");
+    setOutput(preview.previewBrief || JSON.stringify(preview, null, 2));
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-remediate").addEventListener("click", async () => {
+  setOutput("Auto-remediate: patch → re-golden → verify…");
+  try {
+    const payload = await api("/api/ai/remediate", { min_grade: "C", max_rounds: 2 }, { silent: true });
+    await renderAiNativePanel({
+      grade: payload.after?.grade,
+      score: payload.after?.score,
+      verdict: payload.verdict,
+      dimensions: {},
+      suggestions: payload.hints?.map((h) => ({ priority: "medium", action: h })) || []
+    });
+    const lines = [
+      `Remediate: ${payload.verdict}`,
+      `${payload.before?.grade} (${Math.round((payload.before?.score || 0) * 100)}%) → ${payload.after?.grade} (${Math.round((payload.after?.score || 0) * 100)}%)`,
+      ...(payload.hints || [])
+    ];
+    if (payload.diff) {
+      renderPatchDiffPanel(payload.diff, `Remediate ${payload.before?.grade} → ${payload.after?.grade}`);
+      lines.push("", "--- diff ---", payload.diff);
+    }
+    if (payload.suggestedSource && confirm("Apply remediated source to editor?")) {
+      sourceEl.value = payload.suggestedSource;
+      updateSourceBrainGutter();
+    }
+    setOutput(lines.join("\n"));
+  } catch (e) {
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-universal").addEventListener("click", async () => {
+  setOutput("Evaluating Universal program…");
+  try {
+    const payload = await api("/api/universal/evaluate", {
+      source: sourceEl.value,
+      filename: activeExampleName || "playground.noeon"
+    }, { silent: true });
+    renderUniversalPanel(payload);
+    await renderAiNativePanel(payload.aiNative);
+    setOutput(payload.brief || JSON.stringify(payload, null, 2));
+  } catch (e) {
+    universalPanel?.classList.add("hidden");
+    setOutput(e.message, true, e.line);
+  }
+});
+
+document.getElementById("btn-universal-scaffold").addEventListener("click", async () => {
+  const name = prompt("Universal agent name:", "MyUniversalAgent") || "MyUniversalAgent";
+  const intent = prompt("INTENT (goal):", "Declare a measurable AI-native outcome");
+  setOutput("Scaffolding Universal program…");
+  try {
+    const res = await fetch("/api/universal/scaffold", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, intent: intent || undefined })
+    });
+    if (!res.ok) throw new Error(`scaffold → ${res.status}`);
+    const payload = await res.json();
+    sourceEl.value = payload.source;
+    activeExampleName = null;
+    exampleSelect.value = "";
+    updateSourceBrainGutter();
+    setOutput(`Scaffolded Universal program: ${name}\n\n${payload.formula}`);
+    document.getElementById("btn-universal")?.click();
+  } catch (e) {
+    setOutput(e.message, true);
   }
 });
 

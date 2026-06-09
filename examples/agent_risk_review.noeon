@@ -1,11 +1,3 @@
-#!/usr/bin/env node
-'use strict';
-
-/**
- * General Profile — Risk review vertical demo
- * RiskReviewer: approve or escalate payment requests with threshold decisions
- */
-
 PROFILE "general"
 VERSION "1.0.0-alpha"
 

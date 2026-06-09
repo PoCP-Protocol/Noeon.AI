@@ -6,6 +6,12 @@ const path = require('path');
 const REPORT_SCHEMA = 'noeon.canonical.report/v1';
 const AUDIT_SCHEMA = 'noeon.canonical.audit/v1';
 const { buildRuntimeTraceFromResult } = require('./cognitive-architecture');
+const { buildEcosystemSnapshot } = require('./canonical-ecosystem');
+const { evaluateAiNative } = require('./ai-native-lens');
+const { buildSelfExport } = require('./self-introspection');
+const { runPostRunSelfImprove } = require('./self-improve');
+const { buildDeclarationBrief } = require('./declaration-ir');
+const { evaluateCognitiveLoopContract } = require('./cognitive-loop-contract');
 
 function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
   const canonical = canonicalPrep?.canonical;
@@ -19,6 +25,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
     error: result.error || null,
     surface: canonical?.surface || result.profile,
     capabilities: canonical?.capabilities || {},
+    declarations: buildDeclarationBrief(canonical?.declarations) || buildDeclarationBrief(ast?.general?.declarations),
     intent: {
       goal: canonical?.intent?.goal || ast?.cognition?.goal || ast?.task || null,
       task: canonical?.task || ast?.task || null
@@ -46,6 +53,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
     },
     semantic: {
       pulse: result.semanticPulse || null,
+      relay: result.semanticRelay || null,
       convergence: result.convergence?.coherence?.score ?? null,
       route: result.executionRoute?.engine || null
     },
@@ -81,6 +89,18 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
           }
         : canonical?.observability?.architecture || null
     },
+    cognitiveLoop: evaluateCognitiveLoopContract(ast, {
+      architecture: result.architecture,
+      report: {
+        execution: { phases: result.phases || [] },
+        observability: { runtime_trace: buildRuntimeTraceFromResult(result) }
+      }
+    }),
+    ecosystem: buildEcosystemSnapshot(ast, options, result),
+    aiNative: evaluateAiNative(ast, canonicalPrep, result),
+    self: buildSelfExport(ast),
+    selfImprove: result.selfImprove || ast?.cognition?.context?.SELF_IMPROVE || null,
+    patchPreview: result.selfImprove?.patchPreview || null,
     filename: options.filename || options.source_path || null
   };
 }
@@ -98,7 +118,10 @@ function buildCanonicalAuditEntry(report) {
     governance_winner: report.governance?.arbitration?.winner_tier || null,
     fusion_layers: report.fusion?.layers || [],
     triad: report.fusion?.triad || false,
-    coherence: report.fusion?.coherence
+    coherence: report.fusion?.coherence,
+    executor: report.ecosystem?.runtime?.executor || null,
+    mcp_tools: report.ecosystem?.mcp?.attached_tools?.length || 0,
+    package_imports: report.ecosystem?.packages?.imports?.length || 0
   };
 }
 

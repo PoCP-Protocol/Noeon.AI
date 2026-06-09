@@ -60,7 +60,7 @@ function resolveFile(filePath) {
 }
 
 async function cmdRun(filePath) {
-  if (!filePath) { console.error('Usage: noeon run <file.ael|file.noeon> [--json] [--trace] [--verbose] [--auto-evolve] [--next-memory-in file] [--next-memory-out file]'); process.exit(1); }
+  if (!filePath) { console.error('Usage: noeon run <file.ael|file.noeon> [--json] [--trace] [--verbose] [--auto-evolve] [--approval-token TOKEN] [--next-memory-in file] [--next-memory-out file]'); process.exit(1); }
   const nextMemoryInFlag = flags['next-memory-in'] || flags.next_memory_in;
   const nextMemoryOutFlag = flags['next-memory-out'] || flags.next_memory_out;
   const nextMemoryInPath = nextMemoryInFlag ? (nextMemoryInFlag === true ? 'next-memory.json' : nextMemoryInFlag) : null;
@@ -81,6 +81,7 @@ async function cmdRun(filePath) {
     filename: resolved,
     with_protocol: flags['with-protocol'] || flags.with_protocol || 'auto',
     strict_protocol: Boolean(flags['strict-protocol'] || flags.strict_protocol),
+    approval_token: flags['approval-token'] || flags.approval_token || undefined,
     feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
   });
 
@@ -302,6 +303,7 @@ function cmdConverge(targetPath) {
     DEFAULT_PARITY
   } = require('./core/canonical-convergence');
   const { computeSemanticPulse } = require('./core/canonical-pulse');
+  const { buildSemanticRelay } = require('./runtime/fusion/semantic-relay');
 
   let matrix;
   if (!targetPath || targetPath === 'parity') {
@@ -315,6 +317,7 @@ function cmdConverge(targetPath) {
   }
 
   matrix.pulse = computeSemanticPulse(matrix);
+  matrix.relay = buildSemanticRelay(null, matrix, matrix.pulse, { threshold: flags.threshold ? Number(flags.threshold) : 0.6 });
   if (flags.out) {
     fs.writeFileSync(resolveFile(flags.out), JSON.stringify(matrix, null, 2), 'utf8');
     console.log(`Written: ${resolveFile(flags.out)}`);
@@ -323,6 +326,7 @@ function cmdConverge(targetPath) {
   } else {
     console.log(formatConvergenceText(matrix));
     console.log(`\nPulse: ${matrix.pulse.action} (score=${matrix.pulse.score ?? '—'})`);
+    console.log(`Relay: ${matrix.relay.action} (composite=${matrix.relay.composite ?? '—'})`);
     if (flags.graph && matrix.mermaid) {
       console.log('\n--- Mermaid ---\n');
       console.log(matrix.mermaid);
@@ -343,6 +347,162 @@ function cmdReport() {
     console.log(formatAuditReport(report));
   }
   process.exit(0);
+}
+
+async function cmdConform(targetPath) {
+  const { runParityConformance } = require('./core/canonical-conform');
+
+  const sub = targetPath || 'parity';
+  if (sub !== 'parity') {
+    console.error('Usage: noeon conform parity [--json]');
+    process.exit(1);
+  }
+
+  const payload = await runParityConformance();
+  const { allValid, results } = payload;
+
+  if (flags.json) {
+    console.log(JSON.stringify(payload, null, 2));
+  } else {
+    console.log('\n\x1b[36m═══ Canonical Conformance — Parity Surfaces ═══\x1b[0m\n');
+    for (const r of results) {
+      const mark = r.valid ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m';
+      console.log(`  ${mark} ${r.file} | goal=${r.goal || '—'} | executor=${r.executor}`);
+      if (!r.valid && r.missing?.length) console.log(`         missing: ${r.missing.join(', ')}`);
+    }
+    console.log(`\n${allValid ? '\x1b[32m' : '\x1b[31m'}${results.filter((r) => r.valid).length}/${results.length} surfaces conform\x1b[0m\n`);
+  }
+  process.exit(allValid ? 0 : 1);
+}
+
+async function cmdRelay(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon relay <file.noeon> [--json] [--graph]');
+    process.exit(1);
+  }
+  const { ast, resolved } = parseProgram(filePath);
+  const { runFusionCoherence } = require('./runtime/fusion/fusion-coherence');
+  const { runFusionTriad, buildTriadGraph } = require('./runtime/fusion/fusion-triad');
+  const { formatSemanticRelayText } = require('./runtime/fusion/semantic-relay');
+  const { resolveRelayPolicy, applyRelayPolicy, formatRelayPolicyText } = require('./runtime/fusion/fusion-relay-policy');
+
+  const opts = {
+    quiet: true,
+    filename: resolved,
+    source_path: resolved,
+    field_memory_dir: flags['field-memory-dir'] || flags.field_memory_dir,
+    with_protocol: 'off'
+  };
+
+  let payload;
+  if (ast.fusionTriad?.enabled) {
+    payload = await runFusionTriad(ast, opts);
+  } else if (ast.fusionCoherence?.enabled || (ast.fusion || []).some((f) => f.target === 'coherence')) {
+    payload = runFusionCoherence(ast, opts);
+  } else {
+    console.error('No FUSE coherence or triad block in program');
+    process.exit(1);
+  }
+
+  const relay = payload.semanticRelay || payload.relay;
+  const policy = resolveRelayPolicy(ast, opts);
+  const policyOutcome = applyRelayPolicy(relay, policy, { convergence: payload.convergence || payload.matrix });
+  payload.relayPolicy = policy;
+  payload.policyOutcome = policyOutcome;
+  if (flags.graph && payload.triad) {
+    const { mermaid } = buildTriadGraph(payload);
+    if (flags.json) {
+      console.log(JSON.stringify({ ...payload, mermaid }, null, 2));
+    } else {
+      console.log(formatRelayPolicyText(policyOutcome));
+      console.log(formatSemanticRelayText(policyOutcome.relay));
+      console.log('\n--- Mermaid ---\n');
+      console.log(mermaid);
+    }
+  } else if (flags.json) {
+    console.log(JSON.stringify(payload, null, 2));
+  } else {
+    console.log(formatRelayPolicyText(policyOutcome));
+    console.log(formatSemanticRelayText(policyOutcome.relay));
+    if (payload.summary) console.log(payload.summary);
+    if (payload.convergence?.coherence) {
+      console.log(`Convergence: ${payload.convergence.coherence.score} | Aligned: ${payload.convergence.aligned}`);
+    }
+  }
+  process.exit(payload.success !== false ? 0 : 1);
+}
+
+function cmdGate(subCmd) {
+  const {
+    listPendingGates,
+    approveGate,
+    rejectGate,
+    formatGateList,
+    findGateById
+  } = require('./runtime/human-gate-store');
+
+  const gateOpts = {
+    human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir,
+    limit: flags.limit ? Number(flags.limit) : 50
+  };
+
+  const action = (subCmd || 'list').toLowerCase();
+  const gateId = positional[1] || flags.id;
+
+  if (action === 'list') {
+    const pending = listPendingGates(gateOpts);
+    if (flags.json) {
+      console.log(JSON.stringify({ pending, count: pending.length }, null, 2));
+    } else {
+      console.log(formatGateList(pending));
+    }
+    process.exit(0);
+  }
+
+  if (action === 'approve') {
+    if (!gateId) {
+      console.error('Usage: noeon gate approve <id>');
+      process.exit(1);
+    }
+    const gate = approveGate(gateId, gateOpts);
+    if (!gate) {
+      console.error(`Gate not found: ${gateId}`);
+      process.exit(1);
+    }
+    console.log(flags.json ? JSON.stringify(gate, null, 2) : `Approved ${gate.id} (action=${gate.action})`);
+    process.exit(0);
+  }
+
+  if (action === 'reject') {
+    if (!gateId) {
+      console.error('Usage: noeon gate reject <id>');
+      process.exit(1);
+    }
+    const gate = rejectGate(gateId, gateOpts);
+    if (!gate) {
+      console.error(`Gate not found: ${gateId}`);
+      process.exit(1);
+    }
+    console.log(flags.json ? JSON.stringify(gate, null, 2) : `Rejected ${gate.id}`);
+    process.exit(0);
+  }
+
+  if (action === 'show') {
+    if (!gateId) {
+      console.error('Usage: noeon gate show <id>');
+      process.exit(1);
+    }
+    const gate = findGateById(gateId, gateOpts);
+    if (!gate) {
+      console.error(`Gate not found: ${gateId}`);
+      process.exit(1);
+    }
+    console.log(flags.json ? JSON.stringify(gate, null, 2) : JSON.stringify(gate, null, 2));
+    process.exit(0);
+  }
+
+  console.error('Usage: noeon gate list|approve|reject|show [id]');
+  process.exit(1);
 }
 
 async function cmdEpoch(filePath) {
@@ -911,6 +1071,14 @@ async function cmdTest() {
   process.exit(summary.failed > 0 ? 1 : 0);
 }
 
+async function cmdStudio() {
+  const port = flags.port || process.env.PORT || 5177;
+  process.env.PORT = String(port);
+  const { startServer } = require('./serve-site');
+  console.log(`Starting Noeon Studio at http://localhost:${port}/studio.html`);
+  await startServer(Number(port));
+}
+
 async function cmdPlayground() {
   const port = flags.port || process.env.PORT || 5177;
   process.env.PORT = String(port);
@@ -1017,6 +1185,284 @@ function cmdStack(filePath) {
   console.log(flags.json ? JSON.stringify(ast.noeonStack, null, 2) : JSON.stringify(ast.noeonStack, null, 2));
 }
 
+async function cmdUniversal(subOrFile, filePath) {
+  if (subOrFile === 'init') {
+    const { buildUniversalTemplate } = require('./core/universal-scaffold');
+    const name = flags.name || filePath || 'MyUniversalAgent';
+    const intent = flags.intent || 'Declare a measurable AI-native outcome';
+    const source = buildUniversalTemplate({ name, intent, tools: flags.tools?.split(',') });
+    const out = flags.out || flags.output || `${name.replace(/\s+/g, '_')}.noeon`;
+    if (flags.stdout) {
+      console.log(source);
+    } else {
+      require('fs').writeFileSync(path.resolve(process.cwd(), out), source, 'utf8');
+      console.log(`Wrote ${out}`);
+    }
+    process.exit(0);
+    return;
+  }
+
+  const target = subOrFile || flags._?.[0];
+  if (!target) {
+    console.error('Usage: noeon universal <file.noeon> | noeon universal init [--name X] [--out file]');
+    process.exit(1);
+  }
+  const resolved = path.resolve(process.cwd(), target);
+  const fs = require('fs');
+  const source = fs.readFileSync(resolved, 'utf8');
+  const { parseUniversalSource } = require('./grammar/universal-lower');
+  const { validateUniversalProgram, buildUniversalBrief, UNIVERSAL_FORMULA } = require('./core/universal-kernel');
+  const { evaluateAiNative } = require('./core/ai-native-lens');
+  const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+
+  const ast = parseUniversalSource(source, { filename: resolved });
+  const validation = validateUniversalProgram(ast.universal);
+  const prep = prepareCanonicalExecution(ast, { filename: resolved, source });
+  let result = null;
+  if (flags.run) {
+    const { executeProgram } = require('./vm/unified-executor');
+    result = await executeProgram(ast, { filename: resolved, source, quiet: true, with_protocol: 'off' });
+  }
+  const aiNative = evaluateAiNative(ast, prep, result);
+  const payload = {
+    formula: UNIVERSAL_FORMULA,
+    validation,
+    brief: buildUniversalBrief(ast.universal, validation),
+    aiNative,
+    ast: flags.json ? ast : undefined
+  };
+
+  if (flags.json) {
+    console.log(JSON.stringify(payload, null, 2));
+  } else {
+    console.log('\n\x1b[36m═══ Noeon Universal — AI General Programming ═══\x1b[0m\n');
+    console.log(buildUniversalBrief(ast.universal, validation));
+    console.log(`\nAI-Native Lens: ${aiNative.grade} (${Math.round(aiNative.score * 100)}%)`);
+    console.log(`Verdict: ${aiNative.verdict}\n`);
+  }
+  process.exit(validation.ready && aiNative.score >= 0.55 ? 0 : 1);
+}
+
+async function cmdGolden(sub, filePath) {
+  if (sub === 'remediate') {
+    const { runGoldenGateRemediate, openRemediatePullRequest } = require('../scripts/golden-gate-remediate');
+    const payload = await runGoldenGateRemediate({
+      applyToWorktree: Boolean(flags.apply),
+      forceAll: Boolean(flags['force-all'] || flags.force_all),
+      forceFiles: flags['force-hello'] || flags.force_hello ? ['examples/hello.noeon'] : undefined,
+      max_rounds: flags['max-rounds'] || flags.max_rounds || 2
+    });
+    if (flags.json) {
+      console.log(JSON.stringify(payload, null, 2));
+    } else {
+      console.log(`Remediate: ${payload.summary?.improved}/${payload.summary?.attempted} improved`);
+      for (const p of payload.programs || []) {
+        console.log(`  ${p.ok ? 'OK' : 'SKIP'} ${p.file} verify=${p.verify?.verdict || '—'}`);
+      }
+    }
+    if (flags['open-pr'] || flags.open_pr) {
+      const pr = await openRemediatePullRequest(payload, {
+        allowDirty: Boolean(flags.apply),
+        verify: Boolean(flags['verify-pr'] || flags.verify_pr)
+      });
+      console.log(JSON.stringify(pr, null, 2));
+    }
+    process.exit(payload.summary?.improved > 0 ? 0 : 1);
+    return;
+  }
+
+  if (sub === 'apply') {
+    const { applyRemediatedPrograms, applySourceToWorktree } = require('./core/golden-gate-apply');
+    const targetFile = flags.file || filePath;
+    const result = targetFile
+      ? { applied: [applySourceToWorktree({ file: targetFile, force: Boolean(flags.force) })], skipped: [], failed: [] }
+      : applyRemediatedPrograms({ all: Boolean(flags.all), force: Boolean(flags.force) });
+    if (flags.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      for (const r of result.applied || []) {
+        console.log(`  ${r.ok ? 'APPLIED' : 'SKIP'} ${r.file}${r.backupPath ? ` (backup ${r.backupPath})` : ''}`);
+      }
+      for (const r of result.failed || []) console.log(`  FAIL ${r.file}: ${r.reason}`);
+    }
+    process.exit(result.applied?.some((r) => r.ok) ? 0 : 1);
+    return;
+  }
+
+  const goldenFile = sub;
+  if (!goldenFile) {
+    console.error('Usage: noeon golden <file.noeon> | noeon golden remediate [--apply] | noeon golden apply [--all] [--file path]');
+    process.exit(1);
+  }
+  const { runGoldenPath, formatGoldenPathText } = require('./core/golden-path');
+  const resolved = path.resolve(process.cwd(), goldenFile);
+  const payload = await runGoldenPath(resolved, {
+    filename: resolved,
+    min_grade: flags['min-grade'] || flags.min_grade || 'B',
+    dream: flags['no-dream'] || flags.no_dream ? false : true,
+    human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir,
+    approval_token: flags['approval-token'] || flags.approval_token
+  });
+
+  if (flags.json) {
+    console.log(JSON.stringify(payload, null, 2));
+  } else {
+    console.log(formatGoldenPathText(payload));
+  }
+  process.exit(payload.ready ? 0 : payload.verdict === 'awaiting_human' ? 2 : 1);
+}
+
+async function cmdAi(sub, filePath) {
+  const action = sub || 'evaluate';
+  if (!['evaluate', 'dream', 'reflect', 'patch', 'remediate', 'creator'].includes(action)) {
+    console.error('Usage: noeon ai evaluate|dream|reflect|patch|remediate <file> [--json] [--run] [--apply] [--verify]\n       noeon ai creator [--json] [--out dir]');
+    process.exit(1);
+  }
+
+  if (action === 'creator') {
+    const { buildCreatorBlueprint, writeCreatorBlueprint, toMarkdown } = require('./core/ai-creator');
+    const blueprint = buildCreatorBlueprint();
+    const written = writeCreatorBlueprint(blueprint, {
+      outDir: flags.out ? path.resolve(process.cwd(), flags.out) : undefined
+    });
+
+    if (flags.json) {
+      console.log(JSON.stringify({ blueprint, files: written }, null, 2));
+    } else {
+      console.log(toMarkdown(blueprint));
+      console.log('\nArtifacts:');
+      console.log(`- ${written.latestJson}`);
+      console.log(`- ${written.latestMd}`);
+    }
+    process.exit(0);
+    return;
+  }
+
+  if (!filePath) {
+    console.error('Usage: noeon ai evaluate|dream|reflect|patch|remediate <file> [--json] [--run] [--apply] [--verify]\n       noeon ai creator [--json] [--out dir]');
+    process.exit(1);
+  }
+  const fs = require('fs');
+  const { parseNoeonInput } = require('./core/pipeline');
+  const { prepareCanonicalExecution } = require('./core/canonical-runtime');
+  const { evaluateAiNative } = require('./core/ai-native-lens');
+  const { imagineProgram } = require('./core/ai-imagination');
+  const { runPostRunSelfImprove } = require('./core/self-improve');
+  const { buildPatchPreview } = require('./core/patch-preview');
+  const { runAutoRemediate, formatAutoRemediateText, writeRemediatedSource } = require('./core/auto-remediate');
+  const { executeProgram } = require('./vm/unified-executor');
+  const resolved = path.resolve(process.cwd(), filePath);
+  const sourceText = fs.readFileSync(resolved, 'utf8');
+  const { ast } = parseNoeonInput(resolved, { filename: resolved });
+  const prep = prepareCanonicalExecution(ast, { filename: resolved });
+  let result = null;
+  if (flags.run) {
+    result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename: resolved });
+  }
+
+  if (action === 'dream') {
+    const dream = imagineProgram(ast, prep, result);
+    if (flags.json) {
+      console.log(JSON.stringify(dream, null, 2));
+    } else {
+      console.log(`\n\x1b[1m${dream.imagination.title}\x1b[0m\n`);
+      console.log(dream.imagination.narrative);
+      console.log('\n\x1b[1mPriorities:\x1b[0m');
+      for (const p of dream.imagination.priorities) {
+        console.log(`  [${p.priority}] ${p.action}`);
+      }
+      console.log('\n' + dream.prompt_brief);
+    }
+    return;
+  }
+
+  if (action === 'reflect') {
+    if (!result) {
+      result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename: resolved, source: sourceText });
+    }
+    const improve = result.selfImprove || runPostRunSelfImprove(ast, prep, result, { source: sourceText, filename: resolved });
+    if (flags.json) {
+      console.log(JSON.stringify(improve, null, 2));
+    } else {
+      console.log(`\n\x1b[1mSELF-Improve\x1b[0m  epoch ${improve.epoch} | ${improve.lens?.grade}\n`);
+      console.log(improve.brief);
+      if (improve.patchPreview?.diff) {
+        console.log('\n\x1b[1mPatch preview:\x1b[0m\n');
+        console.log(improve.patchPreview.diff);
+      }
+    }
+    return;
+  }
+
+  if (action === 'patch') {
+    if (flags.verify) {
+      action = 'remediate';
+    } else {
+      if (!result) {
+        result = await executeProgram(ast, { quiet: true, with_protocol: 'off', filename: resolved, source: sourceText });
+      }
+      const improve = result.selfImprove || runPostRunSelfImprove(ast, prep, result, { source: sourceText, filename: resolved });
+      const preview = improve.patchPreview || buildPatchPreview(sourceText, improve, { filename: resolved });
+      if (flags.apply && preview.suggestedSource) {
+        const outPath = flags.out || `${resolved}.patched`;
+        fs.writeFileSync(outPath, preview.suggestedSource, 'utf8');
+        console.log(`Wrote patched source: ${outPath}`);
+      }
+      if (flags.json) {
+        console.log(JSON.stringify(preview, null, 2));
+      } else {
+        console.log(`\n\x1b[1mPatch Preview\x1b[0m  applied=${preview.applied?.length || 0} skipped=${preview.skipped?.length || 0}\n`);
+        console.log(preview.previewBrief);
+        if (flags.apply && preview.suggestedSource) {
+          console.log(`\nUse --verify to re-run Golden Path after apply`);
+        }
+      }
+      return;
+    }
+  }
+
+  if (action === 'remediate') {
+    const payload = await runAutoRemediate(resolved, {
+      filename: resolved,
+      min_grade: flags['min-grade'] || flags.min_grade || 'B',
+      max_rounds: flags['max-rounds'] || flags.max_rounds || 2,
+      human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir
+    });
+    if (flags.apply && payload.suggestedSource) {
+      const outPath = flags.out || resolved;
+      const write = writeRemediatedSource(payload, outPath, { in_place: outPath === resolved });
+      console.log(`Wrote remediated source: ${write.path}`);
+    }
+    if (flags.json) {
+      console.log(JSON.stringify(payload, null, 2));
+    } else {
+      console.log(formatAutoRemediateText(payload));
+    }
+    process.exit(payload.remediated ? 0 : payload.improved ? 2 : 1);
+    return;
+  }
+
+  const evaluation = evaluateAiNative(ast, prep, result);
+  if (flags.json) {
+    console.log(JSON.stringify(evaluation, null, 2));
+  } else {
+    console.log(`\n\x1b[1mAI-Native Lens\x1b[0m  ${evaluation.grade} (${Math.round(evaluation.score * 100)}%)\n`);
+    console.log(evaluation.verdict);
+    console.log('\n\x1b[1mDimensions:\x1b[0m');
+    for (const [k, v] of Object.entries(evaluation.dimensions)) {
+      console.log(`  ${k}: ${Math.round(v.score * 100)}%  ${v.notes.join(', ') || '—'}`);
+    }
+    if (evaluation.suggestions.length) {
+      console.log('\n\x1b[1mSuggestions:\x1b[0m');
+      for (const s of evaluation.suggestions) {
+        console.log(`  [${s.priority}] ${s.action}`);
+      }
+    }
+    console.log('\n\x1b[1mBrief (for AI consumption):\x1b[0m');
+    console.log(evaluation.brief);
+  }
+}
+
 function cmdBrain(filePath) {
   if (!filePath) {
     console.error('Usage: noeon brain <file> [--json]');
@@ -1046,22 +1492,30 @@ function cmdBrain(filePath) {
 function cmdHelp() {
   showBanner();
   console.log(`
-\x1b[1mSystem:\x1b[0m    plan | stack | pipeline | brain
+\x1b[1mSystem:\x1b[0m    plan | stack | pipeline | brain | ai | golden
 \x1b[1mCognitive:\x1b[0m   run | compile | inspect | repl | explain
 \x1b[1mProtocol:\x1b[0m  simulate | train | rollback | compile --format ael
-\x1b[1mFusion:\x1b[0m     fuse | triad | converge
-\x1b[1mCanonical:\x1b[0m report
+\x1b[1mFusion:\x1b[0m     fuse | triad | converge | relay | gate
+\x1b[1mCanonical:\x1b[0m report | conform
 \x1b[1mNext:\x1b[0m       epoch | diff | merge | mycelium | field-memory
-\x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | lsp
+\x1b[1mTools:\x1b[0m      validate | parse | graph | test | init | pkg | status | doctor | playground | studio | lsp
 
 \x1b[1mFlags:\x1b[0m --json --verbose --trace --format ir|ael|both --out file
        --with-protocol auto|on|off --strict-protocol --port 5177 --file program.ael
-      --profile general|ael|liminal --auto-evolve --strict-next --next-memory-in file --next-memory-out file
+       --profile general|ael|liminal --auto-evolve --strict-next --approval-token TOKEN
+       --next-memory-in file --next-memory-out file
 
 \x1b[1mLLM:\x1b[0m Set OPENAI_API_KEY or NOEON_API_KEY (NOEON_LLM_MODE=auto|live|mock|off)
 
 \x1b[1mExamples:\x1b[0m
   noeon brain examples/agent_research.noeon
+  noeon ai evaluate examples/ai_native_copilot.noeon --json
+  noeon ai dream examples/hello.noeon
+  noeon ai reflect examples/ai_native_self_reflect.noeon
+  noeon ai patch examples/hello.noeon --verify
+  noeon ai remediate examples/hello.noeon --apply --min-grade C
+  noeon golden examples/ai_native_copilot.noeon
+  noeon golden remediate --force-hello --apply
   noeon architecture --json
   noeon stack examples/agent_research.noeon
   noeon pipeline examples/agent_research.noeon
@@ -1071,9 +1525,11 @@ function cmdHelp() {
   noeon fuse examples/agent_field.noeon --json
   noeon triad examples/fusion_triad.noeon --graph --save
   noeon triad examples/fusion_triad.noeon --run
+  noeon relay examples/semantic_fusion.noeon --graph
   noeon converge parity --graph
   noeon converge examples/parity --json --out artifacts/convergence.json
   noeon report --limit 20
+  noeon conform parity --json
   noeon graph examples/genesis.next --memory
   noeon graph examples/hello.noeon --out hello.mmd
   noeon diff examples/genesis.next
@@ -1084,13 +1540,22 @@ function cmdHelp() {
   noeon test examples/agent_research.noeon
   noeon test
   noeon playground
+  noeon studio
   noeon lsp
 `);
 }
 
 async function main() {
   switch (command) {
+    case 'golden': await cmdGolden(target, positional[1]); break;
+    case 'universal': await cmdUniversal(target, positional[1]); break;
     case 'brain': cmdBrain(target); break;
+    case 'ai': {
+      const aiSub = ['evaluate', 'dream', 'reflect', 'patch', 'remediate', 'creator'];
+      const aiFile = aiSub.includes(target) ? positional[1] : target;
+      await cmdAi(aiSub.includes(target) ? target : 'evaluate', aiFile);
+      break;
+    }
     case 'architecture': cmdArchitecture(); break;
     case 'plan': cmdPlan(target); break;
     case 'stack': cmdStack(target); break;
@@ -1100,7 +1565,10 @@ async function main() {
     case 'fuse': await cmdFuse(target); break;
     case 'triad': await cmdTriad(target); break;
     case 'converge': cmdConverge(target); break;
+    case 'relay': await cmdRelay(target); break;
+    case 'gate': cmdGate(target); break;
     case 'report': cmdReport(); break;
+    case 'conform': await cmdConform(target); break;
     case 'parse': cmdParse(target); break;
     case 'compile': cmdCompile(target); break;
     case 'explain': cmdExplain(target); break;
@@ -1121,6 +1589,7 @@ async function main() {
     case 'train': await cmdTrain(); break;
     case 'rollback': cmdRollback(); break;
     case 'playground': await cmdPlayground(); break;
+    case 'studio': await cmdStudio(); break;
     case 'lsp': cmdLsp(); break;
     case 'help': case '--help': case '-h': cmdHelp(); break;
     case 'version': case '--version': case '-v': console.log(`noeon v${VERSION}`); break;

@@ -134,12 +134,12 @@ const {
 
 const COGNITIVE_CYCLE = [
   { phase: 'perceive', region: 'sensory_cortex', primitive: 'PERCEIVE' },
-  { phase: 'predict', region: 'default_mode_network', primitive: 'PREDICT' },
+  { phase: 'attend', region: 'thalamus', primitive: 'ATTEND' },
   { phase: 'reason', region: 'association_cortex', primitive: 'REASON' },
   { phase: 'decide', region: 'basal_ganglia', primitive: 'DECIDE' },
   { phase: 'act', region: 'motor_cortex', primitive: 'ACT' },
   { phase: 'reflect', region: 'cerebellum', primitive: 'REFLECT' },
-  { phase: 'consolidate', region: 'hippocampus', primitive: 'CONSOLIDATE' }
+  { phase: 'learn', region: 'neuromodulatory', primitive: 'LEARN' }
 ];
 
 function regionForPrimitive(name) {

@@ -16,6 +16,9 @@ const DEFAULT_CONFIG = {
   llm: {
     mode: 'auto',
     model: null
+  },
+  mcp: {
+    servers: []
   }
 };
 
@@ -76,6 +79,9 @@ function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
     quiet: userOptions.quiet ?? false,
     enable_llm: userOptions.enable_llm ?? cog.enable_llm !== false,
     with_protocol: userOptions.with_protocol ?? cog.with_protocol ?? 'auto',
+    legacy_profile: userOptions.legacy_profile ??
+      (process.env.NOEON_LEGACY_PROFILE === '1'),
+    mcp: userOptions.mcp || projectConfig.mcp || { servers: [] },
     llm: {
       mode: userOptions.llm?.mode || llm.mode || process.env.NOEON_LLM_MODE || 'auto',
       model: userOptions.llm?.model || llm.model || process.env.NOEON_LLM_MODEL

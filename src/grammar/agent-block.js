@@ -311,6 +311,12 @@ function parseGeneralAgentFile(source, options = {}) {
       if (fuseResult.fusionTriad) {
         ast.fusionTriad = fuseResult.fusionTriad;
       }
+      if (fuseResult.fusionCoherence) {
+        ast.fusionCoherence = fuseResult.fusionCoherence;
+      }
+      if (fuseResult.fusionRelay) {
+        ast.fusionRelay = fuseResult.fusionRelay;
+      }
       ast.fusion.push(...fuseResult.fusionEntries);
       i = fuseResult.nextIndex;
       continue;

@@ -1,14 +1,14 @@
 {
   "program": "ember",
-  "runs": 3,
-  "updated_at": "2026-06-07T23:06:36.703Z",
+  "runs": 11,
+  "updated_at": "2026-06-08T15:27:12.790Z",
   "cells": {
     "ember_volatility_spike": {
-      "energy": 0.9705999999999999,
+      "energy": 0.98,
       "claim": "Volatility spike confirms risk-off pressure"
     },
     "ember_liquidity_echo": {
-      "energy": 0.6297999999999999,
+      "energy": 0.6480999999999999,
       "claim": "Liquidity echo from cross-market flows"
     }
   },
@@ -27,6 +27,46 @@
       "name": "ember_volatility_spike",
       "energy": 0.9705999999999999,
       "at": "2026-06-07T23:06:36.703Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.746,
+      "at": "2026-06-08T00:33:31.532Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.7201,
+      "at": "2026-06-08T04:39:14.871Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.98,
+      "at": "2026-06-08T04:40:10.233Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.98,
+      "at": "2026-06-08T04:42:32.409Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.8699999999999999,
+      "at": "2026-06-08T15:22:16.840Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.98,
+      "at": "2026-06-08T15:23:22.044Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.98,
+      "at": "2026-06-08T15:26:27.028Z"
+    },
+    {
+      "name": "ember_volatility_spike",
+      "energy": 0.98,
+      "at": "2026-06-08T15:27:12.790Z"
     }
   ],
   "echoes": {
@@ -93,23 +133,277 @@
         "woven": [],
         "dream_feedback": 0,
         "run": 1
+      },
+      {
+        "at": "2026-06-08T00:33:31.532Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.746,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.746,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.5471999999999999,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T04:39:14.871Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.7201,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.7201,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.54,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T04:40:10.233Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.98,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.98,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.5788,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T04:42:32.409Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.98,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.98,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.6128,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T15:22:16.840Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.8699999999999999,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.8699999999999999,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.54,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T15:23:22.044Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.98,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.98,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.5786,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T15:26:27.028Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.98,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.98,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.6109,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      },
+      {
+        "at": "2026-06-08T15:27:12.789Z",
+        "dominant": {
+          "name": "ember_volatility_spike",
+          "energy": 0.98,
+          "claim": "Volatility spike confirms risk-off pressure"
+        },
+        "cells": {
+          "ember_volatility_spike": {
+            "energy": 0.98,
+            "claim": "Volatility spike confirms risk-off pressure"
+          },
+          "ember_liquidity_echo": {
+            "energy": 0.6480999999999999,
+            "claim": "Liquidity echo from cross-market flows"
+          }
+        },
+        "woven": [],
+        "dream_feedback": 0,
+        "run": 1
+      }
+    ],
+    "memory.semantic": [
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 5
+          }
+        ],
+        "consolidated_at": "2026-06-08T04:39:14.871Z",
+        "from_episodes": 5
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 6
+          }
+        ],
+        "consolidated_at": "2026-06-08T04:40:10.233Z",
+        "from_episodes": 6
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 7
+          }
+        ],
+        "consolidated_at": "2026-06-08T04:42:32.410Z",
+        "from_episodes": 7
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 8
+          }
+        ],
+        "consolidated_at": "2026-06-08T15:22:16.840Z",
+        "from_episodes": 8
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 9
+          }
+        ],
+        "consolidated_at": "2026-06-08T15:23:22.044Z",
+        "from_episodes": 9
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 10
+          }
+        ],
+        "consolidated_at": "2026-06-08T15:26:27.028Z",
+        "from_episodes": 10
+      },
+      {
+        "patterns": [
+          {
+            "pattern": "ember_volatility_spike",
+            "kind": "dominant",
+            "weight": 1,
+            "count": 11
+          }
+        ],
+        "consolidated_at": "2026-06-08T15:27:12.790Z",
+        "from_episodes": 11
       }
     ]
   },
   "last_snapshot": {
-    "at": "2026-06-07T23:06:36.703Z",
+    "at": "2026-06-08T15:27:12.790Z",
     "dominant": {
       "name": "ember_volatility_spike",
-      "energy": 0.9705999999999999,
+      "energy": 0.98,
       "claim": "Volatility spike confirms risk-off pressure"
     },
     "cells": {
       "ember_volatility_spike": {
-        "energy": 0.9705999999999999,
+        "energy": 0.98,
         "claim": "Volatility spike confirms risk-off pressure"
       },
       "ember_liquidity_echo": {
-        "energy": 0.6297999999999999,
+        "energy": 0.6480999999999999,
         "claim": "Liquidity echo from cross-market flows"
       }
     },
@@ -137,6 +431,74 @@
       "hybrids": [],
       "declared": [],
       "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T00:33:31.532Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T04:39:14.871Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T04:40:10.233Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T04:42:32.409Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T15:22:16.840Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T15:23:22.044Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T15:26:27.028Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
+    },
+    {
+      "at": "2026-06-08T15:27:12.790Z",
+      "dominant": "ember_volatility_spike",
+      "hybrids": [],
+      "declared": [],
+      "auto_spawns": []
     }
-  ]
+  ],
+  "semantic": {
+    "patterns": [
+      {
+        "pattern": "ember_volatility_spike",
+        "kind": "dominant",
+        "weight": 1,
+        "count": 11
+      }
+    ],
+    "consolidated_at": "2026-06-08T15:27:12.790Z",
+    "from_episodes": 11
+  }
 }

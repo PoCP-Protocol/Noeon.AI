@@ -1,0 +1,22 @@
+profile "general"
+version "1.0.0-alpha"
+module universal_inline
+
+import std.universal
+
+@effect(external)
+fn weave(topic: string) {
+  intent "Inline six-dimension weave"
+  epistemic require_citation=true confidence_floor=0.75
+  cognize()
+  equip tools="web_search,summarize"
+  govern audit=true
+  spawn name=worker_a channel=mesh
+  delegate strategy=round_robin threshold=0.7
+  act action=synthesize channel=console
+  reflect "inline universal stdlib" depth=standard
+}
+
+export fn main() {
+  weave("AI-native language design")
+}

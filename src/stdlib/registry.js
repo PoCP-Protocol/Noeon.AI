@@ -1,10 +1,12 @@
 'use strict';
 
 const stdAi = require('./ai');
+const stdUniversal = require('./universal');
 const { loadProjectRegistryModules } = require('../pkg/registry');
 
 const STDLIB_MODULES = {
   'std.ai': stdAi,
+  'std.universal': stdUniversal,
   'std.cognition': {
     module: 'std.cognition',
     effect: 'io',
@@ -25,6 +27,7 @@ function buildImportContext(imports = [], options = {}) {
     modules: [],
     stdAi: null,
     stdCognition: null,
+    stdUniversal: null,
     exportNames: new Set(),
     registryExports: new Map()
   };
@@ -42,6 +45,12 @@ function buildImportContext(imports = [], options = {}) {
     if (imp === 'std.cognition') {
       context.stdCognition = mod;
     }
+    if (imp === 'std.universal') {
+      context.stdUniversal = mod;
+      for (const name of Object.keys(mod.exports || {})) {
+        context.exportNames.add(name);
+      }
+    }
     for (const name of Object.keys(mod.exports || {})) {
       context.registryExports.set(name, imp);
       if (imp !== 'std.ai') context.exportNames.add(name);
@@ -54,7 +63,7 @@ function buildImportContext(imports = [], options = {}) {
 function validateImports(imports = [], errors, options = {}) {
   for (const imp of imports) {
     if (!resolveImport(imp, options)) {
-      errors.push(`unknown import '${imp}'; supported: std.ai, std.cognition, or registry packages from lockfile`);
+      errors.push(`unknown import '${imp}'; supported: std.ai, std.universal, std.cognition, or registry packages from lockfile`);
     }
   }
 }
@@ -63,10 +72,16 @@ function isStdAiExport(name, importContext = {}) {
   return importContext.exportNames?.has(name) || importContext.stdAi?.exports?.[name];
 }
 
+function isStdUniversalExport(name, importContext = {}) {
+  return importContext.stdUniversal?.exports?.[name] ||
+    (importContext.exportNames?.has(name) && importContext.modules?.some((m) => m.module === 'std.universal'));
+}
+
 module.exports = {
   STDLIB_MODULES,
   resolveImport,
   buildImportContext,
   validateImports,
-  isStdAiExport
+  isStdAiExport,
+  isStdUniversalExport
 };

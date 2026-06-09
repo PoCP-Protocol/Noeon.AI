@@ -70,6 +70,12 @@ function createCanonicalProgram(meta = {}) {
       layers: [],
       triad: false,
       bidirectional: false
+    },
+    declarations: {
+      models: [],
+      tools: [],
+      capabilities: [],
+      effects: []
     }
   };
 }

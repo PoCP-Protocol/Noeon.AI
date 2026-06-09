@@ -5,7 +5,7 @@
 > *"Program by the way humans solve problems; let AI and runtime turn thought into executable systems."*
 
 [![Version](https://img.shields.io/badge/version-1.0.0--alpha-blue)]()
-[![Tests](https://img.shields.io/badge/tests-578%2B%20passed-green)]()
+[![Tests](https://img.shields.io/badge/tests-core%20%2B%20canonical%20%2B%20fusion-green)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
 ---
@@ -34,7 +34,7 @@ This does **not** claim that software is conscious. Noeon **models cognitive wor
 npm install -g noeon-ael
 noeon init my-agent --profile general
 cd my-agent && noeon run main.noeon --trace
-npm run playground   # from repo clone
+noeon playground     # from repo clone
 ```
 
 From a local clone:
@@ -190,7 +190,9 @@ Surface Syntax → Parse AST → Canonical Semantic IR → Governance & Route
 Full spec: [`docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md`](docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md)  
 ADR: [`docs/adr/ADR-003-canonical-architecture-and-dual-ir.md`](docs/adr/ADR-003-canonical-architecture-and-dual-ir.md)  
 Golden proof set: [`examples/golden/`](examples/golden/) — run `npm run test:golden`  
-Inspect stack: `noeon architecture --json`
+Inspect stack: `noeon architecture --json`  
+Conformance: `noeon conform parity` · Fusion: `noeon converge parity --graph` · Audit: `noeon report`  
+MCP: set `NOEON_MCP_MODE=live|stub|auto` and configure `mcp.servers` in `.noeonrc.json` (see NOEON_SPEC §14.3)
 
 ---
 
@@ -227,12 +229,20 @@ node src/cli.js --help
 | `noeon doctor` | Environment and dependency check |
 | `noeon status` | Show kernel status |
 | `noeon playground` | Start web playground + API (port 5177) |
+| `noeon studio` | Open canonical semantic dashboard (via playground server) |
 | `noeon lsp` | Start language server (stdio) |
+| `noeon conform parity` | Verify all parity surfaces emit canonical reports |
+| `noeon converge parity` | Cross-surface semantic coherence matrix |
+| `noeon report` | Canonical audit history |
+| `noeon gate list` | Human approval gates (relay policy) |
+| `noeon ai creator` | Generate the AI/human creator blueprint for the next Noeon workstreams |
 | `noeon simulate` | Protocol simulation + audit artifacts |
 | `noeon train` | Multi-round policy training |
 | `noeon rollback` | Roll back persisted state |
 
 **Common flags:** `--trace`, `--verbose`, `--json`, `--with-protocol auto|on|off`, `--profile general|ael|liminal` (capability entry selector)
+
+`noeon ai creator` emits the shared creator blueprint: readiness signals, the brain-inspired cognitive design contract, the creator charter, workstreams, and priority actions for human/AI co-development.
 
 ---
 
@@ -284,12 +294,13 @@ Noeon provides 50+ cognitive keywords organized by phase:
 ## Test Results
 
 ```
-General Profile v1:    ✓ passed
-Grammar & CLI:         ✓ passed
-Unified Kernel:        ✓ passed
-Protocol conformance:  ✓ passed
-─────────────────────────────────────────────
-Total:                 578+ tests, 0 failures
+Core runtime:          npm run test:core
+Canonical pipeline:    npm run test:canonical
+Fusion/alignment:      npm run test:fusion
+Surface policy:        npm run test:surface-freeze
+Creator blueprint:     npm run test:creator
+Cognitive loop:        npm run test:cognitive-loop
+Protocol conformance:  npm run conformance
 ```
 
 Run locally: `npm test`
@@ -334,7 +345,7 @@ Converges dual execution paths and adds production-ready tooling:
 | Capability | Command |
 |---|---|
 | Unified CLI (cognitive + protocol) | `noeon run` / `noeon simulate` / `noeon train` |
-| Web Playground | `npm run playground` → http://localhost:5177/playground.html |
+| Web Playground | `noeon playground` → http://localhost:5177/playground.html |
 | Language Server | `noeon lsp` |
 | LLM integration | Set `OPENAI_API_KEY` or `NOEON_API_KEY` (`NOEON_LLM_MODE=auto`) |
 | npm publish | `npm install -g noeon-ael` → `noeon` command |

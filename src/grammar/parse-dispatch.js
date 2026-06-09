@@ -8,6 +8,7 @@ const {
   detectSurface,
   SURFACES,
   hasAgentSyntax,
+  hasUniversalSyntax,
   isGeneralSyntax,
   isNextSyntax
 } = require('./detect');
@@ -18,6 +19,12 @@ const { parseGeneralProgram } = require('./general-parser');
 const { lowerGeneralProgram } = require('./lower');
 const { parseNextProgram } = require('./next-parser');
 const { lowerNextProgram } = require('./lower-next');
+
+function tryParseUniversalLocal(source, options) {
+  if (!hasUniversalSyntax(source)) return null;
+  const { parseUniversalSource } = require('./universal-lower');
+  return parseUniversalSource(source, options);
+}
 
 function tryParseNextLocal(source, options) {
   if (!isNextSyntax(source, options)) return null;
@@ -46,10 +53,12 @@ function dispatchParseSurface(source, options = {}) {
   let ast = null;
 
   if (surface === SURFACES.LIMINAL) ast = tryParseLiminal(source, options);
+  else if (surface === SURFACES.UNIVERSAL) ast = tryParseUniversalLocal(source, options);
   else if (surface === SURFACES.NEXT) ast = tryParseNextLocal(source, options);
   else if (surface === SURFACES.GENERAL && hasAgentSyntax(source)) ast = tryParseAgentLocal(source, options);
   else if (surface === SURFACES.GENERAL) ast = tryParseGeneralLocal(source, options);
 
+  if (!ast && surface === SURFACES.UNIVERSAL) ast = tryParseUniversalLocal(source, options);
   if (!ast && surface === SURFACES.LIMINAL) ast = tryParseLiminal(source, options);
   if (!ast && surface === SURFACES.NEXT) ast = tryParseNextLocal(source, options);
   if (!ast && hasAgentSyntax(source)) ast = tryParseAgentLocal(source, options);

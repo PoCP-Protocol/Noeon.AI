@@ -27,7 +27,7 @@ function parseFuseConfigBlock(blockLines, lineNo) {
 function parseFuseStatement(lines, lineIndex, lineNo, rawLine, rawValue) {
   const targetMatch = rawValue.match(/^([a-zA-Z_]+)\s*\{\s*$/i);
   if (!targetMatch) {
-    return { fusionEntries: [], fusionTriad: null, nextIndex: lineIndex };
+    return { fusionEntries: [], fusionTriad: null, fusionCoherence: null, fusionRelay: null, nextIndex: lineIndex };
   }
 
   const parentIndent = lineIndent(rawLine);
@@ -42,12 +42,36 @@ function parseFuseStatement(lines, lineIndex, lineNo, rawLine, rawValue) {
     return {
       fusionEntries,
       fusionTriad: { enabled: true, ...cfg },
+      fusionCoherence: null,
+      fusionRelay: null,
+      nextIndex
+    };
+  }
+
+  if (target === 'coherence') {
+    fusionEntries.push({ target: 'coherence', enabled: true, ...cfg });
+    return {
+      fusionEntries,
+      fusionTriad: null,
+      fusionCoherence: { enabled: true, ...cfg },
+      fusionRelay: null,
+      nextIndex
+    };
+  }
+
+  if (target === 'relay') {
+    fusionEntries.push({ target: 'relay', enabled: true, ...cfg });
+    return {
+      fusionEntries,
+      fusionTriad: null,
+      fusionCoherence: null,
+      fusionRelay: { enabled: true, ...cfg },
       nextIndex
     };
   }
 
   fusionEntries.push({ target, enabled: true, ...cfg });
-  return { fusionEntries, fusionTriad: null, nextIndex };
+  return { fusionEntries, fusionTriad: null, fusionCoherence: null, fusionRelay: null, nextIndex };
 }
 
 module.exports = {

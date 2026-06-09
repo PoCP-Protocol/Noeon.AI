@@ -766,6 +766,32 @@ run("runtime accepts valid signature and reports verification", async () => {
   assert.equal(result.receipt.expectedSignature.startsWith("hmac-sha256:"), true);
 });
 
+run("canonical parity surfaces emit unified report", async () => {
+  const { parseAel } = require("../../src/parser");
+  const { executeProgram } = require("../../src/vm/unified-executor");
+  const { validateCanonicalReport } = require("../../src/core/canonical-contract");
+
+  const PARITY_GOAL = "Assess market risk with evidence";
+  const parityDir = projectPath("examples", "parity");
+  const files = ["risk_assess.noeon", "risk_assess.next", "risk_assess.ael", "risk_assess.lim"];
+
+  for (const file of files) {
+    const filePath = path.join(parityDir, file);
+    const ast = parseAel(fs.readFileSync(filePath, "utf8"), { filename: filePath });
+    const run = await executeProgram(ast, {
+      quiet: true,
+      with_protocol: "off",
+      filename: filePath,
+      triad: false
+    });
+    assert.equal(run.executor, "canonical", `${file} uses canonical executor`);
+    assert.equal(run.irFirst, true, `${file} is IR-first`);
+    const contract = validateCanonicalReport(run.report);
+    assert.equal(contract.valid, true, `${file} report contract (${contract.missing.join(", ")})`);
+    assert.equal(run.report.intent.goal, PARITY_GOAL, `${file} shared intent.goal`);
+  }
+});
+
 (async () => {
   for (const { name, fn } of queuedTests) {
     try {

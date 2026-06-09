@@ -1,4 +1,5 @@
 const httpCall = require("./http-call");
+const { executeMcpTool } = require("../mcp-bridge");
 
 function normalizeBoolean(value, fallback = false) {
   if (value === undefined || value === null) {
@@ -66,6 +67,13 @@ const plugins = {
     name: "http_call",
     version: "0.9.0",
     execute: httpCall.execute
+  },
+  mcp_call: {
+    name: "mcp_call",
+    version: "0.2.0",
+    execute(ctx) {
+      return executeMcpTool(ctx);
+    }
   }
 };
 

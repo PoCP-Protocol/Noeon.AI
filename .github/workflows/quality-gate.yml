@@ -40,6 +40,45 @@ jobs:
       - name: Run Strict Gate
         run: npm run gate:strict
 
+      - name: Run AI Golden Path gate
+        run: npm run gate:golden
+        continue-on-error: true
+        id: golden_gate
+
+      - name: Auto-remediate golden gate failures
+        if: steps.golden_gate.outcome == 'failure'
+        run: node scripts/golden-gate-remediate.js --apply
+
+      - name: Re-verify golden gate after remediate
+        if: steps.golden_gate.outcome == 'failure'
+        run: node -e "require('./scripts/golden-gate-remediate').postRemediateVerify(process.cwd()).then(r=>console.log(JSON.stringify(r,null,2)))"
+
+      - name: Upload golden remediate artifacts
+        if: steps.golden_gate.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-remediate-node-${{ matrix.node-version }}
+          path: |
+            artifacts/golden-gate/remediated/
+            artifacts/golden-gate/remediate.manifest.json
+            artifacts/golden-gate/golden-gate.latest.json
+            artifacts/golden-gate/golden-gate.pr-comment.md
+          if-no-files-found: ignore
+
+      - name: Golden Gate PR feedback artifact
+        if: always() && github.event_name == 'pull_request'
+        run: node scripts/golden-gate-pr-comment.js
+
+      - name: Post Golden Gate PR comment
+        if: steps.golden_gate.outcome == 'failure' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/golden-gate-pr-comment.js --post
+
+      - name: Fail job if Golden Gate failed
+        if: steps.golden_gate.outcome == 'failure'
+        run: exit 1
+
       - name: Upload Conformance Artifact
         if: always()
         uses: actions/upload-artifact@v4

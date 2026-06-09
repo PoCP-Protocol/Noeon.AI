@@ -1,32 +1,150 @@
 name: Noeon Gate
 
+
+
 on:
+
   push:
+
     branches:
+
       - main
+
       - master
+
   pull_request:
 
+
+
 jobs:
+
   strict-governance-gate:
+
     runs-on: ubuntu-latest
 
+
+
     env:
+
       NOEON_REQUIRE_PLUGIN_VERSION: "true"
+
       NOEON_REQUIRE_PLUGIN_SIGNATURE: "true"
+
       NOEON_PLUGIN_SIGNING_KEY: "noeon-hardened-key"
 
+
+
     steps:
+
       - name: Checkout
+
         uses: actions/checkout@v4
 
+
+
       - name: Setup Node.js
+
         uses: actions/setup-node@v4
+
         with:
+
           node-version: 20
 
+
+
       - name: Install dependencies
+
         run: npm install --no-fund --no-audit
 
+
+
       - name: Run strict governance gate
+
         run: npm run gate:strict
+
+
+
+      - name: Run AI Golden Path gate
+
+        run: npm run gate:golden
+
+        continue-on-error: true
+
+        id: golden_gate
+
+
+
+      - name: Auto-remediate golden gate failures
+
+        if: steps.golden_gate.outcome == 'failure'
+
+        run: node scripts/golden-gate-remediate.js --apply
+
+
+
+      - name: Re-verify golden gate after remediate
+        if: steps.golden_gate.outcome == 'failure'
+        run: node -e "require('./scripts/golden-gate-remediate').postRemediateVerify(process.cwd()).then(r=>console.log(JSON.stringify(r,null,2)))"
+
+      - name: Upload remediate artifacts
+
+        if: steps.golden_gate.outcome == 'failure'
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: golden-gate-remediate
+
+          path: |
+
+            artifacts/golden-gate/remediated/
+
+            artifacts/golden-gate/remediate.manifest.json
+
+            artifacts/golden-gate/golden-gate.latest.json
+
+            artifacts/golden-gate/golden-gate.pr-comment.md
+
+          if-no-files-found: ignore
+
+
+
+      - name: Write Golden Gate PR feedback
+
+        if: always() && github.event_name == 'pull_request'
+
+        run: node scripts/golden-gate-pr-comment.js
+
+
+
+      - name: Post Golden Gate PR comment
+
+        if: steps.golden_gate.outcome == 'failure' && github.event_name == 'pull_request'
+
+        env:
+
+          GH_TOKEN: ${{ github.token }}
+
+        run: node scripts/golden-gate-pr-comment.js --post
+
+
+
+      - name: Open auto-remediate PR
+
+        if: steps.golden_gate.outcome == 'failure' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+        env:
+
+          GH_TOKEN: ${{ github.token }}
+
+        run: node scripts/golden-gate-remediate.js --open-pr --apply --verify-pr
+
+
+
+      - name: Fail job if Golden Gate failed
+
+        if: steps.golden_gate.outcome == 'failure'
+
+        run: exit 1
+

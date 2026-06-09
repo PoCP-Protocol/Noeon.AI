@@ -140,6 +140,15 @@ function lowerAgentGovernance(agent, governance) {
   }
 }
 
+function lowerDeclarations(ast, canonical) {
+  const decl = ast.general?.declarations;
+  if (!decl) return;
+  canonical.declarations.models = (decl.models || []).map((m) => ({ ...m }));
+  canonical.declarations.tools = (decl.tools || []).map((t) => ({ ...t }));
+  canonical.declarations.capabilities = (decl.capabilities || []).map((c) => ({ ...c }));
+  canonical.declarations.effects = (decl.effects || []).map((e) => ({ ...e }));
+}
+
 function lowerToCanonical(ast, options = {}) {
   const profile = detectProfile(ast, options);
   const fusionPlan = detectFusionPlan(ast, options);
@@ -190,6 +199,7 @@ function lowerToCanonical(ast, options = {}) {
   lowerAlignmentFromLiminal(ast.liminal, canonical.alignment);
   lowerNextDomain(ast, canonical);
   lowerObservability(ast, canonical.observability);
+  lowerDeclarations(ast, canonical);
 
   if (ast.cognition?.context) {
     canonical.learning.context = { ...ast.cognition.context };
@@ -203,7 +213,9 @@ function lowerToCanonical(ast, options = {}) {
     plan: fusionPlan.plan,
     layers: fusionPlan.layers,
     triad: fusionPlan.triad,
-    bidirectional: fusionPlan.bidirectional
+    bidirectional: fusionPlan.bidirectional,
+    coherence: fusionPlan.coherence || Boolean(ast.fusionCoherence?.enabled),
+    relay: Boolean(ast.fusionRelay?.enabled || (ast.fusion || []).some((f) => f.target === 'relay'))
   };
 
   return canonical;
@@ -216,6 +228,7 @@ module.exports = {
   lowerAlignmentFromLiminal,
   lowerNextDomain,
   lowerAgentGovernance,
+  lowerDeclarations,
   resolveIntentGoal,
   resolveProgramTask
 };

@@ -1,0 +1,43 @@
+{
+  "schema": "noeon.golden.ai-path/v1",
+  "description": "AI-native and Universal programs validated by gate:golden",
+  "programs": [
+    {
+      "id": "copilot",
+      "file": "examples/ai_native_copilot.noeon",
+      "min_grade": "B",
+      "proof": "Epistemic copilot with governance, cognitive loop, require_citation"
+    },
+    {
+      "id": "self_reflect",
+      "file": "examples/ai_native_self_reflect.noeon",
+      "min_grade": "C",
+      "proof": "SELF introspection + REFLECT metric=ai_native_grade"
+    },
+    {
+      "id": "universal_research",
+      "file": "examples/universal/research_synth.noeon",
+      "min_grade": "B",
+      "lens_only": true,
+      "proof": "Universal six-dimension formula — INTENT through EVOLUTION"
+    },
+    {
+      "id": "universal_code",
+      "file": "examples/universal/code_agent.noeon",
+      "min_grade": "B",
+      "lens_only": true,
+      "proof": "Universal code agent with COMPUTE + human_must_approve"
+    },
+    {
+      "id": "universal_orchestrator",
+      "file": "examples/universal/orchestrator.noeon",
+      "min_grade": "B",
+      "lens_only": true,
+      "proof": "Multi-agent mesh — spawn/delegate simulation via std.universal"
+    }
+  ],
+  "gate_command": "npm run gate:golden",
+  "remediate_command": "npm run gate:golden:remediate",
+  "golden_command": "noeon golden <file>",
+  "universal_command": "noeon universal <file>"
+}

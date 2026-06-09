@@ -1,0 +1,29 @@
+profile "general"
+version "1.0.0-alpha"
+module agent_with_tools
+
+import std.ai
+
+MODEL planner type=llm context=128k provider=openai
+TOOL search type=mcp capability=web_search risk=low
+CAPABILITY web_search effects=[io,external_send] budget_tokens=2000
+EFFECT external_send requires=human_gate
+
+FUSE relay {
+  human_must_approve: [external_send, uncited_claim]
+}
+
+@effect(external)
+fn research(query: string) {
+  observe input modality=text source=user
+  reason strategy=abductive depth=2
+  ask query model=planner
+  decide action=respond threshold=0.7
+  search(query)
+  act action=respond channel=console
+  reflect "citation quality" depth=standard
+}
+
+export fn main() {
+  research("What is Noeon?")
+}

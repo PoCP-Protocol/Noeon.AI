@@ -8,6 +8,9 @@
 const PIPELINE_PHASE_TO_REGIONS = {
   canonical: ['prefrontal_cortex', 'thalamus'],
   triad: ['corpus_callosum', 'prefrontal_cortex'],
+  coherence: ['corpus_callosum', 'hippocampus', 'prefrontal_cortex'],
+  relay: ['prefrontal_cortex', 'thalamus', 'corpus_callosum'],
+  'human-gate': ['prefrontal_cortex', 'amygdala'],
   fusion: ['corpus_callosum', 'default_mode_network'],
   'next-field': ['default_mode_network', 'hippocampus'],
   'liminal-field': ['amygdala', 'corpus_callosum'],
@@ -21,6 +24,9 @@ const PIPELINE_PHASE_TO_REGIONS = {
 const PHASE = {
   CANONICAL: 'canonical',
   TRIAD: 'triad',
+  COHERENCE: 'coherence',
+  RELAY: 'relay',
+  HUMAN_GATE: 'human-gate',
   FUSION: 'fusion',
   NEXT_FIELD: 'next-field',
   LIMINAL_FIELD: 'liminal-field',

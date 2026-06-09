@@ -82,11 +82,41 @@ function checkRuntime() {
   };
 }
 
+function checkCanonicalRoute() {
+  const legacy = process.env.NOEON_LEGACY_PROFILE === '1';
+  return {
+    name: 'canonical_route',
+    ok: !legacy,
+    detail: legacy
+      ? 'NOEON_LEGACY_PROFILE=1 — legacy executor opt-out active'
+      : 'Canonical IR-first routing (default)',
+    recommendation: legacy
+      ? 'Unset NOEON_LEGACY_PROFILE to use the unified canonical executor.'
+      : null
+  };
+}
+
+function checkMcpConfig(cwd = process.cwd()) {
+  const { config } = loadProjectConfig({ cwd });
+  const { getMcpStatus } = require('./runtime/mcp-bridge');
+  const status = getMcpStatus(config);
+  return {
+    name: 'mcp',
+    ok: true,
+    detail: status.enabled
+      ? `${status.serverCount} server(s), mode=${status.mode}, ${status.staticToolCount} static tool(s)`
+      : `No MCP servers configured (optional — NOEON_MCP_MODE=${status.mode})`,
+    recommendation: null
+  };
+}
+
 function runDoctor(options = {}) {
   const checks = [
     checkNode(),
     checkConfig(options.cwd),
     checkRuntime(),
+    checkCanonicalRoute(),
+    checkMcpConfig(options.cwd),
     checkExample(options.file)
   ];
 

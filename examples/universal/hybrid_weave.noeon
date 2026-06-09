@@ -1,0 +1,23 @@
+profile "general"
+version "1.0.0-alpha"
+module hybrid_weave
+
+import std.universal
+
+@effect(external)
+fn orchestrate(goal: string) {
+  intent "Hybrid General+Universal mesh weave"
+  epistemic require_citation=true confidence_floor=0.8
+  cognize()
+  equip tools="spawn,delegate,echo/echo"
+  govern audit=true
+  spawn name=synth_worker channel=mesh
+  spawn name=review_worker channel=mesh
+  delegate strategy=mesh threshold=0.65
+  feedback source=telemetry signal=latency
+  reflect "hybrid mesh completion" depth=standard
+}
+
+export fn main() {
+  orchestrate("research synthesis with live mesh")
+}

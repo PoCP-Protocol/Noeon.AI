@@ -29,15 +29,7 @@ function cleanDir(dir) {
     return;
   }
   for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, f.name);
-    if (f.isDirectory()) {
-      for (const g of fs.readdirSync(p)) {
-        try { fs.unlinkSync(path.join(p, g)); } catch { /* ignore */ }
-      }
-      try { fs.rmdirSync(p); } catch { /* ignore */ }
-    } else {
-      fs.unlinkSync(p);
-    }
+    fs.rmSync(path.join(dir, f.name), { recursive: true, force: true });
   }
 }
 

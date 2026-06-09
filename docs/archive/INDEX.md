@@ -10,8 +10,10 @@ These documents remain for history. **Do not extend them.** For normative archit
 | `NOEON_SUPER_BRAIN_ARCHITECTURE.md` | Archive | Canonical architecture + `cognitive-architecture.js` |
 | `NOEON_LANGUAGE_SYSTEM_v1.0_DRAFT.md` | Archive | `NOEON_CANONICAL_ARCHITECTURE_v1.0.md` |
 | `NOEON_SPEC_v0.8.md`, `v0.9` (spec/) | Archive | `NOEON_SPEC_v1.0.md` + Canonical Architecture v1.0 |
-| `examples/parity/` | Parity golden (4 surfaces) | `examples/golden/manifest.json` § parity |
+| Multiple `NEXT_SPEC_v0.x.md` | Archive | `NEXT_SPEC_v1.0.md` |
 | `NOEON_SPEC_NEXT_v0.1.md` | Archive | `NEXT_SPEC_v1.0.md` |
 | `ARCHITECTURE_DECISION_NEW_LANGUAGE.md` | Archive | ADR-002, ADR-003 |
+
+**Parity golden (not archived):** `examples/parity/` — indexed in [`examples/golden/manifest.json`](../../examples/golden/manifest.json) § parity.
 
 When adding docs, prefer updating the canonical spec or an ADR — not a new parallel draft.

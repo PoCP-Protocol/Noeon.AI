@@ -1,0 +1,37 @@
+PROFILE "general"
+VERSION "1.0.0"
+
+FUSE coherence {
+  dir: "parity"
+  threshold: 0.55
+}
+
+FUSE relay {
+  threshold: 0.6
+  enforce: true
+  on_drift: block
+  on_lock: permit
+  human_must_approve: [dominant_shift, external_send]
+}
+
+FUSE triad {
+  next: "genesis.next"
+  next_mode: field
+  liminal: observe
+  general: bridge
+  relay: true
+  resonance_floor: 0.55
+  inject: [dominant, narrative, summary]
+}
+
+AGENT "SemanticSynthesizer"
+  GOAL "Unify cross-surface semantics: field coherence + convergence matrix"
+  MEMORY type=episodic+semantic
+  TOOLS ["field_reader", "convergence_matrix", "semantic_relay"]
+  POLICY require_citation=true
+  FLOW
+    PERCEIVE source=semantic_field modality=fusion
+    REASON strategy=cross_surface depth=5
+    DECIDE action=synthesize threshold=0.7
+    ACT action=write_report channel=document
+    REFLECT

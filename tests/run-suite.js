@@ -8,6 +8,29 @@ const SUITES = {
     'noeon-pipeline.test.js',
     'noeon-brain-architecture.test.js',
     'playground-pipeline.test.js',
+    'playground-human-gate.test.js',
+    'lsp-canonical.test.js',
+    'mcp-bridge.test.js',
+    'mcp-client.test.js',
+    'doctor-canonical.test.js',
+    'canonical-conform-api.test.js',
+    'canonical-ecosystem.test.js',
+    'ai-native-lens.test.js',
+    'golden-path.test.js',
+    'self-improve.test.js',
+    'patch-preview.test.js',
+    'auto-remediate.test.js',
+    'golden-gate-remediate.test.js',
+    'studio-golden-gate.test.js',
+    'golden-gate-diff.test.js',
+    'golden-gate-apply.test.js',
+    'universal-profile.test.js',
+    'universal-stdlib.test.js',
+    'universal-expand.test.js',
+    'universal-inline.test.js',
+    'universal-mesh-trace.test.js',
+    'universal-mesh-runtime.test.js',
+    'declaration-bindings.test.js',
     'architecture-panel.test.js',
     'vm-phases.test.js',
     'golden-examples.test.js',
@@ -31,14 +54,21 @@ const SUITES = {
     'noeon-unified-stack.test.js',
     'canonical-parity.test.js',
     'canonical-phase-b.test.js',
-    'canonical-convergence.test.js'
+    'canonical-convergence.test.js',
+    'canonical-ir-first.test.js',
+    'canonical-executor.test.js',
+    'canonical-observability.test.js',
+    'human-gate.test.js',
+    'playground-human-gate.test.js'
   ],
   fusion: [
     'fusion-profile-v1.test.js',
     'fusion-preview.test.js',
     'fusion-graph.test.js',
     'fusion-unified.test.js',
-    'fusion-triad.test.js'
+    'fusion-triad.test.js',
+    'fusion-coherence.test.js',
+    'fusion-relay.test.js'
   ]
 };
 

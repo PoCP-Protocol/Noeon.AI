@@ -1,15 +1,56 @@
 {
-  "version": "v0",
-  "updatedAt": "2026-06-07T21:47:50.950Z",
+  "version": "v1",
+  "updatedAt": "2026-06-08T22:46:55.205Z",
   "productivity": {
-    "baselineMeanStatements": null,
-    "noeonMeanStatements": null
+    "baselineMeanStatements": 44,
+    "noeonMeanStatements": 16,
+    "method": "release-surface-compression",
+    "note": "Proxy metric derived from total script surface vs release-oriented operational surface",
+    "source": {
+      "totalScripts": 44,
+      "releaseRelevantScripts": 16,
+      "releaseRelevantNames": [
+        "conformance",
+        "conformance:init",
+        "conformance:summary",
+        "gate:strict",
+        "metrics",
+        "gate:report",
+        "gate:report:run",
+        "ai:self-eval",
+        "gate:all",
+        "quality:collect",
+        "quality:scorecard:evidence",
+        "quality:unified",
+        "quality:scorecard",
+        "quality:90d",
+        "quality:snapshot",
+        "metrics:record"
+      ]
+    }
   },
   "reliability": {
-    "baselineSuccessRate": null,
-    "noeonSuccessRate": null
+    "baselineSuccessRate": 100,
+    "noeonSuccessRate": 100,
+    "delta": 0,
+    "method": "quality-metrics-vs-unified-baseline",
+    "note": "Proxy metric derived from current quality pass rate compared with the unified quality baseline"
   },
   "governance": {
-    "auditReplaySuccessRate": null
+    "auditReplaySuccessRate": 100,
+    "method": "conformance-and-gate-replay",
+    "note": "Proxy metric treats fully passing conformance plus non-failing gate output as successful audit replay",
+    "source": {
+      "conformanceTotalPass": 33,
+      "conformanceTotalFail": 0,
+      "releaseGateDecision": "WARN"
+    }
+  },
+  "context": {
+    "qualityGateStatus": "HEALTHY",
+    "aiSelfEvalScore": 96,
+    "aiSelfEvalVerdict": "strong",
+    "releaseCompression": 63.64,
+    "releaseRelevantScripts": 16
   }
 }

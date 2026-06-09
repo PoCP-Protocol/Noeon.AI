@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const { lowerToCanonical } = require('./canonical-lower');
 const { arbitrateGovernance, governanceFingerprint } = require('./canonical-governance');
 const { canonicalSnapshot } = require('./canonical-ir');
@@ -8,6 +9,10 @@ const { mergeExecutionIntoCanonical } = require('./noeon-unified');
 const { hydrateAstFromCanonical, setGovernanceWinnerOnContext } = require('./canonical-hydrate');
 const { attachCognitiveBridge, enrichBridgeWithFlowPreview } = require('./canonical-cognitive-bridge');
 const { buildCanonicalReport, appendCanonicalAudit } = require('./canonical-report');
+const { attachSelfIntrospection, refreshSelfIntrospection } = require('./self-introspection');
+const { runPostRunSelfImprove } = require('./self-improve');
+const { runUniversalMeshRuntime } = require('../runtime/universal-mesh-runtime');
+const { attachMeshTraceToResult } = require('../runtime/universal-mesh-trace');
 
 function prepareCanonicalExecution(ast, options = {}) {
   const canonical = lowerToCanonical(ast, options);
@@ -24,6 +29,8 @@ function prepareCanonicalExecution(ast, options = {}) {
       canonical
     );
   }
+
+  attachSelfIntrospection(ast, { canonical, governance, plan, fingerprint: governanceFingerprint(governance) });
 
   return {
     canonical,
@@ -58,6 +65,15 @@ function finalizeCanonicalResult(result, ast, prepared, options = {}) {
     };
   }
 
+  result.self = refreshSelfIntrospection(ast, result, prepared);
+  const sourceText = options.source
+    || (options.filename && fs.existsSync(options.filename) ? fs.readFileSync(options.filename, 'utf8') : null)
+    || (options.source_path && fs.existsSync(options.source_path) ? fs.readFileSync(options.source_path, 'utf8') : null);
+  result.selfImprove = runPostRunSelfImprove(ast, prepared, result, {
+    source: sourceText,
+    filename: options.filename || options.source_path
+  });
+
   const report = buildCanonicalReport(result, prepared, ast, options);
   result.report = report;
   result.unifiedReport = report;
@@ -69,6 +85,11 @@ function finalizeCanonicalResult(result, ast, prepared, options = {}) {
       // non-fatal
     }
   }
+
+  const meshRuntime = runUniversalMeshRuntime(ast, result);
+  if (meshRuntime) result.meshRuntime = meshRuntime;
+
+  attachMeshTraceToResult(result, ast);
 
   return result;
 }

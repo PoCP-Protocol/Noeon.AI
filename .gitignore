@@ -3,13 +3,24 @@ node_modules/
 .DS_Store
 
 # Test / runtime artifacts (not source)
+artifacts/ai-self-eval/
+artifacts/ai-creator/
+artifacts/ai-creator-test/
+artifacts/auto-remediate/
+artifacts/canonical-observability-audit/
 artifacts/*-test-*/
 artifacts/*-mem/
 artifacts/canonical/
 artifacts/canonical-phase-b/
 artifacts/canonical-parity-mem/
+artifacts/field-memory/
 artifacts/fusion-graph-mem/
+artifacts/golden-gate/
+artifacts/human-gate-test/
+artifacts/playground-human-gate/
+artifacts/release-gate/
 artifacts/field-memory-test-*/
+*.next.evolved
 
 # Debug scratch
 tmp_debug_*

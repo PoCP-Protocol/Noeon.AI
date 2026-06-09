@@ -22,6 +22,7 @@ const { loadConvergenceFromDir, buildConvergenceMatrix } = require('../core/cano
 const { deriveExecutionRoute } = require('../core/canonical-route');
 const { computeSemanticPulse } = require('../core/canonical-pulse');
 const { readCanonicalAudit } = require('../core/canonical-audit-read');
+const { validateCanonicalReport, REPORT_SCHEMA } = require('../core/canonical-contract');
 const { lowerToCanonical } = require('../core/canonical-lower');
 const { runProtocolCycle } = require('../vm/protocol-phase');
 const { hasProtocolFeatures, enrichWithProtocol } = require('../core/protocol-bridge');
@@ -29,7 +30,7 @@ const { runTraining } = require('./trainer');
 const { loadState, saveState, rollbackState } = require('./state-store');
 const { generateReport } = require('./report');
 const { appendAuditEntries } = require('./audit-logger');
-const { VM_VERSION, executeProgram } = require('../vm/unified-executor');
+const { VM_VERSION, executeProgram, executeCanonicalProgram } = require('../vm/unified-executor');
 
 const RUNTIME_VERSION = VM_VERSION;
 
@@ -149,6 +150,12 @@ function createKernel(options = {}) {
 async function runProgram(ast, options = {}) {
   const { config, configPath } = loadProjectConfig(options);
   const runOpts = resolveRunOptions(options, config);
+  const { attachMcpTools, enrichMcpToolsFromDiscovery, setActiveMcpServers } = require('./mcp-bridge');
+  setActiveMcpServers(config.mcp?.servers || []);
+  attachMcpTools(ast, config);
+  if (config.mcp?.servers?.some((s) => s.discover)) {
+    await enrichMcpToolsFromDiscovery(ast, config, runOpts);
+  }
 
   if (runOpts.llm?.mode) process.env.NOEON_LLM_MODE = runOpts.llm.mode;
 
@@ -563,6 +570,7 @@ module.exports = {
   hasProtocolFeatures,
   enrichWithProtocol,
   executeProgram,
+  executeCanonicalProgram,
   VM_VERSION,
   lowerToCanonical,
   prepareCanonicalExecution,
@@ -573,6 +581,11 @@ module.exports = {
   deriveExecutionRoute,
   computeSemanticPulse,
   readCanonicalAudit,
+  validateCanonicalReport,
+  REPORT_SCHEMA,
+  get runParityConformance() { return require('../core/canonical-conform').runParityConformance; },
+  get listMcpTools() { return require('./mcp-bridge').listMcpTools; },
+  get getMcpStatus() { return require('./mcp-bridge').getMcpStatus; },
   get runNoeonPipeline() { return require('../core/pipeline').runNoeonPipeline; },
   get planNoeonProgram() { return require('../core/pipeline').planNoeonProgram; },
   get parseNoeonInput() { return require('../core/pipeline').parseNoeonInput; }

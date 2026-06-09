@@ -3,153 +3,153 @@
     {
       "name": "ember_volatility_spike",
       "claim": "Volatility spike confirms risk-off pressure",
-      "energy": 0.9705999999999999,
+      "energy": 0.98,
       "tags": [
         "public"
       ],
       "program": "ember",
-      "published_at": "2026-06-07T23:06:36.701Z"
+      "published_at": "2026-06-08T15:27:12.788Z"
     },
     {
       "name": "ember_liquidity_echo",
       "claim": "Liquidity echo from cross-market flows",
-      "energy": 0.6297999999999999,
+      "energy": 0.6480999999999999,
       "tags": [
         "public"
       ],
       "program": "ember",
-      "published_at": "2026-06-07T23:06:36.701Z"
+      "published_at": "2026-06-08T15:27:12.788Z"
     },
     {
       "name": "hypothesis_risk_off",
       "claim": "Markets entering risk-off regime",
-      "energy": 0.9720235073684929,
+      "energy": 0.9836413897647261,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "hypothesis_risk_on",
       "claim": "Liquidity wave still expanding",
-      "energy": 0.9386144591548805,
+      "energy": 0.9165851631702138,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "hypothesis_soft",
       "claim": "Soft landing narrative gaining traction",
-      "energy": 0.9609902276830546,
+      "energy": 0.9666818137014372,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "cycle_gate",
       "claim": "Crystallized observe-reason-decide cycle",
-      "energy": 0.966044480440903,
+      "energy": 0.9665284496139862,
       "tags": [],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "hypothesis_risk_off__hypothesis_risk_on_hybrid",
       "claim": "Hybrid(hypothesis_risk_off, hypothesis_risk_on): Markets entering risk-off regime ⊗ Liquidity wave still expanding",
-      "energy": 0.980429899697964,
+      "energy": 0.9768436185362153,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "hypothesis_risk_off__hypothesis_soft_hybrid",
       "claim": "Hybrid(hypothesis_risk_off, hypothesis_soft): Markets entering risk-off regime ⊗ Soft landing narrative gaining traction",
-      "energy": 0.9683745759319028,
+      "energy": 0.979082279236173,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "cycle_gate__hypothesis_risk_off_hybrid",
       "claim": "Hybrid(hypothesis_risk_off, cycle_gate): Markets entering risk-off regime ⊗ Crystallized observe-reason-decide cycle",
-      "energy": 0.9781234171225801,
+      "energy": 0.984901844852746,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "ember__ember_volatility_spike__hypothesis_risk_off_hybrid",
       "claim": "Hybrid(hypothesis_risk_off, ember__ember_volatility_spike): Markets entering risk-off regime ⊗ Volatility spike confirms risk-off pressure",
-      "energy": 0.9535813615954473,
+      "energy": 0.9633505457983667,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "hypothesis_risk_on__hypothesis_soft_hybrid",
       "claim": "Hybrid(hypothesis_risk_on, hypothesis_soft): Liquidity wave still expanding ⊗ Soft landing narrative gaining traction",
-      "energy": 0.9757042382726457,
+      "energy": 0.9711798663823054,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "cycle_gate__hypothesis_risk_on_hybrid",
       "claim": "Hybrid(hypothesis_risk_on, cycle_gate): Liquidity wave still expanding ⊗ Crystallized observe-reason-decide cycle",
-      "energy": 0.9829610797128121,
+      "energy": 0.9777729269194818,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "ember__ember_volatility_spike__hypothesis_risk_on_hybrid",
       "claim": "Hybrid(hypothesis_risk_on, ember__ember_volatility_spike): Liquidity wave still expanding ⊗ Volatility spike confirms risk-off pressure",
-      "energy": 0.9850440520367122,
+      "energy": 0.9822505310122461,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "ember__ember_liquidity_echo__hypothesis_risk_on_hybrid",
       "claim": "Hybrid(hypothesis_risk_on, ember__ember_liquidity_echo): Liquidity wave still expanding ⊗ Liquidity echo from cross-market flows",
-      "energy": 0.8733160282285561,
+      "energy": 0.9036898563956558,
       "tags": [
         "hybrid",
         "auto-spawn"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     },
     {
       "name": "analyst_thread",
       "claim": "Deep-dive the dominant cell after weave",
-      "energy": 0.9997978225594722,
+      "energy": 0.9877454781971289,
       "tags": [
         "spawn",
         "declared"
       ],
       "program": "genesis",
-      "published_at": "2026-06-07T23:06:36.715Z"
+      "published_at": "2026-06-08T15:27:12.803Z"
     }
   ],
   "programs": [
@@ -157,5 +157,5 @@
     "genesis"
   ],
   "cluster": "dream_cluster",
-  "updated_at": "2026-06-07T23:06:36.715Z"
+  "updated_at": "2026-06-08T15:27:12.803Z"
 }

@@ -76,6 +76,7 @@ function createLegacyAstShell(general) {
     agents: [],
     general: {
       imports: general.imports || [],
+      declarations: general.declarations || null,
       functions: general.functions || [],
       exports: general.exports || [],
       effects: general.effects || {},
@@ -88,7 +89,14 @@ function createLegacyAstShell(general) {
 
 const { evalExprSource } = require('./expr');
 
+const { expandUniversalStdlibCall } = require('./universal-stdlib-inline');
+
 function applyStdlibStatement(ast, stmt, paramBindings = {}) {
+  if (stmt.module === 'std.universal') {
+    applyStdUniversalStatement(ast, stmt, paramBindings);
+    return;
+  }
+
   const p = substParams(stmt.params || {}, paramBindings);
   const arg0 = stmt.args?.[0] != null ? substValue(stmt.args[0], paramBindings) : null;
 
@@ -119,6 +127,22 @@ function applyStdlibStatement(ast, stmt, paramBindings = {}) {
       break;
     default:
       break;
+  }
+}
+
+function applyStdUniversalStatement(ast, stmt, paramBindings = {}) {
+  const expanded = expandUniversalStdlibCall(
+    stmt.exportName,
+    (stmt.args || []).map((a) => substValue(a, paramBindings)),
+    substParams(stmt.params || {}, paramBindings)
+  );
+
+  ast.general = ast.general || {};
+  ast.general.universalInline = ast.general.universalInline || [];
+  ast.general.universalInline.push(...(expanded.fragments || []));
+
+  for (const inner of expanded.statements || []) {
+    applyCognitiveStatement(ast, inner, paramBindings);
   }
 }
 
@@ -235,6 +259,9 @@ function applyCognitiveStatement(ast, stmt, paramBindings = {}) {
     case 'SPAWN':
       ast.social.spawns.push(p);
       break;
+    case 'DELEGATE':
+      ast.social.delegations.push(p);
+      break;
     case 'DEBATE':
       ast.social.debates.push(p);
       break;
@@ -339,6 +366,14 @@ function lowerGeneralProgram(general) {
   }
   if (general.fusionTriad?.enabled) {
     ast.fusionTriad = general.fusionTriad;
+  }
+
+  if (general.declarations) {
+    ast.general.declarations = general.declarations;
+    ast.cognition.context._declarations = {
+      models: general.declarations.models?.map((m) => m.name) || [],
+      tools: general.declarations.tools?.map((t) => t.name) || []
+    };
   }
 
   syncAgentsToUnifiedStack(ast);

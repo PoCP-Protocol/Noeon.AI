@@ -1,11 +1,3 @@
-#!/usr/bin/env node
-'use strict';
-
-/**
- * General Profile — Research vertical demo
- * ResearchAnalyst: industry report with citations and comparative reasoning
- */
-
 PROFILE "general"
 VERSION "1.0.0-alpha"
 

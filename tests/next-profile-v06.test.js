@@ -28,9 +28,7 @@ const genesisPath = path.join(__dirname, '../examples/genesis.next');
 for (const dir of [myceliumDir, evolvedDir]) {
   if (fs.existsSync(dir)) {
     for (const f of fs.readdirSync(dir)) {
-      const p = path.join(dir, f);
-      if (fs.statSync(p).isDirectory()) continue;
-      fs.unlinkSync(p);
+      fs.rmSync(path.join(dir, f), { recursive: true, force: true });
     }
   } else {
     fs.mkdirSync(dir, { recursive: true });

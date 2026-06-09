@@ -1,0 +1,35 @@
+PROFILE "universal"
+VERSION "1.0.0"
+
+import std.universal
+
+UNIVERSAL "OrchestratorMesh"
+  INTENT "Coordinate multiple specialist agents toward one measurable outcome"
+    success_metric task_completion>=0.85
+
+  EPISTEMIC
+    require_citation true
+    confidence_floor 0.7
+    evidence_sources ["agents", "telemetry", "human"]
+
+  COGNITION
+    FLOW
+      PERCEIVE source=task_queue modality=structured
+      REASON strategy=abductive depth=3
+      DECIDE action=delegate threshold=0.65
+      ACT action=spawn_agents channel=mesh
+      FEEDBACK source=telemetry modality=metrics
+      REFLECT depth=deep
+
+  CAPABILITY
+    TOOLS ["spawn", "delegate", "echo/echo"]
+    PLUGINS ["http_call", "mcp_call"]
+
+  GOVERNANCE
+    POLICY audit=true
+    BUDGET tokens=12000 wall_clock=300s
+
+  EVOLUTION
+    LEARN signal=feedback rate=0.12
+    EVOLVE strategy=population size=4
+    SELF improve=true dream=true

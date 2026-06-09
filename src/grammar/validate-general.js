@@ -3,8 +3,9 @@
 const { evalExprSource, tryParseExpr } = require('./expr');
 const { validateGeneralTypes } = require('./types');
 const { validateGeneralEffects } = require('./effects');
-const { validateImports, buildImportContext, isStdAiExport } = require('../stdlib/registry');
+const { validateImports, buildImportContext, isStdAiExport, isStdUniversalExport } = require('../stdlib/registry');
 const { validateManifestImports } = require('../pkg/manifest');
+const { validateDeclarations } = require('./validate-declarations');
 
 function collectBindingsFromBody(body, env = {}) {
   for (const stmt of body || []) {
@@ -54,7 +55,11 @@ function validateGeneralExpressions(ast, errors) {
       }
       if (stmt.kind === 'stdlib') {
         const importContext = ast.general?.importContext || {};
-        if (!isStdAiExport(stmt.exportName, importContext)) {
+        if (stmt.module === 'std.universal') {
+          if (!isStdUniversalExport(stmt.exportName, importContext)) {
+            errors.push(`fn '${fn.name}': std.universal export '${stmt.exportName}' used without import std.universal`);
+          }
+        } else if (!isStdAiExport(stmt.exportName, importContext)) {
           errors.push(`fn '${fn.name}': std.ai export '${stmt.exportName}' used without import std.ai`);
         }
       }
@@ -78,7 +83,11 @@ function validateGeneralProfile(ast, errors, warnings, options = {}) {
   validateGeneralTypes(ast, errors);
   validateGeneralEffects(ast, errors);
   validateGeneralExpressions(ast, errors);
+  validateDeclarations(ast, errors, warnings);
 
+  if (ast.general.importContext.stdUniversal) {
+    warnings.push('std.universal import resolved; inline six-dimension expansion active at lower time');
+  }
   if (ast.general.importContext.stdAi) {
     warnings.push('std.ai import resolved; LLM bindings active at lower time');
   }

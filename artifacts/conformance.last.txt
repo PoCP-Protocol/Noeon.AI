@@ -1,5 +1,5 @@
 
-> noeon-ael@1.0.0-alpha conformance
+> noeon-ael@0.7.0-unified conformance
 > node tests/conformance/run.js
 
 PASS parser and validator accept reference contract
@@ -34,4 +34,5 @@ PASS runtime denies when version is required but missing
 PASS runtime denies plugin version mismatch
 PASS runtime denies when signature is required but missing
 PASS runtime accepts valid signature and reports verification
+PASS canonical parity surfaces emit unified report
 All conformance checks passed.
