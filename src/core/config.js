@@ -174,8 +174,11 @@ function resolveRunOptions(userOptions = {}, projectConfig = DEFAULT_CONFIG) {
       (process.env.NOEON_LEGACY_PROFILE === '1'),
     mcp: userOptions.mcp || projectConfig.mcp || { servers: [] },
     llm: {
-      mode: userOptions.llm?.mode || llm.mode || process.env.NOEON_LLM_MODE || 'auto',
-      model: userOptions.llm?.model || llm.model || process.env.NOEON_LLM_MODEL
+      // Precedence: explicit call option > NOEON_LLM_MODE env > project/default
+      // config. The env var must beat the config default ('auto'), otherwise it
+      // is a dead switch and CI can't force deterministic offline runs.
+      mode: userOptions.llm?.mode || process.env.NOEON_LLM_MODE || llm.mode || 'auto',
+      model: userOptions.llm?.model || process.env.NOEON_LLM_MODEL || llm.model
     },
     pluginPolicy: resolvePluginPolicyFromConfig(userOptions, projectConfig),
     audit: resolveAuditOptions(userOptions, projectConfig)

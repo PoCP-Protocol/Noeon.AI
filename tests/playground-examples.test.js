@@ -22,6 +22,7 @@ assert(examples.every((e) => e.executionStrategy && e.executionPath), 'each exam
 
 const names = new Set(examples.map((e) => e.name));
 assert(names.has('hello.noeon'), 'includes hello.noeon');
+assert(names.has('parity/risk_assess_unified.noeon'), 'includes unified entry example');
 assert(names.has('http_demo.noeon'), 'includes http_demo.noeon');
 assert(names.has('web_fetch.noeon'), 'includes web_fetch.noeon');
 
@@ -33,8 +34,16 @@ const agentResearch = examples.find((e) => e.name === 'agent_research.noeon');
 assert(agentResearch?.executionPath === 'hybrid', 'agent_research tagged hybrid');
 assert(agentResearch?.autoCanonical === true, 'agent_research auto canonical');
 
+const unified = examples.find((e) => e.name === 'parity/risk_assess_unified.noeon');
+assert(unified?.tier === 'primary', 'unified entry is primary tier');
+assert(unified?.source?.includes('CONTRACT'), 'unified entry source has CONTRACT block');
+
 const hello = examples.find((e) => e.name === 'hello.noeon');
 assert(hello?.executionPath === 'cognitive', 'hello cognitive path');
+assert(examples.every((e) => e.tier === 'primary'), 'default curated list is primary tier only');
+
+const advanced = loadCuratedExamples({ root, tier: null, primaryOnly: false });
+assert(advanced.length >= examples.length, 'full curated list is at least primary size');
 
 const signedDemo = examples.find((e) => e.name === 'signed_act_demo.noeon');
 assert(signedDemo?.executionPath === 'hybrid', 'signed_act_demo tagged hybrid');

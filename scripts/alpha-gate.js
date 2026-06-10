@@ -4,6 +4,11 @@ const { spawnSync } = require('child_process');
 const path = require('path');
 const { ALPHA_GATE_TESTS } = require('../src/core/engineering-status');
 
+// Gates must be deterministic and reproducible: default to offline mock LLM so
+// the result never depends on ambient API keys or network. Override explicitly
+// (e.g. NOEON_LLM_MODE=live) if a live check is intended.
+if (!process.env.NOEON_LLM_MODE) process.env.NOEON_LLM_MODE = 'mock';
+
 let failed = 0;
 
 console.log('\n\x1b[36m═══ Noeon Alpha Gate ═══\x1b[0m\n');

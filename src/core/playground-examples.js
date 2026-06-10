@@ -8,31 +8,40 @@ const {
   resolveExecutionStrategy,
   resolveGeneralCanonical
 } = require('./general-canonical-mode');
+const { filterExamplesByTier } = require('./surface-catalog');
 
 const CURATED_EXAMPLES = [
-  { name: 'hello.noeon', title: 'Hello World', description: '最简认知循环示例', category: 'getting-started' },
-  { name: 'http_demo.noeon', title: 'HTTP 请求', description: '模拟 HTTP 调用 · 工具快照路径', category: 'tools' },
+  { name: 'hello.noeon', title: 'Hello World', description: '最简认知循环示例', category: 'getting-started', tier: 'primary' },
+  {
+    name: 'parity/risk_assess_unified.noeon',
+    title: '统一入口',
+    description: 'CONTRACT + ALIGN + GOVERNANCE + AGENT · 单文件替代四套 capability 入口',
+    category: 'getting-started',
+    tier: 'primary'
+  },
+  { name: 'http_demo.noeon', title: 'HTTP 请求', description: '模拟 HTTP 调用 · 工具快照路径', category: 'tools', tier: 'primary' },
   {
     name: 'signed_act_demo.noeon',
     title: '签名行动演示',
     description: '带版本与 HMAC 签名的 http_call · 生产插件策略',
-    category: 'production'
+    category: 'production',
+    tier: 'primary'
   },
-  { name: 'fs_demo.noeon', title: '文件读取', description: '模拟文件系统读取 · 工具快照路径', category: 'tools' },
-  { name: 'github_demo.noeon', title: 'GitHub 查询', description: '模拟仓库信息查询 · 工具快照路径', category: 'tools' },
-  { name: 'web_fetch.noeon', title: '网页抓取', description: '模拟网页文本提取 · 工具快照路径', category: 'tools' },
-  { name: 'hybrid_tool_agent.noeon', title: '混合工具智能体', description: '插件行动 + 认知内核（混合路径）', category: 'agents' },
-  { name: 'agent_research.noeon', title: '研究分析师', description: '带引用的研究任务 · 混合执行路径', category: 'agents' },
-  { name: 'agent_risk_review.noeon', title: '风险审查', description: '支付审批场景 · 混合执行路径', category: 'agents' },
-  { name: 'agent_customer_service.noeon', title: '客服智能体', description: '客户问题解决 · 混合执行路径', category: 'agents' },
-  { name: 'fusion_triad.noeon', title: '三元融合', description: 'FUSE triad 循环', category: 'fusion' },
-  { name: 'semantic_fusion.noeon', title: '语义融合', description: 'FUSE 连贯性与中继', category: 'fusion' },
-  { name: 'agent_field.noeon', title: '场域分析师', description: 'AGENT + Next 场 + Liminal 层', category: 'fusion' },
-  { name: 'universal/research_synth.noeon', title: '通用研究合成', description: '六维综合智能体', category: 'universal', profile: 'universal' },
-  { name: 'universal/code_agent.noeon', title: '通用代码智能体', description: '带门控的代码编织', category: 'universal', profile: 'universal' },
-  { name: 'universal/orchestrator.noeon', title: '通用编排器', description: '多智能体协作网格', category: 'universal', profile: 'universal' },
-  { name: 'universal/inline_fn.noeon', title: '通用内联函数', description: 'std.universal 内联展开', category: 'universal', profile: 'general' },
-  { name: 'universal/hybrid_weave.noeon', title: '混合网格编织', description: 'General + Universal 协作', category: 'universal', profile: 'general' }
+  { name: 'fs_demo.noeon', title: '文件读取', description: '模拟文件系统读取 · 工具快照路径', category: 'tools', tier: 'primary' },
+  { name: 'github_demo.noeon', title: 'GitHub 查询', description: '模拟仓库信息查询 · 工具快照路径', category: 'tools', tier: 'primary' },
+  { name: 'web_fetch.noeon', title: '网页抓取', description: '模拟网页文本提取 · 工具快照路径', category: 'tools', tier: 'primary' },
+  { name: 'hybrid_tool_agent.noeon', title: '混合工具智能体', description: '插件行动 + 认知内核（混合路径）', category: 'agents', tier: 'primary' },
+  { name: 'agent_research.noeon', title: '研究分析师', description: '带引用的研究任务 · 混合执行路径', category: 'agents', tier: 'primary' },
+  { name: 'agent_risk_review.noeon', title: '风险审查', description: '支付审批场景 · 混合执行路径', category: 'agents', tier: 'primary' },
+  { name: 'agent_customer_service.noeon', title: '客服智能体', description: '客户问题解决 · 混合执行路径', category: 'agents', tier: 'primary' },
+  { name: 'fusion_triad.noeon', title: '三元融合', description: 'FUSE triad 循环', category: 'fusion', tier: 'advanced' },
+  { name: 'semantic_fusion.noeon', title: '语义融合', description: 'FUSE 连贯性与中继', category: 'fusion', tier: 'advanced' },
+  { name: 'agent_field.noeon', title: '场域分析师', description: 'AGENT + Next 场 + Liminal 层', category: 'fusion', tier: 'advanced' },
+  { name: 'universal/research_synth.noeon', title: '通用研究合成', description: '六维综合智能体', category: 'universal', profile: 'universal', tier: 'advanced' },
+  { name: 'universal/code_agent.noeon', title: '通用代码智能体', description: '带门控的代码编织', category: 'universal', profile: 'universal', tier: 'advanced' },
+  { name: 'universal/orchestrator.noeon', title: '通用编排器', description: '多智能体协作网格', category: 'universal', profile: 'universal', tier: 'advanced' },
+  { name: 'universal/inline_fn.noeon', title: '通用内联函数', description: 'std.universal 内联展开', category: 'universal', profile: 'general', tier: 'advanced' },
+  { name: 'universal/hybrid_weave.noeon', title: '混合网格编织', description: 'General + Universal 协作', category: 'universal', profile: 'general', tier: 'advanced' }
 ];
 
 function resolveExamplesDir(root) {
@@ -90,13 +99,19 @@ function loadCuratedExamples(options = {}) {
       title: entry.title,
       description: entry.description,
       category: entry.category,
+      tier: entry.tier || 'primary',
       profile: entry.profile || (entry.name.startsWith('universal/') ? 'universal' : 'general'),
       source,
       ...enrichExampleExecution(entry, source, options)
     });
   }
 
-  return examples;
+  // Default the curated list to the primary tier; callers opt into the full
+  // (advanced-inclusive) set with an explicit tier or primaryOnly:false.
+  const filterOpts = ('tier' in options || 'primaryOnly' in options)
+    ? options
+    : { ...options, primaryOnly: true };
+  return filterExamplesByTier(examples, filterOpts);
 }
 
 function loadAllExamples(options = {}) {

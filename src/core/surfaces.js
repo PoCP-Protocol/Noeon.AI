@@ -41,14 +41,14 @@ const SURFACE_DESCRIPTIONS = {
     'Kernel research scripts — raw cognitive primitives.'
 };
 
-/** Organizational metaphor — see docs/spec/NOEON_CANONICAL_ARCHITECTURE_v1.0.md */
+/** Internal pipeline roles — not neuroscience claims. User docs use workflow vocabulary. */
 const SURFACE_METAPHORS = {
-  [SURFACES.UNIVERSAL]: 'mind',
-  [SURFACES.GENERAL]: 'hand',
-  [SURFACES.NEXT]: 'will',
+  [SURFACES.UNIVERSAL]: 'mesh',
+  [SURFACES.GENERAL]: 'authoring',
+  [SURFACES.NEXT]: 'field',
   [SURFACES.AEL]: 'contract',
-  [SURFACES.LIMINAL]: 'conscience',
-  [SURFACES.COGNITIVE]: 'neural-structure'
+  [SURFACES.LIMINAL]: 'alignment',
+  [SURFACES.COGNITIVE]: 'kernel'
 };
 
 /**

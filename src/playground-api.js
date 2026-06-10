@@ -93,7 +93,13 @@ async function handlePlaygroundApi(req, res, pathname) {
   }
 
   if (pathname === '/api/status' && req.method === 'GET') {
-    sendJson(res, 200, getRuntimeStatus());
+    const { buildSurfaceCatalog } = require('./core/surface-catalog');
+    const { buildRuntimeModeReport } = require('./core/runtime-mode');
+    sendJson(res, 200, {
+      ...getRuntimeStatus(),
+      surfaceCatalog: buildSurfaceCatalog(),
+      runtimeMode: buildRuntimeModeReport({}, null, { config: loadProjectConfig().config })
+    });
     return true;
   }
 
@@ -251,6 +257,7 @@ async function handlePlaygroundApi(req, res, pathname) {
         pipeline: true,
         dualView,
         agentSurface: report?.agentSurface || null,
+        runtimeMode: report?.runtimeMode || null,
         checkpointMeta: report?.checkpointMeta || out.result?.executionCheckpoint || null,
         ...(brainView
           ? {
@@ -957,8 +964,12 @@ async function handlePlaygroundApi(req, res, pathname) {
   if (pathname === '/api/examples' && req.method === 'GET') {
     const url = new URL(req.url || '/api/examples', 'http://localhost');
     const listAll = url.searchParams.get('all') === '1';
-    const examples = listAll ? loadAllExamples() : loadCuratedExamples();
-    sendJson(res, 200, { examples });
+    const primaryOnly = !listAll && url.searchParams.get('advanced') !== '1';
+    const { buildSurfaceCatalog } = require('./core/surface-catalog');
+    const examples = listAll
+      ? loadAllExamples()
+      : loadCuratedExamples({ primaryOnly, tier: primaryOnly ? 'primary' : null });
+    sendJson(res, 200, { examples, surfaceCatalog: buildSurfaceCatalog(), primaryOnly });
     return true;
   }
 

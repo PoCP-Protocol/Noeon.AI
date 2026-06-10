@@ -71,6 +71,51 @@ function resolveFile(filePath) {
   return path.resolve(process.cwd(), filePath);
 }
 
+async function cmdProvenance(filePath) {
+  if (!filePath) {
+    console.error('Usage: noeon provenance <file.noeon> [--json] [--approval-token TOKEN]');
+    process.exit(1);
+  }
+  const { parseProgram, runProgram } = require('./runtime/unified-runtime');
+  const { verifyProvenance, formatProvenance } = require('./runtime/provenance');
+  const { ast, resolved } = parseProgram(filePath);
+  const result = await runProgram(ast, {
+    general_canonical: true,
+    source_path: resolved,
+    filename: resolved,
+    approval_token: flags['approval-token'] || flags.approval_token || undefined,
+    human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir
+  });
+  const record = result.provenance;
+  if (!record) {
+    console.error('No provenance produced (run did not reach a governed phase).');
+    process.exit(1);
+  }
+  const verdict = verifyProvenance(record);
+  if (flags.html || flags.md) {
+    const { renderHtml, renderMarkdown } = require('./runtime/provenance-report');
+    const isHtml = Boolean(flags.html);
+    const body = isHtml ? renderHtml(record, verdict) : renderMarkdown(record, verdict);
+    const out = (flags.out && flags.out !== true) ? flags.out
+      : (isHtml && typeof flags.html === 'string') ? flags.html
+      : (!isHtml && typeof flags.md === 'string') ? flags.md
+      : null;
+    if (out) {
+      const dest = resolveFile(out);
+      fs.writeFileSync(dest, body, 'utf8');
+      console.error(`Decision report → ${dest}  (${verdict.valid ? 'seal intact' : 'TAMPERED'})`);
+    } else {
+      console.log(body);
+    }
+  } else if (flags.json) {
+    console.log(JSON.stringify({ provenance: record, verification: verdict }, null, 2));
+  } else {
+    console.log(formatProvenance(record));
+    console.log(`  verify: ${verdict.valid ? '\x1b[32m✓ seal intact\x1b[0m' : '\x1b[31m✗ TAMPERED\x1b[0m'}`);
+  }
+  process.exit(verdict.valid ? 0 : 2);
+}
+
 async function cmdRun(filePath) {
   if (!filePath) {
     console.error('Usage: noeon run <file.ael|file.noeon> [--json] [--trace] [--canonical] [--verbose] [--auto-evolve] [--approval-token TOKEN] [--next-memory-in file] [--next-memory-out file]');
@@ -98,6 +143,7 @@ async function cmdRun(filePath) {
     strict_protocol: Boolean(flags['strict-protocol'] || flags.strict_protocol),
     approval_token: flags['approval-token'] || flags.approval_token || undefined,
     human_gate_dir: flags['human-gate-dir'] || flags.human_gate_dir,
+    learn_store: flags['learn-store'] || flags.learn_store,
     feedback: flags.feedback ? readJsonFileIfExists(flags.feedback) : {}
   };
   if (flags.canonical) runOptions.general_canonical = true;
@@ -187,6 +233,11 @@ async function cmdRun(filePath) {
       pluginLines.forEach((line) => console.log(line));
     }
     if (result.llm) console.log(`LLM:     ${result.llm.totalCalls} call(s), mode ${process.env.NOEON_LLM_MODE || 'auto'}`);
+    const { formatRuntimeModeLine, buildRuntimeModeReport } = require('./core/runtime-mode');
+    const modeLine = formatRuntimeModeLine(
+      result.report?.runtimeMode || buildRuntimeModeReport(result, ast, runOptions)
+    );
+    if (modeLine) console.log(modeLine);
     if (result.protocol?.enriched) {
       console.log(`Protocol:  ${result.protocol.protocolSuccess ? '\x1b[32m✓ OK\x1b[0m' : '\x1b[33m⚠ issues\x1b[0m'} (compute + META)`);
     }
@@ -1075,33 +1126,48 @@ function cmdInit(name) {
   const dir = path.join(process.cwd(), name);
   if (fs.existsSync(dir)) { console.error(`Directory exists: ${name}`); process.exit(1); }
   const profile = String(flags.profile || 'general').toLowerCase();
-  if (!['general', 'ael', 'liminal', 'next'].includes(profile)) {
-    console.error('Usage: noeon init <project-name> [--profile general|ael|liminal|next]');
+  if (!['general', 'ael', 'liminal', 'next', 'advanced'].includes(profile)) {
+    console.error('Usage: noeon init <project-name> [--profile general|advanced]');
+    console.error('  general  — default AGENT .noeon (recommended)');
+    console.error('  advanced — legacy .ael / .lim / .next scaffold (use CONTRACT/ALIGN/GOVERNANCE in .noeon instead)');
     process.exit(1);
   }
+
+  const legacyProfile = profile === 'advanced' ? String(flags.legacy || 'ael').toLowerCase() : profile;
+  if (profile === 'advanced' && !['ael', 'liminal', 'next'].includes(legacyProfile)) {
+    console.error('Usage: noeon init <project-name> --profile advanced --legacy ael|liminal|next');
+    process.exit(1);
+  }
+  if (['ael', 'liminal', 'next'].includes(profile)) {
+    console.warn('\x1b[33m⚠ Legacy profile — prefer: noeon init <name> (general AGENT .noeon with CONTRACT/ALIGN/GOVERNANCE blocks)\x1b[0m');
+  }
+
+  const effectiveProfile = profile === 'general' ? 'general' : legacyProfile;
 
   fs.mkdirSync(dir, { recursive: true });
   const entry = profile === 'general'
     ? 'main.noeon'
-    : profile === 'liminal'
+    : effectiveProfile === 'liminal'
       ? 'main.lim'
-      : profile === 'next'
+      : effectiveProfile === 'next'
         ? 'genesis.next'
         : 'main.ael';
-  const source = profile === 'next'
+  const agentName = name.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1') || 'MainAgent';
+  const source = profile === 'general'
+    ? `profile "general"\nversion "${VERSION}"\nmodule "${name}"\n\nAGENT "${agentName}"\n  GOAL "Describe what this agent should accomplish"\n  MEMORY type=episodic+semantic\n  POLICY require_citation=true\n  FLOW\n    PERCEIVE source=user_input modality=text\n    REASON strategy=deductive depth=2\n    DECIDE action=respond threshold=0.7\n    ACT action=respond channel=runtime\n    REFLECT\n\n# Optional inline capabilities (instead of separate .ael / .lim / .next files):\n# CONTRACT {\n#   task: ${name}\n#   budget: 1000 msat\n# }\n# ALIGN {\n#   intent: "Describe what this agent should accomplish"\n#   resonance_floor: 0.7\n#   human_must_approve: [external_send]\n# }\n# GOVERNANCE {\n#   constitution name=evidence rule="Claims require evidence" priority=1.0\n#   field core { ingest: [signals] decay: 1h }\n# }\n`
+    : effectiveProfile === 'next'
     ? `profile "next"\nversion "${VERSION}"\nprogram "genesis"\n\nGOAL "Evolve a living field toward the primary objective"\n\nCONSTITUTION name=evidence rule="Claims require field evidence" priority=1.0\n\nFIELD core {\n  ingest: [signals]\n  decay: 1h\n}\n\nCELL seed {\n  claim: "Initial field hypothesis"\n  energy: 0.55\n}\n\nACT action=observe channel=field\nREFLECT target=execution method=causal\n`
-    : profile === 'liminal'
+    : effectiveProfile === 'liminal'
     ? `profile "liminal"\nversion "${VERSION}"\nmodule "${name}"\n\ncovenant ${name.replace(/[^a-zA-Z0-9_]/g, '_')} {\n  intent: "Achieve the primary user goal with human-AI alignment"\n  never: [autonomous_spend, unsupervised_publish]\n  human_must_approve: [external_action]\n  resonance_floor: 0.70\n\n  when uncertain(confidence < 0.55) {\n    ask human\n  }\n}\n\nbelief user_goal {\n  claim: "User wants a helpful, auditable outcome"\n  confidence: 0.65\n  sources: [user_input]\n}\n\n@effect(ai, trace)\nresonate user_input -> user_goal {\n  mirror: "Confirming I understood the request correctly"\n}\n\npropose respond(body) {\n  requires: belief(user_goal) >= 0.55\n  on approve(human) -> act respond channel=runtime\n  on veto(human) -> reflect\n}\n`
-    : profile === 'general'
-    ? `profile "general"\nversion "${VERSION}"\nmodule "${name}"\n\nimport std.ai\n\n@effect(external)\nfn main() {\n  observe input modality=text source="user"\n  ask("What is the primary goal?")\n  reason strategy=deductive depth=2\n  decide action=respond threshold=0.7\n  act action=respond channel=runtime\n  reflect "execution quality" depth=standard\n}\n`
     : `VERSION "0.8"\nNETWORK "local"\nTASK "${name}"\n\nGOAL "Primary objective"\nBUDGET 1000 msat\n\nPERCEIVE input modality=text\nREASON strategy=deductive\nDECIDE action=proceed threshold=0.7\n`;
   fs.writeFileSync(path.join(dir, entry), source);
   fs.writeFileSync(path.join(dir, '.noeonrc.json'), JSON.stringify({
     environment: 'development',
-    profile,
-    profile_role: profile === 'next' ? 'core' : profile === 'liminal' ? 'alignment' : profile === 'ael' ? 'protocol' : 'authoring',
+    profile: effectiveProfile === 'general' ? 'general' : effectiveProfile,
+    profile_role: effectiveProfile === 'next' ? 'core' : effectiveProfile === 'liminal' ? 'alignment' : effectiveProfile === 'ael' ? 'protocol' : 'authoring',
     entry,
-    cognition: { enable_llm: true, with_protocol: profile === 'general' || profile === 'liminal' ? 'off' : 'auto' },
+    authoring: profile === 'general' ? 'unified' : 'legacy',
+    cognition: { enable_llm: true, with_protocol: profile === 'general' || effectiveProfile === 'liminal' ? 'off' : 'auto' },
     observability: { log_level: 'debug' },
     llm: { mode: 'auto' }
   }, null, 2));
@@ -1115,8 +1181,13 @@ function cmdInit(name) {
     const { installPackages } = require('./pkg/manifest');
     installPackages(dir);
   }
-  const role = profile === 'next' ? 'core' : profile === 'liminal' ? 'alignment' : profile === 'ael' ? 'protocol' : 'authoring';
-  console.log(`\x1b[32m✓ Created ${name}/ (${profile}, ${role}, ${entry})\x1b[0m`);
+  const role = effectiveProfile === 'next' ? 'core' : effectiveProfile === 'liminal' ? 'alignment' : effectiveProfile === 'ael' ? 'protocol' : 'authoring';
+  const label = profile === 'general' ? 'general · unified AGENT' : `${effectiveProfile} · legacy`;
+  console.log(`\x1b[32m✓ Created ${name}/ (${label}, ${role}, ${entry})\x1b[0m`);
+  if (profile === 'general') {
+    console.log('\x1b[36m  Start: noeon run main.noeon\x1b[0m');
+    console.log('\x1b[36m  Add CONTRACT / ALIGN / GOVERNANCE blocks for protocol, alignment, field\x1b[0m');
+  }
 }
 
 function cmdPkg(subcommand, arg) {
@@ -1710,7 +1781,9 @@ function cmdHelp() {
        --profile general|ael|liminal --auto-evolve --strict-next --approval-token TOKEN
        --next-memory-in file --next-memory-out file
 
-\x1b[1mLLM:\x1b[0m Set OPENAI_API_KEY or NOEON_API_KEY (NOEON_LLM_MODE=auto|live|mock|off)
+\x1b[1mLLM / Runtime:\x1b[0m NOEON_LLM_MODE=auto|live|mock|off (default mock without API key)
+       Every run/report includes runtimeMode: mock | live | deterministic
+       noeon status · report.runtimeMode · Playground 证据链
 
 \x1b[1mExamples:\x1b[0m
   noeon brain examples/agent_research.noeon
@@ -1768,6 +1841,7 @@ async function main() {
     case 'stack': cmdStack(target); break;
     case 'pipeline': await cmdPipeline(target); break;
     case 'run': await cmdRun(target); break;
+    case 'provenance': await cmdProvenance(target); break;
     case 'epoch': await cmdEpoch(target); break;
     case 'fuse': await cmdFuse(target); break;
     case 'triad': await cmdTriad(target); break;

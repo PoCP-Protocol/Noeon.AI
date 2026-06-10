@@ -24,6 +24,19 @@ function hasGeneralProfileHeader(source) {
   return /^\s*PROFILE\s+"general"/im.test(source) || /^\s*profile\s+"general"/im.test(source);
 }
 
+function hasUnifiedCapabilityBlocks(source) {
+  return /^\s*(CONTRACT|ALIGN|GOVERNANCE)\s*\{/im.test(source);
+}
+
+function isUnifiedNoeonAuthoring(source, options = {}) {
+  if (!options.filename || !String(options.filename).endsWith('.noeon')) return false;
+  return (
+    hasGeneralProfileHeader(source) ||
+    hasAgentSyntax(source) ||
+    hasUnifiedCapabilityBlocks(source)
+  );
+}
+
 /**
  * Detect whether source uses General block grammar (program {}, fn) — not AGENT lines.
  * AGENT blocks use the unified line parser in parser.js but surface as general.
@@ -54,6 +67,7 @@ function isNextSyntax(source, options = {}) {
   if (options.filename && String(options.filename).endsWith('.next')) return true;
   if (/^\s*profile\s+"next"/im.test(source)) return true;
   if (/^\s*PROFILE\s+"next"/im.test(source)) return true;
+  if (isUnifiedNoeonAuthoring(source, options)) return false;
   if (
     /^\s*(field|cell|weave|echo|flux|bond|mycelium|autobond|dream|spawn|ritual|constitution)\s+/im.test(source) &&
     (/^\s*profile\s+/im.test(source) || /^\s*PROFILE\s+/im.test(source) ||
@@ -80,6 +94,7 @@ function isLiminalFilename(filename) {
 
 function isLiminalSyntaxQuick(source, options = {}) {
   if (isLiminalFilename(options.filename)) return true;
+  if (isUnifiedNoeonAuthoring(source, options)) return false;
   return /^\s*covenant\s*\{/im.test(source) || /^\s*belief\s+/im.test(source);
 }
 
@@ -134,5 +149,7 @@ module.exports = {
   detectSurface,
   hasAgentSyntax,
   hasUniversalSyntax,
-  hasGeneralBlockSyntax
+  hasGeneralBlockSyntax,
+  hasUnifiedCapabilityBlocks,
+  isUnifiedNoeonAuthoring
 };

@@ -1,0 +1,46 @@
+PROFILE "general"
+VERSION "1.0.0"
+
+CONTRACT {
+  task: risk_assess
+  budget: 1000 msat
+}
+
+ALIGN {
+  intent: "Assess market risk with evidence"
+  resonance_floor: 0.55
+  never: [uncited_publish]
+  human_must_approve: [external_send]
+
+  belief market_risk {
+    claim: "Market risk requires evidence-backed assessment"
+    confidence: 0.72
+    sources: [market]
+  }
+
+  resonate assess_goal -> market_risk {
+    mirror: "Assessment goal aligns with market risk belief"
+  }
+}
+
+GOVERNANCE {
+  constitution name=no_unverified_claims rule="All field claims require evidence tag" priority=1.0
+  vow name=cite_sources pledge="Every synthesis cites provenance"
+  field signals {
+    ingest: [market]
+    decay: 1h
+  }
+  cell hypothesis_risk {
+    claim: "Elevated market risk detected"
+    energy: 0.65
+  }
+}
+
+AGENT "RiskAssessor"
+  GOAL "Assess market risk with evidence"
+  POLICY require_citation=true
+  FLOW
+    PERCEIVE source=market_data
+    REASON strategy=deductive
+    ACT action=write_report
+    REFLECT

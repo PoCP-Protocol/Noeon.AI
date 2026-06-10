@@ -16,14 +16,35 @@ function agentRequiresCitation(ast) {
   });
 }
 
-// Opt-in mandatory human sign-off: POLICY require_human_approval=true forces an
-// irreversible ACT through a human approval gate regardless of the model's own
-// confidence — the runtime will not act until a one-time token is consumed.
-function agentRequiresHumanApproval(ast) {
-  return (ast?.agents || []).some((a) => {
+// Opt-in human sign-off. POLICY require_human_approval accepts:
+//   true            → always gate (irreversible ACT needs a one-time token).
+//   critical|high|… → gate only when the run contains an ACT at/above that risk.
+// Returns the mode: 'always', a risk level, or null when not configured.
+function humanApprovalMode(ast) {
+  const { RISK_ORDER } = require('./act-risk');
+  for (const a of (ast?.agents || [])) {
     const v = a.policy?.require_human_approval;
-    return v === true || v === 'true';
-  });
+    if (v === true || v === 'true') return 'always';
+    if (typeof v === 'string' && RISK_ORDER.includes(v.toLowerCase())) return v.toLowerCase();
+  }
+  return null;
+}
+
+function agentRequiresHumanApproval(ast) {
+  return humanApprovalMode(ast) != null;
+}
+
+// Gather executed/declared acts from a result for risk classification.
+function actsForRisk(result) {
+  const buckets = [
+    result.canonicalActs?.acts,
+    result.canonicalActs?.cognitive?.acts,
+    result.canonical?.execution?.acts
+  ];
+  for (const acts of buckets) {
+    if (Array.isArray(acts) && acts.length) return acts;
+  }
+  return [];
 }
 
 // Count REAL evidence backing the run — genuine provenance, not the mere
@@ -54,7 +75,8 @@ function countEvidence(result, ast) {
   //    channel) that ran and carries a URL is one piece of cited provenance.
   const actBuckets = [
     result.canonicalActs?.acts,
-    result.canonicalActs?.cognitive?.acts
+    result.canonicalActs?.cognitive?.acts,
+    result.canonical?.execution?.acts   // path-robust: declared external fetches survive every canonical route
   ];
   for (const acts of actBuckets) {
     if (!Array.isArray(acts)) continue;
@@ -74,11 +96,31 @@ function countEvidence(result, ast) {
   return count;
 }
 
+// Honest run confidence: aggregate the REAL confidence signals the run actually
+// produced (perception/understanding/reasoning/decision results in the trace),
+// rather than fabricating a perfect 1 when no signal exists. A run that did no
+// real reasoning has no basis to claim high confidence.
 function averageConfidence(result) {
   const stats = result.cognitive?.stats || result.stats;
-  if (stats?.avg_confidence != null) return stats.avg_confidence;
-  if (result.cognitive?.context?.confidence != null) return result.cognitive.context.confidence;
-  return 1;
+  if (typeof stats?.avg_confidence === 'number') return stats.avg_confidence;
+
+  const trace = result.cognitive?.trace || result.trace ||
+    result.canonicalActs?.cognitive?.trace || [];
+  if (Array.isArray(trace)) {
+    const vals = [];
+    for (const s of trace) {
+      const c = (s && typeof s === 'object')
+        ? (typeof s.result?.confidence === 'number' ? s.result.confidence
+           : (typeof s.confidence === 'number' ? s.confidence : null))
+        : null;
+      if (typeof c === 'number' && c >= 0 && c <= 1) vals.push(c);
+    }
+    if (vals.length) return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+
+  const ctxC = result.cognitive?.context?.confidence;
+  if (typeof ctxC === 'number') return ctxC;
+  return 0.5; // conservative neutral — never assume perfect confidence
 }
 
 function enforceEpistemicGate(result, ast, options = {}) {
@@ -104,18 +146,31 @@ function enforceEpistemicGate(result, ast, options = {}) {
     }
   }
 
-  // Mandatory human sign-off: block unconditionally until a token is consumed.
-  // This does not rely on the confidence/evidence heuristic below (which can be
-  // satisfied by ordinary trace content) — it is an explicit, auditable gate.
-  if (needsHumanApproval) {
+  // Human sign-off gate. In 'always' mode it blocks unconditionally; in a
+  // risk-level mode (e.g. require_human_approval=critical) it blocks only when
+  // the run actually contains an ACT at or above that risk. Does not rely on the
+  // confidence/evidence heuristic below — it is an explicit, auditable gate.
+  const haMode = humanApprovalMode(ast);
+  let mustGate = haMode === 'always';
+  let gateRisk = null;
+  if (haMode && haMode !== 'always') {
+    const { maxActRisk, rank } = require('./act-risk');
+    gateRisk = maxActRisk(actsForRisk(result));
+    mustGate = rank(gateRisk) >= rank(haMode);
+  }
+  if (needsHumanApproval && mustGate) {
     const goal = ast?.agents?.find((a) => agentRequiresHumanApproval({ agents: [a] }))?.goal;
+    const message = haMode === 'always'
+      ? 'require_human_approval policy: irreversible action requires human sign-off before ACT'
+      : `require_human_approval=${haMode} policy: a ${gateRisk}-risk action requires human sign-off before ACT`;
     const pending = createPendingGate({
       action: 'human_approval',
       kind: 'epistemic',
       goal: goal || ast?.cognition?.goal,
       file: options.filename || options.source_path,
       surface: result.profile,
-      message: 'require_human_approval policy: irreversible action requires human sign-off before ACT'
+      risk: gateRisk,
+      message
     }, options);
     result.epistemicGate = true;
     result.humanGate = true;
@@ -137,19 +192,33 @@ function enforceEpistemicGate(result, ast, options = {}) {
     };
   }
 
+  // The remaining checks are the citation/confidence gate. If the agent only
+  // requested human approval (and its risk gate did not trigger), there is
+  // nothing further to enforce.
+  if (!needsCitation) {
+    return { blocked: false, schema: EPISTEMIC_SCHEMA, enforced: true,
+      message: 'human-approval risk gate not triggered' };
+  }
+
   const evidence = countEvidence(result, ast);
   const confidence = averageConfidence(result);
-  const threshold = Number(
-    ast.agents?.find((a) => a.policy?.require_citation)?.policy?.confidence_floor || 0.72
-  );
+  // Citation and confidence are SEPARATE requirements:
+  //  - require_citation  → at least one real piece of evidence before ACT.
+  //  - confidence_floor   → only enforced when the policy explicitly declares it
+  //    (a citation requirement is not a confidence requirement).
+  const policy = ast.agents?.find((a) => a.policy?.require_citation)?.policy || {};
+  const floor = policy.confidence_floor != null ? Number(policy.confidence_floor) : null;
+  const evidenceOk = evidence >= 1;
+  const confidenceOk = floor == null ? true : confidence >= floor;
 
-  if (evidence >= 1 && confidence >= threshold) {
+  if (evidenceOk && confidenceOk) {
     return {
       blocked: false,
       schema: EPISTEMIC_SCHEMA,
       enforced: true,
       evidence,
       confidence,
+      threshold: floor,
       message: 'Epistemic requirements satisfied'
     };
   }
@@ -162,10 +231,10 @@ function enforceEpistemicGate(result, ast, options = {}) {
     surface: result.profile,
     evidence_count: evidence,
     confidence,
-    threshold,
-    message: evidence < 1
+    threshold: floor,
+    message: !evidenceOk
       ? 'require_citation policy: no citations or evidence attached before ACT'
-      : `require_citation policy: confidence ${confidence.toFixed(2)} below floor ${threshold}`
+      : `confidence_floor policy: confidence ${confidence.toFixed(2)} below floor ${floor}`
   }, options);
 
   result.epistemicGate = true;
@@ -186,9 +255,9 @@ function enforceEpistemicGate(result, ast, options = {}) {
     enforced: true,
     evidence,
     confidence,
-    threshold,
+    threshold: floor,
     pending,
-    blockReason: 'epistemic_gate_uncited'
+    blockReason: evidenceOk ? 'epistemic_gate_low_confidence' : 'epistemic_gate_uncited'
   };
 }
 
@@ -197,5 +266,6 @@ module.exports = {
   agentRequiresCitation,
   agentRequiresHumanApproval,
   countEvidence,
+  averageConfidence,
   enforceEpistemicGate
 };

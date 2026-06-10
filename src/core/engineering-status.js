@@ -44,7 +44,19 @@ const ALPHA_GATE_TESTS = [
   'tests/cognitive-effect.test.js',
   'tests/dual-view.test.js',
   'tests/agent-surface.test.js',
-  'tests/execution-checkpoint.test.js'
+  'tests/execution-checkpoint.test.js',
+  'tests/provenance.test.js',
+  'tests/provenance-report.test.js',
+  'tests/act-risk.test.js',
+  'tests/learning-loop.test.js',
+  'tests/outcome-learning.test.js',
+  'tests/decide-learning.test.js',
+  'tests/refund-demo.test.js',
+  'tests/learning-robustness.test.js',
+  'tests/contextual-learning.test.js',
+  'tests/runtime-mode.test.js',
+  'tests/surface-catalog.test.js',
+  'tests/unified-entry.test.js'
 ];
 
 const TEST_SUITES = Object.freeze({

@@ -39,6 +39,8 @@ const {
 const { WorldModelRuntime } = require('./world-model-runtime');
 const { runDualCognition } = require('./dual-process-bridge');
 const { GroundedMemory } = require('../runtime/cognitive/grounded-memory');
+const { loadLearningStore, recordOutcome, preferred, saveLearningStore, meanReward } = require('../runtime/learning-store');
+const { attributeRunOutcome } = require('../runtime/outcome-reward');
 const { buildActBinding } = require('../runtime/act-binding');
 const { runActionStep } = require('../runtime/action-runner');
 
@@ -211,9 +213,18 @@ class CognitiveKernel {
       ctx.noeonAst = input;
       ctx.worldModel = WorldModelRuntime.fromAst(input, options);
     }
+    // Cross-run learning substrate: a persistent bandit consulted by DECIDE and
+    // updated by LEARN with real outcomes. No store path → in-memory no-op.
+    ctx.learning = loadLearningStore(options.learn_store || this.options.learn_store);
+    ctx.feedback = options.feedback || this.options.feedback || {};
 
     // Step 3: Run the cognitive cycle
     const result = await this._runCognitiveCycle(program, ctx, options);
+
+    // Step 3b: Automatic learning from real outcomes. If a learnable decision
+    // was made and no explicit LEARN settled it, attribute the run's actual
+    // outcome (ACT success / VALIDATE / errors) to the chosen option and persist.
+    attributeRunOutcome(ctx);
 
     // Step 4: Update stats
     this.stats.programs_executed++;
@@ -572,8 +583,28 @@ class CognitiveKernel {
       const delta = signal === 'punishment' ? -amount : amount;
       const reinforced = ctx.memory ? ctx.memory.reinforce(delta) : 0;
 
-      ctx.broadcast('learning_signal', { signal, amount, reinforced }, 0.5);
-      return { signal, amount, reinforced, emotional_update: ctx.emotions };
+      // Cross-run learning: attribute the REAL outcome to the option this run
+      // chose, and persist it. Outcome reward = an externally-observed payoff for
+      // the chosen option when provided (feedback.payoff), else the signal/amount.
+      let learned = null;
+      if (ctx.learning && ctx.lastDecisionKey != null && ctx.lastChosen != null) {
+        const payoff = ctx.feedback && ctx.feedback.payoff;
+        const reward = (payoff && payoff[ctx.lastChosen] != null)
+          ? Number(payoff[ctx.lastChosen])
+          : delta;
+        if (ctx.lastContextual) {
+          const { recordContextual } = require('../runtime/threshold-learner');
+          recordContextual(ctx.learning, ctx.lastDecisionKey, ctx.lastConf, ctx.lastChosen, reward, { approve: ctx.lastApproveOption });
+        } else {
+          recordOutcome(ctx.learning, ctx.lastDecisionKey, ctx.lastChosen, reward);
+        }
+        saveLearningStore(ctx.learning);
+        ctx.learningRecorded = true; // explicit feedback settles this decision
+        learned = { key: ctx.lastDecisionKey, option: ctx.lastChosen, reward };
+      }
+
+      ctx.broadcast('learning_signal', { signal, amount, reinforced, learned }, 0.5);
+      return { signal, amount, reinforced, learned, emotional_update: ctx.emotions };
     });
 
     // PERCEIVE handler
@@ -590,6 +621,12 @@ class CognitiveKernel {
       const trace = [source, node.params.pattern, node.params.content, modality]
         .filter(Boolean).join(' ');
       if (trace) ctx.memory.store(trace, { type: 'episodic', strength: percept.confidence ?? 0.6, source: 'perceive' });
+      // Perception caps overall confidence: a downstream decision cannot be more
+      // certain than the evidence it perceived. This keeps ctx.confidence honest
+      // even when no explicit UNDERSTAND/REASON step lowers it from the initial 1.0.
+      if (typeof percept.confidence === 'number') {
+        ctx.confidence = Math.min(ctx.confidence, percept.confidence);
+      }
       ctx.broadcast('percept:' + modality, percept, percept.confidence);
       return percept;
     });
@@ -609,24 +646,81 @@ class CognitiveKernel {
       } else if (type === 'cognitive_decision') {
         const options = node.params.options || [];
         const reasoning = ctx.getFromWorkspace('reasoning_result');
+        // When confident and there are real alternatives, let accumulated
+        // learning pick the best-known option (explore-then-exploit); otherwise
+        // fall back. With no learning history this is just options[0] as before.
+        const learnKey = node.params.learn_key || node.params.strategy || node.params.name
+          || (options.length ? `decide:${options.join('|')}` : 'decide');
+        let pick = options[0] || node.params.action || 'proceed';
+        let learnReason = null;
+        if (ctx.confidence >= threshold && ctx.learning && options.length > 1) {
+          const pref = preferred(ctx.learning, learnKey, options);
+          if (pref) { pick = pref.option; learnReason = pref.reason; }
+        }
         const chosen = ctx.confidence >= threshold
-          ? (options[0] || node.params.action || 'proceed')
+          ? pick
           : (node.params.fallback || options[1] || 'wait');
+        // Remember this choice so a later LEARN/FEEDBACK can attribute reward.
+        if (ctx.confidence >= threshold && options.length > 1) {
+          ctx.lastDecisionKey = learnKey;
+          ctx.lastChosen = chosen;
+        }
         decision = {
           type: 'cognitive',
           chosen,
           strategy: node.params.strategy || node.params.mode,
           confidence: ctx.confidence,
           threshold,
+          learn_key: options.length > 1 ? learnKey : undefined,
+          learn_reason: learnReason,
           influenced_by: reasoning ? 'reasoning_result' : null
         };
       } else {
+        // Everyday DECIDE: the two learnable branches are [action, fallback].
+        // Learning never forces an unsafe choice — it only nudges the effective
+        // threshold within a bounded band when real outcome history exists for
+        // both branches (action historically better → act more readily; worse →
+        // be more cautious). No store / no history → identical to before.
         const action = node.params.action || node.params.chosen;
+        const fallback = node.params.fallback || 'escalate';
+        const learnKey = node.params.learn_key || (action ? `decide:${action}` : 'decide');
+        let effThreshold = threshold;
+        let learnReason = null;
+        let chosen;
+        if (ctx.learning && action && node.params.learn_mode === 'contextual') {
+          // Contextual (per-confidence-bucket) learning: corrects both over-caution
+          // AND over-aggression, converging to the true optimal threshold.
+          const { contextualDecision, learnedThreshold } = require('../runtime/threshold-learner');
+          const cd = contextualDecision(ctx.learning, learnKey, ctx.confidence, threshold, { fallback, approve: action });
+          chosen = cd.chosen;
+          learnReason = `ctx:${cd.reason}`;
+          effThreshold = learnedThreshold(ctx.learning, learnKey, threshold);
+          ctx.lastDecisionKey = learnKey; ctx.lastChosen = chosen; ctx.lastConf = ctx.confidence;
+          ctx.lastContextual = true; ctx.lastApproveOption = action;
+        } else {
+          // Default: bounded global-mean threshold nudge (one-directional — only
+          // relaxes over-caution; see learning-robustness experiment).
+          if (ctx.learning && action) {
+            const ra = meanReward(ctx.learning, learnKey, action);
+            const rf = meanReward(ctx.learning, learnKey, fallback);
+            if (ra != null && rf != null) {
+              const MARGIN = 0.15;
+              const nudge = Math.max(-MARGIN, Math.min(MARGIN, -(ra - rf) * MARGIN));
+              effThreshold = Math.max(0, Math.min(1, threshold + nudge));
+              learnReason = `learned(act=${ra.toFixed(2)},fb=${rf.toFixed(2)},thr=${threshold}→${effThreshold.toFixed(2)})`;
+            }
+          }
+          chosen = ctx.confidence >= effThreshold ? action : fallback;
+          if (action) { ctx.lastDecisionKey = learnKey; ctx.lastChosen = chosen; }
+        }
         decision = {
           type,
-          chosen: ctx.confidence >= threshold ? action : (node.params.fallback || 'escalate'),
+          chosen,
           confidence: ctx.confidence,
-          threshold
+          threshold,
+          effective_threshold: effThreshold,
+          learn_key: action ? learnKey : undefined,
+          learn_reason: learnReason
         };
       }
 

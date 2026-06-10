@@ -185,6 +185,14 @@ function extractAgentOutcome(data) {
 }
 
 function appendProvenanceEntries(entries, report) {
+  const mode = report?.runtimeMode;
+  if (mode?.cognition?.effective) {
+    const key = mode.llm?.configured ? '密钥已配置' : '无密钥 → mock';
+    entries.push({
+      label: '运行时模式',
+      value: `${mode.cognition.effective} · LLM=${mode.llm?.mode || 'auto'} · ${key}`
+    });
+  }
   const effects = report?.effects;
   if (effects?.runtime?.length) {
     const escalated = effects.escalated?.length ? ` · 超出声明: ${effects.escalated.join(', ')}` : '';
@@ -570,18 +578,18 @@ async function renderBrainMermaid(mermaidText) {
 }
 
 const REGION_LABELS = {
-  prefrontal_cortex: "执行中枢",
+  prefrontal_cortex: "编排",
   sensory_cortex: "感知",
   association_cortex: "推理",
   motor_cortex: "行动",
   hippocampus: "记忆",
   amygdala: "显著性",
-  basal_ganglia: "选择",
-  cerebellum: "校正",
-  thalamus: "路由",
-  corpus_callosum: "整合",
+  basal_ganglia: "决策",
+  cerebellum: "校验",
+  thalamus: "调度",
+  corpus_callosum: "融合",
   default_mode_network: "场域",
-  neuromodulatory: "演化"
+  neuromodulatory: "学习"
 };
 
 const CATEGORY_LABELS = {

@@ -10,6 +10,8 @@ const {
   interpolate
 } = require('./parse-utils');
 const { parseFuseStatement } = require('./fuse-block');
+const { parseCapabilityStatement } = require('./capability-block');
+const { applyInlineCapabilities } = require('./capability-apply');
 const { annotateFlowSteps } = require('../core/cognitive-architecture');
 const { syncAgentsToUnifiedStack, buildStackManifest } = require('../core/noeon-unified');
 const { NOEON_VERSION } = require('../core/release-version');
@@ -285,7 +287,9 @@ function createGeneralAgentAstShell() {
     fusionTriad: null,
     next: null,
     liminal: null,
-    noeonStack: null
+    noeonStack: null,
+    pendingCapabilities: [],
+    inlineCapabilities: []
   };
 }
 
@@ -323,6 +327,15 @@ function parseGeneralAgentFile(source, options = {}) {
       continue;
     }
 
+    if (rawKeyword === 'CONTRACT' || rawKeyword === 'ALIGN' || rawKeyword === 'GOVERNANCE') {
+      const capResult = parseCapabilityStatement(lines, i, lineNo, rawLine);
+      if (capResult.capability) {
+        ast.pendingCapabilities.push(capResult.capability);
+      }
+      i = capResult.nextIndex - 1;
+      continue;
+    }
+
     if (rawKeyword === 'AGENT') {
       const name = parseQuoted(rawValue, lineNo);
       const parentIndent = lineIndent(rawLine);
@@ -355,6 +368,7 @@ function parseGeneralAgentFile(source, options = {}) {
     }
   }
 
+  applyInlineCapabilities(ast);
   ast.detectedSurface = 'general';
   ast.noeonStack = buildStackManifest(ast);
   return ast;

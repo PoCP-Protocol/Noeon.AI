@@ -67,6 +67,9 @@ assert(status.pluginPolicy?.schema === 'noeon.plugin.policy.status/v1', 'getRunt
 assert(statusText.includes('Plugin policy:'), 'formatRuntimeStatusText includes plugin policy line');
 assert(status.productionGate?.schema === 'noeon.production.gate.status/v1' || status.productionGate?.available === false, 'getRuntimeStatus includes productionGate');
 assert(statusText.includes('Production gate:'), 'formatRuntimeStatusText includes production gate line');
+assert(status.authoring?.mode === 'unified', 'getRuntimeStatus defaults authoring to unified');
+assert(status.authoring?.inlineBlocks?.includes('CONTRACT'), 'authoring lists CONTRACT inline block');
+assert(statusText.includes('Authoring: unified'), 'formatRuntimeStatusText includes authoring line');
 assert(
   formatExecutionPathStatusLine(execPath).startsWith('Execution path: hybrid=2 snapshot=2 cognitive=1 (5 tracked) · acts 1/2 signed'),
   'formatExecutionPathStatusLine compact with plugin acts'

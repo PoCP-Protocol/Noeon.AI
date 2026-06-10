@@ -278,22 +278,43 @@ Set `NOEON_GENERAL_CANONICAL=1` to default compile/run presentation to canonical
 
 With `--canonical`, tool demos execute ACT plugins directly from `canonical.execution.acts` (phase `canonical-act`) without the legacy cognitive kernel path. Tool-only General programs auto-enable this path by default (`cognition.general_canonical_tools: true` in `.noeonrc.json` / runtime defaults). Override with `--canonical` off via `general_canonical: false` in API/CLI options, or set `general_canonical_tools: false` in project config.
 
-**Execution summary** (`noeon.execution.summary/v1`): `noeon run --json`, Playground, Workbench, LSP, and Golden Gate report `strategy`, `path` (`snapshot-act` / `hybrid` / `cognitive`), and phase tags. Workbench and VS Code show the static path before run via `/api/brain` and file-level LSP analysis.
+**Execution summary** (`noeon.execution.summary/v1`): `noeon run --json`, Playground, Workbench, LSP, and Golden Gate report `strategy`, `path` (`snapshot-act` / `hybrid` / `cognitive`), and phase tags. Workbench shows **声明 ↔ 运行** alignment and **执行路径** (workflow phases, not neuroscience labels).
 
-`noeon ai creator` emits the shared creator blueprint: readiness signals, the brain-inspired cognitive design contract, the creator charter, workstreams, and priority actions for human/AI co-development.
+`noeon ai creator` emits the shared creator blueprint: readiness signals, cognitive workflow design contract, creator charter, workstreams, and priority actions for human/AI co-development.
 
 ---
 
-## LLM Configuration
+## Authoring surfaces
+
+**Start here:** General `.noeon` with `AGENT` or `program` blocks — primary Playground examples and README quick start.
+
+| Tier | Entry | Use when |
+|------|-------|----------|
+| Primary | `.noeon` (General) | Agents, workflows, tool ACTs — default |
+| Advanced | `.ael`, `.next`, `.lim`, Universal | Protocol, Next field, Liminal gates, mesh — see `docs/spec/` |
+
+`noeon status` → `surfaceCatalog`. Playground `/api/examples` returns primary tier by default (`?all=1` for full library).
+
+## LLM & runtime mode
+
+Every run embeds `report.runtimeMode` (`noeon.runtime.mode/v1`):
+
+| Mode | When |
+|------|------|
+| **mock** | Default without API key — same evidence schemas, deterministic replay |
+| **live** | API key + `NOEON_LLM_MODE=live\|auto` and live evidence provenance |
+| **deterministic** | `NOEON_LLM_MODE=off` — rule handlers only |
 
 ```bash
 export OPENAI_API_KEY=sk-...
 export NOEON_LLM_MODE=auto    # auto | live | mock | off
-export NOEON_LLM_MODEL=gpt-4o-mini
-noeon run examples/agent_research.noeon --trace
+node src/cli.js run examples/agent_research.noeon --json   # check report.runtimeMode
+node src/cli.js status
 ```
 
-Project-level settings live in `.noeonrc.json` (LLM mode, observability, protocol enrichment). Without an API key, the kernel uses deterministic mock reasoning — tests and CI stay offline.
+Spec: [RUNTIME_MODE_v1.0.md](docs/spec/RUNTIME_MODE_v1.0.md). Playground **证据链** shows **运行时模式** on every run.
+
+Project settings: `.noeonrc.json` (LLM mode, observability, protocol enrichment).
 
 ---
 
@@ -347,7 +368,7 @@ Mock mode (default in demos): `mock=true` or `NOEON_HTTP_MOCK=1`. Run output inc
 ## Test Results
 
 ```
-Alpha gate (CI):       npm run gate:alpha     # 31 checks — hybrid + golden gate + LSP execution
+Alpha gate (CI):       npm run gate:alpha     # 42 checks — hybrid + cognitive proof + LSP
 Doctor gate:           npm run gate:doctor    # execution_path_probes + plugin policy
 Production gate:       npm run gate:production # NOEON_ENV=production profile simulation
 Strict gate:           npm run gate:strict    # conformance + production + signed plugin simulate

@@ -26,6 +26,13 @@ function finishExecution(result, ast, canonicalPrep, options) {
       filename: options.filename || options.source_path
     });
   }
+  // Seal a machine-verifiable accountability chain for every governed run.
+  try {
+    const { buildProvenance } = require('../runtime/provenance');
+    result.provenance = buildProvenance(result, ast, options);
+  } catch (e) {
+    result.provenanceError = e.message;
+  }
   return result;
 }
 

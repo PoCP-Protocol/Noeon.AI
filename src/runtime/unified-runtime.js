@@ -561,10 +561,23 @@ function getRuntimeStatus() {
   const { buildExecutionPathStatusSummary } = require('../core/execution-path-status');
   const { buildProductionGateStatusSummary } = require('../core/production-gate-status');
   const { buildPluginPolicyStatusSummary } = require('../core/config');
+  const { buildRuntimeModeReport } = require('../core/runtime-mode');
+  const { buildSurfaceCatalog } = require('../core/surface-catalog');
+  const surfaceCatalog = buildSurfaceCatalog();
+  const authoringMode = config.authoring || 'unified';
   return {
     ...engineering,
     version: RUNTIME_VERSION,
     vm: VM_VERSION,
+    surfaceCatalog,
+    authoring: {
+      mode: authoringMode,
+      defaultSurface: surfaceCatalog.defaultAuthoring,
+      inlineBlocks: ['CONTRACT', 'ALIGN', 'GOVERNANCE'],
+      legacySurfaces: surfaceCatalog.advanced,
+      note: surfaceCatalog.onboarding
+    },
+    runtimeMode: buildRuntimeModeReport({}, null, { config }),
     generalCanonicalDefault: isGeneralCanonicalEnabled({}),
     generalCanonicalToolsAuto: config.cognition?.general_canonical_tools === true,
     generalCanonicalAgentsAuto: config.cognition?.general_canonical_agents === true,
@@ -611,6 +624,19 @@ function formatRuntimeStatusText(status = getRuntimeStatus()) {
     );
   }
   lines.push(`LLM: ${status.llm?.mode || 'auto'} · configured=${status.llm?.configured ? 'yes' : 'no'}`);
+  const { formatRuntimeModeLine } = require('../core/runtime-mode');
+  const modeLine = formatRuntimeModeLine(status.runtimeMode);
+  if (modeLine) lines.push(modeLine);
+  const auth = status.authoring;
+  if (auth?.mode) {
+    lines.push(
+      `Authoring: ${auth.mode} · default ${auth.defaultSurface || 'general'}`
+      + ` · inline ${(auth.inlineBlocks || []).join('/')}`
+    );
+    if (auth.mode === 'unified' && auth.note) {
+      lines.push(`  ${auth.note}`);
+    }
+  }
   return lines.join('\n');
 }
 

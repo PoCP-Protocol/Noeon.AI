@@ -18,6 +18,7 @@ const { buildWorldModelReport } = require('./world-model-runtime');
 const { buildEffectReport } = require('./cognitive-effect');
 const { buildDualView } = require('./dual-view');
 const { buildAgentSurfaceReport } = require('./agent-surface');
+const { buildRuntimeModeReport } = require('./runtime-mode');
 
 function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
   const canonical = canonicalPrep?.canonical;
@@ -40,6 +41,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
   };
   const dualView = buildDualView(ast, result, partialReport);
   const agentSurface = buildAgentSurfaceReport(ast, result, partialReport, dualView);
+  const runtimeMode = buildRuntimeModeReport(result, ast, options);
 
   return {
     schema: REPORT_SCHEMA,
@@ -122,6 +124,7 @@ function buildCanonicalReport(result, canonicalPrep, ast, options = {}) {
     effectsValid: effects.valid === true,
     dualView,
     agentSurface,
+    runtimeMode,
     ecosystem: buildEcosystemSnapshot(ast, options, result),
     aiNative: evaluateAiNative(ast, canonicalPrep, result),
     self: buildSelfExport(ast),

@@ -158,6 +158,10 @@ function renderDualView(data) {
       const agent = data.agentSurface.cards[0];
       lines.push("", `智能体 ${agent.name} · FLOW ${agent.flow.filter((s) => s.status === "executed").length}/${agent.flow.length}`);
     }
+    const mode = data.runtimeMode || data.report?.runtimeMode;
+    if (mode?.cognition?.effective) {
+      lines.push(`模式 ${mode.cognition.effective} · LLM ${mode.llm?.mode || "auto"}`);
+    }
     tracePane.textContent = lines.join("\n");
     return;
   }

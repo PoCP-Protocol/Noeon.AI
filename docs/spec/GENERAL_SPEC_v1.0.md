@@ -76,6 +76,50 @@ FUSE next → run Next phase → inject context → FUSE liminal → observe ali
 
 Runtime: `run.nextField`, `run.phases` includes `next-field`.
 
+## Inline Capability Blocks (unified entry)
+
+Instead of separate `.ael`, `.lim`, or `.next` files, embed capability entry modes in a single `.noeon` program:
+
+```noeon
+CONTRACT {
+  task: my_agent
+  budget: 1000 msat
+  verify_quorum: 2/3
+  verify_challenge: 600
+}
+
+ALIGN {
+  intent: "Primary goal with human alignment"
+  resonance_floor: 0.7
+  human_must_approve: [external_send]
+  belief user_goal { claim: "..." confidence: 0.65 sources: [user] }
+  resonate input -> user_goal { mirror: "Confirming understanding" }
+}
+
+GOVERNANCE {
+  constitution name=evidence rule="Claims require evidence" priority=1.0
+  field signals { ingest: [market] decay: 1h }
+  cell hypothesis { claim: "Initial hypothesis" energy: 0.55 }
+}
+
+AGENT "MyAgent"
+  GOAL "Primary goal with human alignment"
+  FLOW
+    PERCEIVE source=user_input
+    ACT action=respond channel=runtime
+    REFLECT
+```
+
+| Block | Replaces | Canonical IR |
+|-------|----------|--------------|
+| `CONTRACT` | `.ael` budget/verify | `execution.budget`, `capabilities.ael` |
+| `ALIGN` | `.lim` covenant/beliefs | `alignment.*`, `capabilities.liminal` |
+| `GOVERNANCE` | `.next` field/governance | `governance.*`, `learning.field`, `capabilities.next` |
+
+Parity reference: `examples/parity/risk_assess_unified.noeon` vs `risk_assess.{noeon,ael,lim,next}`.
+
+Legacy sidecars (`FUSE next { file }`, `.lim` beside `.noeon`) remain supported for advanced workflows.
+
 ## Example
 
 `examples/agent_field.noeon` — FieldAnalyst agent fused with `genesis.next`.
